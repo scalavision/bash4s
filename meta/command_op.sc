@@ -40,6 +40,17 @@ val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
 
 val commandBuilder = s"""
   case class ${ScriptBuilder}[A <: ${CommandOp}](acc: Vector[A]) extends ${CommandOp} { self =>
+
+    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
+      op match {
+        case ScriptBuilder(scripts) => 
+          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+            acc ++ decomposeOnion(c)
+          }
+        case _ => Vector(op)
+      }
+    }
+
     ${((cmdListFns ++ pipeFns).map(m => tmpl.toCmdOp(m))).mkString("\n")}
   }
 """
@@ -60,6 +71,8 @@ val domain =
       final case class BString(value: String) extends ${VariableValue}
       final case class BSubCommand(value: CommandOp) extends ${VariableValue}
       final case class BEmpty() extends ${VariableValue}
+
+      final case class END() extends ${CommandOp}
 
       final case class ${BashVariable}(name: String, value: VariableValue) extends ${CommandOp} {
         def `=` (text: String) = this.copy(value = BString(text))

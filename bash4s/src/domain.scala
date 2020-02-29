@@ -16,6 +16,8 @@ object domain {
   final case class BSubCommand(value: CommandOp) extends VariableValue
   final case class BEmpty() extends VariableValue
 
+  final case class END() extends CommandOp
+
   final case class BashVariable(name: String, value: VariableValue)
       extends CommandOp {
     def `=`(text: String) = this.copy(value = BString(text))
@@ -58,33 +60,40 @@ object domain {
   sealed trait ProcessSubstitution extends CommandOp
   final case class ProcCommandStart() extends ProcessSubstitution
   final case class ProcCommandEnd() extends ProcessSubstitution
-  final case class END() extends CommandOp
-
 
   case class ScriptBuilder[A <: CommandOp](acc: Vector[A]) extends CommandOp {
     self =>
-    
+
     def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
       op match {
-        case ScriptBuilder(scripts) => 
+        case ScriptBuilder(scripts) =>
           scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
             acc ++ decomposeOnion(c)
           }
         case _ => Vector(op)
       }
     }
-    def o[B <: A](op: CommandOp) = self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
-    def `;`[B <: A](op: CommandOp) = self.copy(acc :+ Semi() :+ op)
-    def &[B <: A](op: CommandOp) = self.copy(acc :+ Amper() :+ op)
-    def &&[B <: A](op: CommandOp) = self.copy(acc :+ And() :+ op)
-    def ||[B <: A](op: CommandOp) = self.copy(acc :+ Or() :+ op)
-    def `\n`[B <: A](op: CommandOp) = self.copy(acc :+ NewLine() :+ op)
-    def |[B <: A](op: CommandOp) = self.copy(acc :+ PipeStdOut() :+ op)
-    def |&[B <: A](op: CommandOp) = self.copy(acc :+ PipeStdOutWithErr() :+ op)
-    def time[B <: A](op: CommandOp) = self.copy(acc :+ TimedPipeline() :+ op)
 
+    def o[B <: A](op: CommandOp) =
+      self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
+    def `;`[B <: A](op: CommandOp) =
+      self.copy((acc :+ Semi()) ++ decomposeOnion(op))
+    def &[B <: A](op: CommandOp) =
+      self.copy((acc :+ Amper()) ++ decomposeOnion(op))
+    def &&[B <: A](op: CommandOp) =
+      self.copy((acc :+ And()) ++ decomposeOnion(op))
+    def ||[B <: A](op: CommandOp) =
+      self.copy((acc :+ Or()) ++ decomposeOnion(op))
+    def `\n`[B <: A](op: CommandOp) =
+      self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
+    def |[B <: A](op: CommandOp) =
+      self.copy((acc :+ PipeStdOut()) ++ decomposeOnion(op))
+    def |&[B <: A](op: CommandOp) =
+      self.copy((acc :+ PipeStdOutWithErr()) ++ decomposeOnion(op))
+    def time[B <: A](op: CommandOp) =
+      self.copy((acc :+ TimedPipeline()) ++ decomposeOnion(op))
     def ![B <: A](op: CommandOp) =
-      self.copy(acc :+ NegatePipelineExitStatus() :+ op)
+      self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
   }
 
 }
