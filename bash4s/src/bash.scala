@@ -12,7 +12,7 @@ package object bash {
   def True = TRUE()
   def False = FALSE()
 
-  def $(op: CommandOp) = 
+  def $(op: CommandOp) =
     ScriptBuilder[CommandOp](Vector(SubCommandStart(), op, SubCommandEnd()))
 
   def time(op: CommandOp) =

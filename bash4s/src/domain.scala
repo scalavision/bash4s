@@ -75,8 +75,8 @@ object domain {
   final case class ProcCommandEnd() extends ProcessSubstitution
 
   sealed trait Redirections extends CommandOp
-  final case class StdOut() extends Redirections
   final case class StdIn() extends Redirections
+  final case class StdOut() extends Redirections
   final case class StdErr() extends Redirections
   final case class AppendStdOut() extends Redirections
   final case class StdOutWithStdErr() extends Redirections
@@ -123,9 +123,9 @@ object domain {
     def ![B <: A](op: CommandOp) =
       self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
     def <[B <: A](op: CommandOp) =
-      self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
-    def >[B <: A](op: CommandOp) =
       self.copy((acc :+ StdIn()) ++ decomposeOnion(op))
+    def >[B <: A](op: CommandOp) =
+      self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
     def `2>`[B <: A](op: CommandOp) =
       self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
     def >>[B <: A](op: CommandOp) =

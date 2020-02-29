@@ -27,6 +27,9 @@ package object bash {
 
   ${toDef(cmd.helpers)}
 
+  def $$(op: CommandOp) = 
+    ScriptBuilder[CommandOp](Vector(SubCommandStart(), op, SubCommandEnd()))
+
   def time(op: CommandOp) = 
     ScriptBuilder[CommandOp](Vector(TimedPipeline(), op))
 

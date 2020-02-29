@@ -42,7 +42,7 @@ val helpers = "END TRUE FALSE".list
 val redirectionSymbols = 
   "< > `2>` >> &> &>> `2>&1` <&- >&-".list
 val redirectionNames = 
-  "StdOut StdIn StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
+  "StdIn StdOut StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
 
 val cmdListFns: List[(String, String)] = (commandListSymbols).zip("NewLine" +: commandListNames)
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
@@ -91,7 +91,7 @@ val domain =
 
       final case class ${BashVariable}(name: String, value: VariableValue) extends ${CommandOp} {
         def `=` (text: String) = this.copy(value = BString(text))
-        def =& (op: CommandOp) = this.copy(value = BSubCommand(op))
+        def `=` (op: ScriptBuilder[CommandOp]) = this.copy(value = BSubCommand(op))
       }
       
       final case class ${FileTypeOp}(path: String) extends ${CommandOp}
