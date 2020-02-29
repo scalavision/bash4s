@@ -13,30 +13,19 @@ object ScriptSpec extends DefaultRunnableSpec(
 
       val myVar = Var
 
-      val test = #!()              o
-        ls"-halt"                  o
-        myVar`=`"Hello World"      o
-        myVar=&( ls"-halt" )       o
+      val test = bash_#!                                o
+        ls"-halt"                                       o
+        myVar `=` "Hello World"                         o
+        myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
         time (ls"-h") | ls"-halt"  !
-        ls"end.txt" | ls"yepp!"    o
-        ls"one" & ls"two" & ls"three" o
-        ls"one" && ls"two" && ls"three"
+        ls"end.txt" | ls"yepp!"                         o
+        ls"one" & ls"two" & ls"three"                   o
+        ls"one" && ls"two" && ls"three"                 o
+        ls | ls | ls || ls 
 
       pprint.pprintln(test)
-
       assert(1, equalTo(1))
+
     }
   )
 )
-/*
-
-    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
-      op match {
-        case ScriptBuilder(scripts) => 
-          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
-            acc ++ decomposeOnion(c)
-          }
-        case _ => op
-      }
-    }
-*/

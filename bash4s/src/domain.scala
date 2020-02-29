@@ -16,10 +16,18 @@ object domain {
   final case class BSubCommand(value: CommandOp) extends VariableValue
   final case class BEmpty() extends VariableValue
 
+  sealed trait SheBang extends CommandOp
+  final case class Bash(value: String) extends SheBang
+  final case class Sh(value: String) extends SheBang
+  final case class Zsh(value: String) extends SheBang
+  final case class Scala(value: String) extends SheBang
+  final case class Perl(value: String) extends SheBang
+  final case class Python(value: String) extends SheBang
+
   final case class BashVariable(name: String, value: VariableValue)
       extends CommandOp {
     def `=`(text: String) = this.copy(value = BString(text))
-    def =&(op: CommandOp) = this.copy(value = BSubCommand(op))
+    def `=`(op: ScriptBuilder[CommandOp]) = this.copy(value = BSubCommand(op))
   }
 
   final case class FileTypeOp(path: String) extends CommandOp
@@ -59,9 +67,27 @@ object domain {
   final case class SubCommandStart() extends CommandSubstitution
   final case class SubCommandEnd() extends CommandSubstitution
 
+  final case class SubCommand[A <: CommandOp](subScript: Vector[A])
+      extends CommandOp
+
   sealed trait ProcessSubstitution extends CommandOp
   final case class ProcCommandStart() extends ProcessSubstitution
   final case class ProcCommandEnd() extends ProcessSubstitution
+
+  sealed trait Redirections extends CommandOp
+  final case class StdOut() extends Redirections
+  final case class StdIn() extends Redirections
+  final case class StdErr() extends Redirections
+  final case class AppendStdOut() extends Redirections
+  final case class StdOutWithStdErr() extends Redirections
+  final case class AppendStdOutWithStdErr() extends Redirections
+  final case class RedirectStdOutWithStdErr() extends Redirections
+  final case class CloseStdOut() extends Redirections
+  final case class CloseStdIn() extends Redirections
+
+  final case class CloseFileDescriptor(fileDescriptor: Int) extends Redirections
+  final case class MergeFileDescriptorsToSingleStream(from: Int, to: Int)
+      extends Redirections
 
   case class ScriptBuilder[A <: CommandOp](acc: Vector[A]) extends CommandOp {
     self =>
@@ -96,6 +122,27 @@ object domain {
       self.copy((acc :+ TimedPipeline()) ++ decomposeOnion(op))
     def ![B <: A](op: CommandOp) =
       self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
+    def <[B <: A](op: CommandOp) =
+      self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
+    def >[B <: A](op: CommandOp) =
+      self.copy((acc :+ StdIn()) ++ decomposeOnion(op))
+    def `2>`[B <: A](op: CommandOp) =
+      self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
+    def >>[B <: A](op: CommandOp) =
+      self.copy((acc :+ AppendStdOut()) ++ decomposeOnion(op))
+    def &>[B <: A](op: CommandOp) =
+      self.copy((acc :+ StdOutWithStdErr()) ++ decomposeOnion(op))
+    def &>>[B <: A](op: CommandOp) =
+      self.copy((acc :+ AppendStdOutWithStdErr()) ++ decomposeOnion(op))
+    def `2>&1`[B <: A](op: CommandOp) =
+      self.copy((acc :+ RedirectStdOutWithStdErr()) ++ decomposeOnion(op))
+    def <&-[B <: A](op: CommandOp) =
+      self.copy((acc :+ CloseStdOut()) ++ decomposeOnion(op))
+    def >&-[B <: A](op: CommandOp) =
+      self.copy((acc :+ CloseStdIn()) ++ decomposeOnion(op))
+
+    def >&-(fileDescriptor: Int) = CloseFileDescriptor(fileDescriptor)
+    def >&(from: Int, to: Int) = MergeFileDescriptorsToSingleStream(from, to)
   }
 
 }

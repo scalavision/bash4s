@@ -1,22 +1,29 @@
 package bash
-
 import domain._
 
 package object bash {
 
-  def Var(implicit name: sourcecode.Name) = 
+  def Var(implicit name: sourcecode.Name) =
     BashVariable(name.value, BEmpty())
 
-  def #!() = ScriptBuilder(Vector())
+  def bash_#! = ScriptBuilder(Vector())
 
-  def end = END()
+  def End = END()
+  def True = TRUE()
+  def False = FALSE()
 
-  def time(op: CommandOp) = 
+  def $(op: CommandOp) = 
+    ScriptBuilder[CommandOp](Vector(SubCommandStart(), op, SubCommandEnd()))
+
+  def time(op: CommandOp) =
     ScriptBuilder[CommandOp](Vector(TimedPipeline(), op))
 
-  implicit class CmdSyntax(s: StringContext)  {
-     def ls(args: Any*) = 
-       ScriptBuilder(Vector(SimpleCommand("ls", CmdArgCtx(args.toVector, s))))
+  def ls =
+    ScriptBuilder(Vector(SimpleCommand("ls", CmdArgs(Vector.empty[String]))))
+
+  implicit class CmdSyntax(s: StringContext) {
+    def ls(args: Any*) =
+      ScriptBuilder(Vector(SimpleCommand("ls", CmdArgCtx(args.toVector, s))))
   }
 
 }
