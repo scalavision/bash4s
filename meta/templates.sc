@@ -22,5 +22,5 @@ def toAdt(ext: String, subClasses: List[String]) = {
 }
 
 def toOpDef(fnMeta: (String, String)) = {
-    s"""def ${fnMeta._1}[B <: A](op: CommandOp) = self.copy((acc :+ ${fnMeta._2}())  ++ decomposeOnion(op))"""
+    s"""def ${fnMeta._1}(op: CommandOp) = self.copy((acc :+ ${fnMeta._2}())  ++ decomposeOnion(op))"""
 }

@@ -40,9 +40,10 @@ val processSubstitutionNames = "ProcCommandStart ProcCommandEnd".list
 val helpers = "END TRUE FALSE".list
 
 val redirectionSymbols = 
-  "< > `2>` >> &> &>> `2>&1` <&- >&-".list
+  "> `2>` >> &> &>> `2>&1` <&- >&-".list
+
 val redirectionNames = 
-  "StdIn StdOut StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
+  "StdOut StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
 
 val cmdListFns: List[(String, String)] = (commandListSymbols).zip("NewLine" +: commandListNames)
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
@@ -64,9 +65,16 @@ val commandBuilder = s"""
     }
 
     ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
+    def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 
-    def >&-(fileDescriptor: Int) = CloseFileDescriptor(fileDescriptor)
-    def >&(from: Int, to: Int) = MergeFileDescriptorsToSingleStream(from, to)
+    def < (p: ScriptBuilder[CommandOp]) = 
+      self.copy( acc = (acc :+ ProcCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]){(acc1, op1) => acc1 ++ p.decomposeOnion(op1)} :+ ProcCommandEnd()))
+
+    def $$ (p: ScriptBuilder[CommandOp]) = 
+      self.copy( acc = (acc :+ SubCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]){(acc1, op1) => acc1 ++ p.decomposeOnion(op1)} :+ SubCommandEnd()))
+
+    def >&-(fileDescriptor: Int) = self.copy( acc = acc :+ CloseFileDescriptor(fileDescriptor))
+    def >&(from: Int, to: Int) = self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(from, to))
   }
 """
 
@@ -84,14 +92,19 @@ val domain =
       
       sealed trait ${VariableValue} extends ${CommandOp}
       final case class BString(value: String) extends ${VariableValue}
-      final case class BSubCommand(value: CommandOp) extends ${VariableValue}
+      final case class BSubCommand(value: Vector[CommandOp]) extends ${VariableValue}
       final case class BEmpty() extends ${VariableValue}
      
       ${tmpl.toAdtValue(SheBang, shebangNames)}
 
       final case class ${BashVariable}(name: String, value: VariableValue) extends ${CommandOp} {
         def `=` (text: String) = this.copy(value = BString(text))
-        def `=` (op: ScriptBuilder[CommandOp]) = this.copy(value = BSubCommand(op))
+        def `=` (op: ScriptBuilder[CommandOp]) = {
+           val cmdOps = op.acc.foldLeft(Vector.empty[CommandOp]){(acc, op1) =>
+           acc ++ op.decomposeOnion(op1)
+         }
+         this.copy(value = BSubCommand(cmdOps))
+        }
       }
       
       final case class ${FileTypeOp}(path: String) extends ${CommandOp}
@@ -102,7 +115,6 @@ val domain =
       ${tmpl.toAdt(Loop, loopNames)}
       ${tmpl.toAdt(Conditional, conditionalNames)}
       ${tmpl.toAdt(CommandSubstitution, commandSubstitutionNames)}
-      final case class SubCommand[A <: CommandOp](subScript: Vector[A]) extends CommandOp
       ${tmpl.toAdt(ProcessSubstitution, processSubstitutionNames)}
       ${tmpl.toAdt(Redirections, redirectionNames)}
       final case class CloseFileDescriptor(fileDescriptor: Int) extends Redirections

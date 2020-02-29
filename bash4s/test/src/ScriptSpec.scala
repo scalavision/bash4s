@@ -21,8 +21,8 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls"end.txt" | ls"yepp!"                         o
         ls"one" & ls"two" & ls"three"                   o
         ls"one" && ls"two" && ls"three"                 o
-        ls | ls | ls || ls > ls                         o 
-        ls < $(ls"halt" | ls"crazy")
+        ls $(ls | ls || ls > ls)                         o 
+        ls <( ls"start" | ls"end" )
 
       pprint.pprintln(test)
       assert(1, equalTo(1))

@@ -13,7 +13,7 @@ object domain {
 
   sealed trait VariableValue extends CommandOp
   final case class BString(value: String) extends VariableValue
-  final case class BSubCommand(value: CommandOp) extends VariableValue
+  final case class BSubCommand(value: Vector[CommandOp]) extends VariableValue
   final case class BEmpty() extends VariableValue
 
   sealed trait SheBang extends CommandOp
@@ -27,7 +27,12 @@ object domain {
   final case class BashVariable(name: String, value: VariableValue)
       extends CommandOp {
     def `=`(text: String) = this.copy(value = BString(text))
-    def `=`(op: ScriptBuilder[CommandOp]) = this.copy(value = BSubCommand(op))
+    def `=`(op: ScriptBuilder[CommandOp]) = {
+      val cmdOps = op.acc.foldLeft(Vector.empty[CommandOp]) { (acc, op1) =>
+        acc ++ op.decomposeOnion(op1)
+      }
+      this.copy(value = BSubCommand(cmdOps))
+    }
   }
 
   final case class FileTypeOp(path: String) extends CommandOp
@@ -67,15 +72,11 @@ object domain {
   final case class SubCommandStart() extends CommandSubstitution
   final case class SubCommandEnd() extends CommandSubstitution
 
-  final case class SubCommand[A <: CommandOp](subScript: Vector[A])
-      extends CommandOp
-
   sealed trait ProcessSubstitution extends CommandOp
   final case class ProcCommandStart() extends ProcessSubstitution
   final case class ProcCommandEnd() extends ProcessSubstitution
 
   sealed trait Redirections extends CommandOp
-  final case class StdIn() extends Redirections
   final case class StdOut() extends Redirections
   final case class StdErr() extends Redirections
   final case class AppendStdOut() extends Redirections
@@ -102,47 +103,56 @@ object domain {
       }
     }
 
-    def o[B <: A](op: CommandOp) =
+    def o(op: CommandOp) = self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
+    def `;`(op: CommandOp) = self.copy((acc :+ Semi()) ++ decomposeOnion(op))
+    def &(op: CommandOp) = self.copy((acc :+ Amper()) ++ decomposeOnion(op))
+    def &&(op: CommandOp) = self.copy((acc :+ And()) ++ decomposeOnion(op))
+    def ||(op: CommandOp) = self.copy((acc :+ Or()) ++ decomposeOnion(op))
+    def `\n`(op: CommandOp) =
       self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
-    def `;`[B <: A](op: CommandOp) =
-      self.copy((acc :+ Semi()) ++ decomposeOnion(op))
-    def &[B <: A](op: CommandOp) =
-      self.copy((acc :+ Amper()) ++ decomposeOnion(op))
-    def &&[B <: A](op: CommandOp) =
-      self.copy((acc :+ And()) ++ decomposeOnion(op))
-    def ||[B <: A](op: CommandOp) =
-      self.copy((acc :+ Or()) ++ decomposeOnion(op))
-    def `\n`[B <: A](op: CommandOp) =
-      self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
-    def |[B <: A](op: CommandOp) =
+    def |(op: CommandOp) =
       self.copy((acc :+ PipeStdOut()) ++ decomposeOnion(op))
-    def |&[B <: A](op: CommandOp) =
+    def |&(op: CommandOp) =
       self.copy((acc :+ PipeStdOutWithErr()) ++ decomposeOnion(op))
-    def time[B <: A](op: CommandOp) =
+    def time(op: CommandOp) =
       self.copy((acc :+ TimedPipeline()) ++ decomposeOnion(op))
-    def ![B <: A](op: CommandOp) =
+    def !(op: CommandOp) =
       self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
-    def <[B <: A](op: CommandOp) =
-      self.copy((acc :+ StdIn()) ++ decomposeOnion(op))
-    def >[B <: A](op: CommandOp) =
-      self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
-    def `2>`[B <: A](op: CommandOp) =
-      self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
-    def >>[B <: A](op: CommandOp) =
+    def >(op: CommandOp) = self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
+    def `2>`(op: CommandOp) = self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
+    def >>(op: CommandOp) =
       self.copy((acc :+ AppendStdOut()) ++ decomposeOnion(op))
-    def &>[B <: A](op: CommandOp) =
+    def &>(op: CommandOp) =
       self.copy((acc :+ StdOutWithStdErr()) ++ decomposeOnion(op))
-    def &>>[B <: A](op: CommandOp) =
+    def &>>(op: CommandOp) =
       self.copy((acc :+ AppendStdOutWithStdErr()) ++ decomposeOnion(op))
-    def `2>&1`[B <: A](op: CommandOp) =
+    def `2>&1`(op: CommandOp) =
       self.copy((acc :+ RedirectStdOutWithStdErr()) ++ decomposeOnion(op))
-    def <&-[B <: A](op: CommandOp) =
+    def <&-(op: CommandOp) =
       self.copy((acc :+ CloseStdOut()) ++ decomposeOnion(op))
-    def >&-[B <: A](op: CommandOp) =
+    def >&-(op: CommandOp) =
       self.copy((acc :+ CloseStdIn()) ++ decomposeOnion(op))
+    def <(file: FileTypeOp) = self.copy(acc = acc :+ file)
 
-    def >&-(fileDescriptor: Int) = CloseFileDescriptor(fileDescriptor)
-    def >&(from: Int, to: Int) = MergeFileDescriptorsToSingleStream(from, to)
+    def <(p: ScriptBuilder[CommandOp]) =
+      self.copy(acc =
+        (acc :+ ProcCommandStart()) ++ (p.acc
+          .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>
+            acc1 ++ p.decomposeOnion(op1)
+          } :+ ProcCommandEnd())
+      )
+
+    def $(p: ScriptBuilder[CommandOp]) =
+      self.copy(acc =
+        (acc :+ SubCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]) {
+          (acc1, op1) => acc1 ++ p.decomposeOnion(op1)
+        } :+ SubCommandEnd())
+      )
+
+    def >&-(fileDescriptor: Int) =
+      self.copy(acc = acc :+ CloseFileDescriptor(fileDescriptor))
+    def >&(from: Int, to: Int) =
+      self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(from, to))
   }
 
 }
