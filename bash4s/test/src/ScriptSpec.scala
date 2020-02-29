@@ -24,7 +24,7 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls ^(ls | ls || ls > ls ) | ls"yes"              o 
         ls <( ls"start" | ls"end" ) | ls"nope"          o
         ls ^( ls"start" | ls"end" ) | ls"nope"          o
-        ls <( ls"start" | ls"end" ) | ls"nope"          o
+        cat <( ls"start" | ls"end" ) | ls"nope"          o
         ls"echo"
 
       pprint.pprintln(test)

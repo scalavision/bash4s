@@ -1,2 +1,2 @@
 Create a serializer with magnolia
-Add commands to the dsl
+Add standalone commands to the dsl
