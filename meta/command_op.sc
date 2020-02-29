@@ -80,7 +80,7 @@ val commandBuilder = s"""
           } :+ SubCommandEnd()))
       
     def >&-(fileDescriptor: Int) = self.copy( acc = acc :+ CloseFileDescriptor(fileDescriptor))
-    def >&(from: Int, to: Int) = self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(from, to))
+    def >&(desc1: Int, desc2: Int) = self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(desc1, desc2))
   }
 """
 
@@ -124,7 +124,7 @@ val domain =
       ${tmpl.toAdt(ProcessSubstitution, processSubstitutionNames)}
       ${tmpl.toAdt(Redirections, redirectionNames)}
       final case class CloseFileDescriptor(fileDescriptor: Int) extends Redirections
-      final case class MergeFileDescriptorsToSingleStream(from: Int, to: Int) extends Redirections
+      final case class MergeFileDescriptorsToSingleStream(descriptor1: Int, descriptor2: Int) extends Redirections
       ${commandBuilder}
 }
 """

@@ -87,8 +87,10 @@ object domain {
   final case class CloseStdIn() extends Redirections
 
   final case class CloseFileDescriptor(fileDescriptor: Int) extends Redirections
-  final case class MergeFileDescriptorsToSingleStream(from: Int, to: Int)
-      extends Redirections
+  final case class MergeFileDescriptorsToSingleStream(
+      descriptor1: Int,
+      descriptor2: Int
+  ) extends Redirections
 
   case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self =>
 
@@ -153,8 +155,8 @@ object domain {
 
     def >&-(fileDescriptor: Int) =
       self.copy(acc = acc :+ CloseFileDescriptor(fileDescriptor))
-    def >&(from: Int, to: Int) =
-      self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(from, to))
+    def >&(desc1: Int, desc2: Int) =
+      self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(desc1, desc2))
   }
 
 }
