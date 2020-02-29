@@ -16,8 +16,6 @@ object domain {
   final case class BSubCommand(value: CommandOp) extends VariableValue
   final case class BEmpty() extends VariableValue
 
-  final case class END() extends CommandOp
-
   final case class BashVariable(name: String, value: VariableValue)
       extends CommandOp {
     def `=`(text: String) = this.copy(value = BString(text))
@@ -25,6 +23,10 @@ object domain {
   }
 
   final case class FileTypeOp(path: String) extends CommandOp
+
+  final case class END() extends CommandOp
+  final case class TRUE() extends CommandOp
+  final case class FALSE() extends CommandOp
 
   sealed trait PipeOp extends CommandOp
   final case class PipeStdOut() extends PipeOp

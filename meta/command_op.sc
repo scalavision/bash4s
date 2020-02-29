@@ -35,6 +35,8 @@ val conditionalNames = "CIf CThen CElse CFi".list
 val commandSubstitutionNames = "SubCommandStart SubCommandEnd".list
 val processSubstitutionNames = "ProcCommandStart ProcCommandEnd".list
 
+val helpers = "END TRUE FALSE".list
+
 val cmdListFns: List[(String, String)] = (commandListSymbols).zip("NewLine" +: commandListNames)
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
 
@@ -51,7 +53,7 @@ val commandBuilder = s"""
       }
     }
 
-    ${((cmdListFns ++ pipeFns).map(m => tmpl.toCmdOp(m))).mkString("\n")}
+    ${((cmdListFns ++ pipeFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
   }
 """
 
@@ -72,15 +74,14 @@ val domain =
       final case class BSubCommand(value: CommandOp) extends ${VariableValue}
       final case class BEmpty() extends ${VariableValue}
 
-      final case class END() extends ${CommandOp}
-
       final case class ${BashVariable}(name: String, value: VariableValue) extends ${CommandOp} {
         def `=` (text: String) = this.copy(value = BString(text))
         def =& (op: CommandOp) = this.copy(value = BSubCommand(op))
       }
       
       final case class ${FileTypeOp}(path: String) extends ${CommandOp}
-
+      
+      ${helpers.map(c => tmpl.toCmdOp(CommandOp)(c)).mkString("\n")} 
       ${tmpl.toAdt(PipeOp, pipeNames)}
       ${tmpl.toAdt(CommandList, commandListNames)}
       ${tmpl.toAdt(Loop, loopNames)}

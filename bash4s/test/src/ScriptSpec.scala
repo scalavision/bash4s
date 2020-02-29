@@ -15,10 +15,12 @@ object ScriptSpec extends DefaultRunnableSpec(
 
       val test = #!()              o
         ls"-halt"                  o
-        myVar `=` "Hello World"    o
-        myVar =&( ls"-halt" )      o
+        myVar`=`"Hello World"      o
+        myVar=&( ls"-halt" )       o
         time (ls"-h") | ls"-halt"  !
-        ls"end.txt" | ls"yepp!"
+        ls"end.txt" | ls"yepp!"    o
+        ls"one" & ls"two" & ls"three" o
+        ls"one" && ls"two" && ls"three"
 
       pprint.pprintln(test)
 
