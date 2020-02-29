@@ -27,7 +27,7 @@ object domain {
   final case class BashVariable(name: String, value: VariableValue)
       extends CommandOp {
     def `=`(text: String) = this.copy(value = BString(text))
-    def `=`(op: ScriptBuilder[CommandOp]) = {
+    def `=`(op: ScriptBuilder) = {
       val cmdOps = op.acc.foldLeft(Vector.empty[CommandOp]) { (acc, op1) =>
         acc ++ op.decomposeOnion(op1)
       }
@@ -90,8 +90,7 @@ object domain {
   final case class MergeFileDescriptorsToSingleStream(from: Int, to: Int)
       extends Redirections
 
-  case class ScriptBuilder[A <: CommandOp](acc: Vector[A]) extends CommandOp {
-    self =>
+  case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self =>
 
     def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
       op match {
@@ -134,7 +133,7 @@ object domain {
       self.copy((acc :+ CloseStdIn()) ++ decomposeOnion(op))
     def <(file: FileTypeOp) = self.copy(acc = acc :+ file)
 
-    def <(p: ScriptBuilder[CommandOp]) =
+    def <(p: ScriptBuilder) =
       self.copy(acc =
         (acc :+ ProcCommandStart()) ++ (p.acc
           .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>
@@ -142,11 +141,14 @@ object domain {
           } :+ ProcCommandEnd())
       )
 
-    def $(p: ScriptBuilder[CommandOp]) =
+    // This should have been $, but it seems there is some infix presedence that
+    // destroys the ordering of commands. Therefor we try to use ^ instead ..
+    def ^(p: ScriptBuilder) =
       self.copy(acc =
-        (acc :+ SubCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]) {
-          (acc1, op1) => acc1 ++ p.decomposeOnion(op1)
-        } :+ SubCommandEnd())
+        (acc :+ SubCommandStart()) ++ (p.acc
+          .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>
+            acc1 ++ p.decomposeOnion(op1)
+          } :+ SubCommandEnd())
       )
 
     def >&-(fileDescriptor: Int) =

@@ -13,10 +13,10 @@ package object bash {
   def False = FALSE()
 
   def $(op: CommandOp) =
-    ScriptBuilder[CommandOp](Vector(SubCommandStart(), op, SubCommandEnd()))
+    ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
 
   def time(op: CommandOp) =
-    ScriptBuilder[CommandOp](Vector(TimedPipeline(), op))
+    ScriptBuilder(Vector(TimedPipeline(), op))
 
   def ls =
     ScriptBuilder(Vector(SimpleCommand("ls", CmdArgs(Vector.empty[String]))))

@@ -52,7 +52,7 @@ val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionN
 val shebangNames = "Bash Sh Zsh Scala Perl Python".list
 
 val commandBuilder = s"""
-  case class ${ScriptBuilder}[A <: ${CommandOp}](acc: Vector[A]) extends ${CommandOp} { self =>
+  case class ${ScriptBuilder}(acc: Vector[CommandOp]) extends ${CommandOp} { self =>
 
     def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
       op match {
@@ -67,12 +67,18 @@ val commandBuilder = s"""
     ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 
-    def < (p: ScriptBuilder[CommandOp]) = 
+    def < (p: ScriptBuilder) = 
       self.copy( acc = (acc :+ ProcCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]){(acc1, op1) => acc1 ++ p.decomposeOnion(op1)} :+ ProcCommandEnd()))
 
-    def $$ (p: ScriptBuilder[CommandOp]) = 
-      self.copy( acc = (acc :+ SubCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]){(acc1, op1) => acc1 ++ p.decomposeOnion(op1)} :+ SubCommandEnd()))
-
+    // This should have been $$, but it seems there is some infix presedence that
+    // destroys the ordering of commands. Therefor we try to use ^ instead ..
+    def ^(p: ScriptBuilder) =
+      self.copy(acc =
+        (acc :+ SubCommandStart()) ++ (p.acc
+          .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>
+            acc1 ++ p.decomposeOnion(op1)
+          } :+ SubCommandEnd()))
+      
     def >&-(fileDescriptor: Int) = self.copy( acc = acc :+ CloseFileDescriptor(fileDescriptor))
     def >&(from: Int, to: Int) = self.copy(acc = acc :+ MergeFileDescriptorsToSingleStream(from, to))
   }
@@ -99,7 +105,7 @@ val domain =
 
       final case class ${BashVariable}(name: String, value: VariableValue) extends ${CommandOp} {
         def `=` (text: String) = this.copy(value = BString(text))
-        def `=` (op: ScriptBuilder[CommandOp]) = {
+        def `=` (op: ScriptBuilder) = {
            val cmdOps = op.acc.foldLeft(Vector.empty[CommandOp]){(acc, op1) =>
            acc ++ op.decomposeOnion(op1)
          }
