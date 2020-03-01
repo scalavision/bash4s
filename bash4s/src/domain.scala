@@ -8,7 +8,7 @@ object domain {
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
       extends CommandArg
   final case class CmdArgs(args: Vector[String]) extends CommandArg { self =>
-    def :+(arg: String) = self.copy(args = args :+ arg)
+    def :+(arg: String) = copy(args = self.args :+ arg)
   }
   final case class SimpleCommand(name: String, args: CommandArg)
       extends CommandOp

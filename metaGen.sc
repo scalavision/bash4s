@@ -10,5 +10,8 @@ def generateDomain(dest: os.Path): Unit = {
   val bashPath = dest / "bash.scala"
   os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
 
+  val bashcliPath = dest / "clitools"
+  createCommandToolClasses(bashcliPath)
+
 }
 

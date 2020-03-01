@@ -93,7 +93,9 @@ val domain =
 
       sealed trait ${CommandArg} extends ${CommandOp}
       final case class ${CmdArgCtx}(args: Vector[Any], strCtx: StringContext) extends ${CommandArg}
-      final case class ${CmdArgs}(args: Vector[String]) extends ${CommandArg}
+      final case class ${CmdArgs}(args: Vector[String]) extends ${CommandArg} { self =>
+        def :+ (arg: String) = copy(args = self.args :+ arg)
+      }
       final case class ${SimpleCommand}(name: String, args: ${CommandArg}) extends ${CommandOp}
       
       sealed trait ${VariableValue} extends ${CommandOp}

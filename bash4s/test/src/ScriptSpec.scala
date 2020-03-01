@@ -28,11 +28,11 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls <( ls"start" | ls"end" ) | ls"nope"          o
         ls ^( ls"start" | ls"end" ) | ls"nope"          o
         cat <( ls"start" | ls"end" ) | ls"nope"          o
-        du.inFolder() | ls"echo"                        o
-        du.v.h | ls"hello"
+        du | ls"echo"                        o
+        du.help | ls"hello"
 
       val scriptTest2 = 
-        du.inFolder().toCmd  
+        du.help.toCmd  
       
       pprint.pprintln(scriptTest1)
       pprint.pprintln(scriptTest2)

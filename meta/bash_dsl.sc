@@ -37,7 +37,11 @@ def implicitCommand(name: String) =
        ScriptBuilder(Vector(SimpleCommand("$name", CmdArgCtx(args.toVector, s))))
  """
 
+def commandTool(name: String) = 
+  s"""def $name = clitools.${name.capFirst}Wrapper()"""
+
 def commandTemplate = s"""
+  ${commands.map(commandTool).mkString("\n")}
   implicit class CmdSyntax(s: StringContext)  {
     ${commands.map(implicitCommand).mkString("\n")}
   }
@@ -45,6 +49,15 @@ def commandTemplate = s"""
 
 def bashDsl = s"""package bash
 import domain._
+
+trait BashCommandAdapter {
+  def toCmd: SimpleCommand
+}
+
+object dsl {
+  implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => ScriptBuilder = 
+    cmd => ScriptBuilder(Vector(cmd.toCmd))
+}
 
 package object bash {
 
@@ -64,3 +77,24 @@ package object bash {
   ${commandTemplate}
 
 }""".stripMargin
+
+def commandToolClass(name: String) = 
+    s"""
+    package bash.clitools
+
+    import bash.domain._
+    import bash.BashCommandAdapter
+
+    case class ${name.capFirst}Wrapper (
+      args: CmdArgs = CmdArgs(Vector.empty[String])
+    ) extends BashCommandAdapter { self =>
+      def toCmd = SimpleCommand("du", args)
+      def help = copy(args = self.args :+ "--help")
+    }
+    """
+
+def createCommandToolClasses(path: os.Path): Unit =
+  commands.map(commandToolClass).zip(commands).foreach {
+    case (src, name)  =>
+      os.write.over(path / s"${name.capFirst}.scala", src)
+  }
