@@ -16,19 +16,19 @@ object ScriptSpec extends DefaultRunnableSpec(
 
       val myVar = Var
 
-      val scriptTest1 = bash_#!                                o
+      val scriptTest1 = bash_#!                         o
         ls"-halt"                                       o
         myVar `=` "Hello World"                         o
         myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
-        time (ls"-h") | ls"-halt"  !
+        time (ls"-h") | ls"-halt" !
         ls"end.txt" | ls"yepp!"                         o
         ls"one" & ls"two" & ls"three"                   o
         ls"one" && ls"two" && ls"three"                 o
-        ls ^(ls | ls || ls > ls ) | ls"yes"              o 
+        ls ^(ls | ls || ls > ls ) | ls"yes"             o 
         ls <( ls"start" | ls"end" ) | ls"nope"          o
         ls ^( ls"start" | ls"end" ) | ls"nope"          o
-        cat <( ls"start" | ls"end" ) | ls"nope"          o
-        du | ls"echo"                        o
+        cat <( ls"start" | ls"end" ) | ls"nope"         o
+        du | ls"echo"                                   o
         du.help | ls"hello"
 
       val scriptTest2 = 
