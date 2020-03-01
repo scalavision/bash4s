@@ -1,6 +1,15 @@
 package bash
 import domain._
 
+trait BashCommandAdapter {
+  def toCmd: SimpleCommand
+}
+
+object dsl {
+  implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => ScriptBuilder = 
+    cmd => ScriptBuilder(Vector(cmd.toCmd))
+}
+
 package object bash {
 
   def Var(implicit name: sourcecode.Name) =
@@ -18,6 +27,16 @@ package object bash {
   def time(op: CommandOp) =
     ScriptBuilder(Vector(TimedPipeline(), op))
 
+  def du = coreutil.duWrapper()
+
+  def ls = 
+      ScriptBuilder(
+        Vector(SimpleCommand("ls", CmdArgs(Vector.empty[String])))
+      )
+  def cat = 
+      ScriptBuilder(
+        Vector(SimpleCommand("cat", CmdArgs(Vector.empty[String])))
+      )
   implicit class CmdSyntax(s: StringContext) {
 
     def comm(args: Any*) =
