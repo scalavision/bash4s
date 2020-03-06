@@ -109,6 +109,7 @@ object domain {
     def o(op: CommandOp) = self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
     def `;`(op: CommandOp) = self.copy((acc :+ Semi()) ++ decomposeOnion(op))
     def &(op: CommandOp) = self.copy((acc :+ Amper()) ++ decomposeOnion(op))
+    def &^(op: CommandOp) = self.copy((acc :+ Amper()) ++ decomposeOnion(op))
     def &&(op: CommandOp) = self.copy((acc :+ And()) ++ decomposeOnion(op))
     def ||(op: CommandOp) = self.copy((acc :+ Or()) ++ decomposeOnion(op))
     def `\n`(op: CommandOp) =
@@ -120,6 +121,8 @@ object domain {
     def time(op: CommandOp) =
       self.copy((acc :+ TimedPipeline()) ++ decomposeOnion(op))
     def !(op: CommandOp) =
+      self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
+    def !^(op: CommandOp) =
       self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
     def >(op: CommandOp) = self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
     def `2>`(op: CommandOp) = self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
@@ -147,7 +150,7 @@ object domain {
 
     // This should have been $, but it seems there is some infix presedence that
     // destroys the ordering of commands. Therefor we try to use ^ instead ..
-    def ^(p: ScriptBuilder) =
+    def %(p: ScriptBuilder) =
       self.copy(acc =
         (acc :+ SubCommandStart()) ++ (p.acc
           .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>

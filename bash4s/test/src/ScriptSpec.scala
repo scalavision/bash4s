@@ -20,14 +20,15 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls"-halt"                                       o
         myVar `=` "Hello World"                         o
         myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
-        time (ls"-h") | ls"-halt" !
-        ls"end.txt" | ls"yepp!"                         o
-        ls"one" & ls"two" & ls"three"                   o
+        time (ls"-h") | ls"-halt"                       !^
+        ls"end.txt" | ls"yepp!"                         &^
+        ls"one" & ls"two" & ls"three"                   o 
         ls"one" && ls"two" && ls"three"                 o
-        ls ^(ls | ls || ls > ls ) | ls"yes"             o 
+        ls %(ls | ls || ls > ls ) | ls"yes"             o 
         ls <( ls"start" | ls"end" ) | ls"nope"          o
-        ls ^( ls"start" | ls"end" ) | ls"nope"          o
+        ls %( ls"start" | ls"end" ) | ls"nope"          o
         cat <( ls"start" | ls"end" ) | ls"nope"         o
+        cat <( ls"start" | ls"end7" ) & ls"nope"         o
         du | ls"echo"                                   o
         du.help | ls"hello"
 
