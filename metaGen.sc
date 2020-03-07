@@ -1,6 +1,7 @@
 import $file.meta.formatter, formatter._
 import $file.meta.command_op, command_op._
 import $file.meta.bash_dsl, bash_dsl._
+import $file.meta.serializer
 
 def generateDomain(dest: os.Path): Unit = {
 
@@ -9,11 +10,13 @@ def generateDomain(dest: os.Path): Unit = {
 
   val bashPath = dest / "bash.scala"
   os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
-
+ 
+  serializer.generateSerializer(dest)
 /*
   val bashcliPath = dest / "clitools"
   createCommandToolClasses(bashcliPath)
 */
+
 
 }
 
