@@ -57,6 +57,9 @@ object ScriptSerializer {
     s => s"""$$${s.name}"""
   }
 
+  implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
+   f => s"""for ${enc.apply(f.op)}""" 
+  }
   implicit def bashVariable(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] {
@@ -161,6 +164,12 @@ object ScriptSerializer {
     pure[ProcCommandStart] { _ => "<(" }
   implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
     pure[ProcCommandEnd] { _ => ")" }
+  implicit val lInSerializer: ScriptSerializer[LIn] =
+    pure[LIn] { _ => "in" }
+  implicit val lDoSerializer: ScriptSerializer[LDo] =
+    pure[LDo] { _ => ";do\n" }
+  implicit val lDoneSerializer: ScriptSerializer[LDone] =
+    pure[LDone] { _ => "done" }
 
   implicit val devFdSerializer: ScriptSerializer[`/dev/fd`] =
     pure[`/dev/fd`] { df => s"/dev/fd/${df.fileDescriptor}" }

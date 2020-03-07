@@ -14,6 +14,17 @@ def toAdtValue(ext: String, subClasses: List[String]) = {
   """
 }
 
+def toAdtOpClass(ext: String = "CommandOp"): String => String = s => {
+  s"""final case class $s(op: CommandOp) extends $ext"""
+}
+
+def toAdtOpValue(ext: String, subClasses: List[String]) = {
+  s"""
+  sealed trait $ext extends CommandOp
+  ${subClasses.map(s => toAdtOpClass(ext)(s)).mkString("\n")}
+  """
+}
+
 def toAdt(ext: String, subClasses: List[String]) = {
   s"""
   sealed trait $ext extends CommandOp
@@ -27,5 +38,9 @@ def toOpDef(fnMeta: (String, String)) = {
 
 def toOpDefWithNewLineTerminator(fnMeta: (String, String)) = {
   s"""def ${fnMeta._1}^(op: CommandOp) = self.copy(acc = (acc :+ ${fnMeta._2}() :+ NewLine()) ++ decomposeOnion(op))"""
+}
+
+def toOpDefEmpty(fnMeta: (String, String)) = {
+    s"""def ${fnMeta._1} = self.copy(acc = acc :+ ${fnMeta._2}())"""
 }
 

@@ -87,12 +87,14 @@ object domain {
   final case class NewLine() extends CommandList
 
   sealed trait Loop extends CommandOp
-  final case class LUntil() extends Loop
-  final case class LWhile() extends Loop
-  final case class LFor() extends Loop
-  final case class LDo() extends Loop
-  final case class LDone() extends Loop
-  final case class LIn() extends Loop
+  final case class LUntil(op: CommandOp) extends Loop
+  final case class LFor(op: CommandOp) extends Loop
+  final case class LWhile(op: CommandOp) extends Loop
+
+  sealed trait LoopCtrl extends CommandOp
+  final case class LIn() extends LoopCtrl
+  final case class LDo() extends LoopCtrl
+  final case class LDone() extends LoopCtrl
 
   sealed trait Conditional extends CommandOp
   final case class CIf() extends Conditional
@@ -173,18 +175,11 @@ object domain {
       self.copy(acc = (acc :+ CloseStdOut()) ++ decomposeOnion(op))
     def >&-(op: CommandOp) =
       self.copy(acc = (acc :+ CloseStdIn()) ++ decomposeOnion(op))
-    def Until(op: CommandOp) =
-      self.copy(acc = (acc :+ LUntil()) ++ decomposeOnion(op))
-    def While(op: CommandOp) =
-      self.copy(acc = (acc :+ LFor()) ++ decomposeOnion(op))
     def In(op: CommandOp) =
-      self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
-    def Do(op: CommandOp) =
-      self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
-    def Done(op: CommandOp) =
       self.copy(acc = (acc :+ LIn()) ++ decomposeOnion(op))
-    def Done =
-      self.copy(acc = (acc :+ LDone()) )
+    def Do(op: CommandOp) =
+      self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
+    def Done = self.copy(acc = acc :+ LDone())
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))
     def !^(op: CommandOp) =

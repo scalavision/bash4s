@@ -15,6 +15,12 @@ def toDef(helpers: List[String]): String = {
 
 }
 
+def toLoop(loop: List[String]): String = {
+  def t(name: String) =
+    s"""def ${name}(op: CommandOp) = L${name}(op)"""
+  loop.map(t).mkString("\n")
+}
+
 def readDat(file: String)(transformer: String => String): List[String] = 
   os.read(os.pwd / "meta" / "commands" / file).lines.toList.map(_.trim()).map {
     case s if s.contains('-') => s.map {
@@ -77,6 +83,10 @@ package object bash {
   def `/dev/random` = domain.`/dev/random`
 
   ${toDef(cmd.helpers)}
+
+  ${toLoop(cmd.loopFns.map(_._1))}
+
+  def Done = LDone()
 
   def $$(op: CommandOp) = 
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))

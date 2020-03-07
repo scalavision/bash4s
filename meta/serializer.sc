@@ -32,7 +32,12 @@ val symbolNames = (cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirect
 )).map {
   case (symbol, name) =>
     (symbol.filter(_ != '`'), name)
+} ++ cops.loopCtrlFns.map {
+  case (symbol, name) =>
+    val fixedSymbol = if(symbol == "Do") ";do\\n" else symbol.uncapFirst
+    (fixedSymbol, name)
 }
+
 val serializeFileTypeOp: ((String, String)) => String = { case (symbol, name) => 
   s"""|implicit val ${name.uncapFirst}Serializer: ScriptSerializer[${symbol}.type] = 
       | pure[${symbol}.type] { _ => "${symbol.filter(_ != '`')}" }""".stripMargin

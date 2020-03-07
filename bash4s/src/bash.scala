@@ -33,10 +33,9 @@ package object bash {
   def True = TRUE()
   def False = FALSE()
 
-  def For(b: BashVariable) = {
-    pprint.pprintln(b)
-    LFor()
-  }
+  def Until(op: CommandOp) = LUntil(op)
+  def For(op: CommandOp) = LFor(op)
+  def While(op: CommandOp) = LWhile(op)
 
   def Done = LDone()
 

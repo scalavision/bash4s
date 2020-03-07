@@ -34,8 +34,9 @@ val commandListWithLineTerminator = "&".list
 val pipelineLineTerminator = "!".list
 
 val commandListNames = "Semi Amper And Or NewLine".list
-val loopSymbols = "Until For While In Do Done".list
-val loopNames = "LUntil LWhile LFor LDo LDone LIn".list
+
+val loopSymbols = "Until For While".list
+val loopCtrlSymbols = "In Do Done".list
 
 val conditionalSymbols = "If Then Else Fi".list
 val conditionalNames = "CIf CThen CElse CFi".list
@@ -55,7 +56,8 @@ val cmdListFns: List[(String, String)] = (commandListSymbols).zip(commandListNam
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
 val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionNames)
 
-val loopFns: List[(String, String)] = loopSymbols.zip(loopNames)
+val loopFns: List[(String, String)] = loopSymbols.zip(loopSymbols.map("L" + _))
+val loopCtrlFns: List[(String, String)] = loopCtrlSymbols.zip(loopCtrlSymbols.map("L" + _))
 
 val shebangNames = "Bash Sh Zsh Scala Perl Python".list
 
@@ -73,7 +75,9 @@ val commandBuilder = s"""
     }
 
     def `;\\n`(op: CommandOp) = self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
-    ${((cmdListFns ++ pipeFns ++ redirectionFns ++ loopFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
+    ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
+    ${loopCtrlFns.filterNot(s => s == ("Done", "LDone")).map(tmpl.toOpDef).mkString("\n")}
+    ${tmpl.toOpDefEmpty(("Done", "LDone"))}
     ${(commandListWithLineTerminator ++ pipelineLineTerminator).zip(List("Amper", "NegatePipelineExitStatus")).map(m => tmpl.toOpDefWithNewLineTerminator(m)).mkString("\n") }
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 
@@ -159,7 +163,8 @@ val domain =
       ${helpers.map(c => tmpl.toCmdOp(CommandOp)(c)).mkString("\n")} 
       ${tmpl.toAdt(PipeOp, pipeNames)}
       ${tmpl.toAdt(CommandList, commandListNames)}
-      ${tmpl.toAdt(Loop, loopNames)}
+      ${tmpl.toAdtOpValue(Loop, loopSymbols.map("L" + _))}
+      ${tmpl.toAdt("LoopCtrl", loopCtrlSymbols.map("L" + _))}
       ${tmpl.toAdt(Conditional, conditionalNames)}
       ${tmpl.toAdt(CommandSubstitution, commandSubstitutionNames)}
       ${tmpl.toAdt(ProcessSubstitution, processSubstitutionNames)}
