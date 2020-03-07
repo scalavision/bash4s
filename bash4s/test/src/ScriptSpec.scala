@@ -28,15 +28,18 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls <( ls"start" | ls"end" ) | ls"nope"          o
         ls %( ls"start" | ls"end" ) | ls"nope"          o
         cat <( ls"start" | ls"end" ) | ls"nope"         o
-        cat <( ls"start" | ls"end7" ) & ls"nope"         o
+        cat <( ls"start" | ls"end7" ) & ls"nope"        o
         du | ls"echo"                                   o
         du.help | ls"hello"
 
       val scriptTest2 = 
         du.help.toCmd  
-      
-      pprint.pprintln(scriptTest1)
+     
+      val result = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest1)
+
+//      pprint.pprintln(scriptTest1)
       pprint.pprintln(scriptTest2)
+      pprint.pprintln(result)
 
       assert(1, equalTo(1))
 

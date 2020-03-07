@@ -27,7 +27,11 @@ val Redirections = name
 
 // ; & and \n are also used as terminators for a command list
 // not sure if this is something we want to model though ..
-val commandListSymbols = "o `;` & && || `\\n`".list
+val commandListSymbols = "`;` o & && || `\\n`".list
+
+val commandListWithLineTerminator = "&".list
+val pipelineLineTerminator = "!".list
+
 val commandListNames = "Semi Amper And Or NewLine".list
 val loopSymbols = "Until For While In Do Done".list
 val loopNames = "LUntil LWhile LFor LDo LDone LIn".list
@@ -45,7 +49,8 @@ val redirectionSymbols =
 val redirectionNames = 
   "StdOut StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
 
-val cmdListFns: List[(String, String)] = (commandListSymbols).zip("NewLine" +: commandListNames)
+// Some rearrangements going on:
+val cmdListFns: List[(String, String)] = (commandListSymbols).zip(commandListNames.head +: "NewLine" +: commandListNames.tail)
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
 val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionNames)
 
@@ -64,15 +69,17 @@ val commandBuilder = s"""
       }
     }
 
+    def `;\\n`(op: CommandOp) = self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
     ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
+    ${(commandListWithLineTerminator ++ pipelineLineTerminator).zip(List("Amper", "NegatePipelineExitStatus")).map(m => tmpl.toOpDefWithNewLineTerminator(m)).mkString("\n") }
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 
     def < (p: ScriptBuilder) = 
       self.copy( acc = (acc :+ ProcCommandStart()) ++ (p.acc.foldLeft(Vector.empty[CommandOp]){(acc1, op1) => acc1 ++ p.decomposeOnion(op1)} :+ ProcCommandEnd()))
 
     // This should have been $$, but it seems there is some infix presedence that
-    // destroys the ordering of commands. Therefor we try to use ^ instead ..
-    def ^(p: ScriptBuilder) =
+    // destroys the ordering of commands. Therefor we try to use % instead ..
+    def %(p: ScriptBuilder) =
       self.copy(acc =
         (acc :+ SubCommandStart()) ++ (p.acc
           .foldLeft(Vector.empty[CommandOp]) { (acc1, op1) =>

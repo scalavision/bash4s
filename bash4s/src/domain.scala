@@ -106,38 +106,49 @@ object domain {
       }
     }
 
-    def o(op: CommandOp) = self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
-    def `;`(op: CommandOp) = self.copy((acc :+ Semi()) ++ decomposeOnion(op))
-    def &(op: CommandOp) = self.copy((acc :+ Amper()) ++ decomposeOnion(op))
-    def &^(op: CommandOp) = self.copy((acc :+ Amper()) ++ decomposeOnion(op))
-    def &&(op: CommandOp) = self.copy((acc :+ And()) ++ decomposeOnion(op))
-    def ||(op: CommandOp) = self.copy((acc :+ Or()) ++ decomposeOnion(op))
+    def `;\n`(op: CommandOp) =
+      self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
+    def `;`(op: CommandOp) =
+      self.copy(acc = (acc :+ Semi()) ++ decomposeOnion(op))
+    def o(op: CommandOp) =
+      self.copy(acc = (acc :+ NewLine()) ++ decomposeOnion(op))
+    def &(op: CommandOp) =
+      self.copy(acc = (acc :+ Amper()) ++ decomposeOnion(op))
+    def &&(op: CommandOp) =
+      self.copy(acc = (acc :+ And()) ++ decomposeOnion(op))
+    def ||(op: CommandOp) = self.copy(acc = (acc :+ Or()) ++ decomposeOnion(op))
     def `\n`(op: CommandOp) =
-      self.copy((acc :+ NewLine()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ NewLine()) ++ decomposeOnion(op))
     def |(op: CommandOp) =
-      self.copy((acc :+ PipeStdOut()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ PipeStdOut()) ++ decomposeOnion(op))
     def |&(op: CommandOp) =
-      self.copy((acc :+ PipeStdOutWithErr()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ PipeStdOutWithErr()) ++ decomposeOnion(op))
     def time(op: CommandOp) =
-      self.copy((acc :+ TimedPipeline()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ TimedPipeline()) ++ decomposeOnion(op))
     def !(op: CommandOp) =
-      self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
-    def !^(op: CommandOp) =
-      self.copy((acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
-    def >(op: CommandOp) = self.copy((acc :+ StdOut()) ++ decomposeOnion(op))
-    def `2>`(op: CommandOp) = self.copy((acc :+ StdErr()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ NegatePipelineExitStatus()) ++ decomposeOnion(op))
+    def >(op: CommandOp) =
+      self.copy(acc = (acc :+ StdOut()) ++ decomposeOnion(op))
+    def `2>`(op: CommandOp) =
+      self.copy(acc = (acc :+ StdErr()) ++ decomposeOnion(op))
     def >>(op: CommandOp) =
-      self.copy((acc :+ AppendStdOut()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ AppendStdOut()) ++ decomposeOnion(op))
     def &>(op: CommandOp) =
-      self.copy((acc :+ StdOutWithStdErr()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ StdOutWithStdErr()) ++ decomposeOnion(op))
     def &>>(op: CommandOp) =
-      self.copy((acc :+ AppendStdOutWithStdErr()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ AppendStdOutWithStdErr()) ++ decomposeOnion(op))
     def `2>&1`(op: CommandOp) =
-      self.copy((acc :+ RedirectStdOutWithStdErr()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ RedirectStdOutWithStdErr()) ++ decomposeOnion(op))
     def <&-(op: CommandOp) =
-      self.copy((acc :+ CloseStdOut()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ CloseStdOut()) ++ decomposeOnion(op))
     def >&-(op: CommandOp) =
-      self.copy((acc :+ CloseStdIn()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ CloseStdIn()) ++ decomposeOnion(op))
+    def &^(op: CommandOp) =
+      self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))
+    def !^(op: CommandOp) =
+      self.copy(acc =
+        (acc :+ NegatePipelineExitStatus() :+ NewLine()) ++ decomposeOnion(op)
+      )
     def <(file: FileTypeOp) = self.copy(acc = acc :+ file)
 
     def <(p: ScriptBuilder) =
@@ -149,7 +160,7 @@ object domain {
       )
 
     // This should have been $, but it seems there is some infix presedence that
-    // destroys the ordering of commands. Therefor we try to use ^ instead ..
+    // destroys the ordering of commands. Therefor we try to use % instead ..
     def %(p: ScriptBuilder) =
       self.copy(acc =
         (acc :+ SubCommandStart()) ++ (p.acc

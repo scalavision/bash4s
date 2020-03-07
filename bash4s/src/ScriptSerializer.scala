@@ -1,6 +1,8 @@
 package bash
 
 import magnolia._
+import domain._
+
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
 
@@ -23,6 +25,29 @@ object ScriptSerializer {
   implicit val stringSerializer: ScriptSerializer[String] = pure[String] { _.toString() }
   implicit val intSerializer: ScriptSerializer[Int] = pure[Int] { _.toString() }
   implicit val charSerializer: ScriptSerializer[Char] = pure[Char] { _.toString() }
+
+  implicit def cmdArgCtx(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx]{
+    case CmdArgCtx(args: Vector[Any], stringContext) =>
+      val serializedArgs = args.map {
+        case c: CommandOp => enc.apply(c)
+        case other => other
+      }
+      stringContext.s(serializedArgs :_*)
+  }
+
+  implicit def simpleCommand(implicit enc: ScriptSerializer[CmdArgCtx]): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
+    s"""${sc.name} ${sc.args match {
+      case CmdArgs(args) => args.mkString(" ")
+      case c: CmdArgCtx => enc.apply(c)
+    }}"""
+  }
+
+  implicit def vectorSerializerAny(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[Vector[Any]] = 
+    pure[Vector[Any]]{ _.map { 
+      case c: CommandOp => enc.apply(c)
+      case a: Any => a.toString()
+    }.mkString("\n")}
+
 
   implicit def vectorSerializer[A](implicit enc: ScriptSerializer[A]): ScriptSerializer[Vector[A]] = 
     pure[Vector[A]] { _.map(enc.apply).mkString("\n") }
