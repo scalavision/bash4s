@@ -21,7 +21,7 @@ object ScriptSpec extends DefaultRunnableSpec(
         myVar `=` "Hello World"                         o
         myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
         time (ls"-h") | ls"-halt"                       !^
-        ls"end.txt" | ls"yepp!"                         &^
+        ls"end.txt" | ls"'yepp!'"                         &^
         ls"one" & ls"two" & ls"three"                   o 
         ls"one" && ls"two" && ls"three"                 o
         ls %(ls | ls || ls > ls ) | ls"yes"             o 

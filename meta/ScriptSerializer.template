@@ -35,6 +35,16 @@ object ScriptSerializer {
       stringContext.s(serializedArgs :_*)
   }
 
+
+  implicit def bashVariable(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[BashVariable] = pure[BashVariable] {
+   case BashVariable(name, variableValue)  =>
+    s"""$name=${variableValue match {
+        case BString(value)     => s""""${value}""""
+        case BSubCommand(value) => s"${value.map(enc.apply).mkString(" ")}"
+        case BEmpty() =>"''"
+      }}"""
+    }
+  
   implicit def simpleCommand(implicit enc: ScriptSerializer[CmdArgCtx]): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
     s"""${sc.name} ${sc.args match {
       case CmdArgs(args) => args.mkString(" ")
@@ -46,11 +56,11 @@ object ScriptSerializer {
     pure[Vector[Any]]{ _.map { 
       case c: CommandOp => enc.apply(c)
       case a: Any => a.toString()
-    }.mkString("\n")}
+    }.mkString(" ")}
 
 
   implicit def vectorSerializer[A](implicit enc: ScriptSerializer[A]): ScriptSerializer[Vector[A]] = 
-    pure[Vector[A]] { _.map(enc.apply).mkString("\n") }
+    pure[Vector[A]] { _.map(enc.apply).mkString(" ") }
 
   def combine[T](caseClass: CaseClass[ScriptSerializer, T]): ScriptSerializer[T] = new ScriptSerializer[T]{
     def apply(t: T) = {

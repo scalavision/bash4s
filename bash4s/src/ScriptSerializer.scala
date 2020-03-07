@@ -43,6 +43,17 @@ object ScriptSerializer {
       stringContext.s(serializedArgs: _*)
   }
 
+  implicit def bashVariable(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[BashVariable] = pure[BashVariable] {
+    case BashVariable(name, variableValue) =>
+      s"""$name=${variableValue match {
+        case BString(value)     => s""""${value}""""
+        case BSubCommand(value) => s"${value.map(enc.apply).mkString(" ")}"
+        case BEmpty()           => "''"
+      }}"""
+  }
+
   implicit def simpleCommand(
       implicit enc: ScriptSerializer[CmdArgCtx]
   ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
@@ -127,4 +138,12 @@ object ScriptSerializer {
     pure[CloseStdOut] { _ => "<&-" }
   implicit val closeStdInSerializer: ScriptSerializer[CloseStdIn] =
     pure[CloseStdIn] { _ => ">&-" }
+  implicit val subCommandStartSerializer: ScriptSerializer[SubCommandStart] =
+    pure[SubCommandStart] { _ => "$(" }
+  implicit val subCommandEndSerializer: ScriptSerializer[SubCommandEnd] =
+    pure[SubCommandEnd] { _ => ")" }
+  implicit val procCommandStartSerializer: ScriptSerializer[ProcCommandStart] =
+    pure[ProcCommandStart] { _ => "<(" }
+  implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
+    pure[ProcCommandEnd] { _ => ")" }
 }

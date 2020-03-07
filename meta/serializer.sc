@@ -9,8 +9,14 @@ val tmpl = templates
 import $file.command_op 
 val cops = command_op
 
-val symbolNames = cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns
-
+val symbolNames = cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns ++ List(
+  ("$(", "SubCommandStart"), (")", "SubCommandEnd"),
+  ("<(", "ProcCommandStart"), (")", "ProcCommandEnd")
+)
+/*
+  (">&-", "CloseFileDescriptor"),
+  (">&", "MergeFileDescriptorsToSingleStream")
+*/
 val serializeSymbols: ((String, String)) => String = { case (symbol, name) => 
   val symbolFixed = if(symbol == "o") "\\n" else symbol
   s"""|implicit val ${name.uncapFirst}Serializer: ScriptSerializer[${name}] = 
