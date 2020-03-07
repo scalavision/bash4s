@@ -9,10 +9,13 @@ val tmpl = templates
 import $file.command_op 
 val cops = command_op
 
-val symbolNames = cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns ++ List(
+val symbolNames = (cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns ++ List(
   ("$(", "SubCommandStart"), (")", "SubCommandEnd"),
-  ("<(", "ProcCommandStart"), (")", "ProcCommandEnd")
-)
+  ("<(", "ProcCommandStart"), (")", "ProcCommandEnd"),
+)).map {
+  case (symbol, name) =>
+    (symbol.filter(_ != '`'), name)
+}
 /*
   (">&-", "CloseFileDescriptor"),
   (">&", "MergeFileDescriptorsToSingleStream")
@@ -31,6 +34,6 @@ def generateSerializer(dest: os.Path): Unit = {
   val template = os.read( os.pwd / "meta" / "ScriptSerializer.template").lines.toList.dropRight(1).mkString("\n")
 
   val path = dest / "ScriptSerializer.scala"
-  val scriptSerializerSrc = Formatter.style(template + src + "}", path)
+  val scriptSerializerSrc = Formatter.style(template + "\n" + src + "\n}", path)
   os.write.over(path, scriptSerializerSrc) 
 }

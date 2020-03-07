@@ -43,6 +43,20 @@ object ScriptSerializer {
       stringContext.s(serializedArgs: _*)
   }
 
+  implicit val closeFileDescriptorSerializer
+      : ScriptSerializer[CloseFileDescriptor] =
+    pure[CloseFileDescriptor] { cfd => s"${cfd.fileDescriptor}>&-" }
+
+  implicit val mergeFileDescriptorsToSingleStreamSerializer
+      : ScriptSerializer[MergeFileDescriptorsToSingleStream] =
+    pure[MergeFileDescriptorsToSingleStream] { mfds =>
+      s"${mfds.descriptor1}>&${mfds.descriptor2}"
+    }
+
+  implicit val refVariable: ScriptSerializer[RefVariable] = pure[RefVariable] {
+    s => s"""$$${s.name}"""
+  }
+
   implicit def bashVariable(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] {
@@ -100,8 +114,9 @@ object ScriptSerializer {
   }
 
   implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
+
   implicit val semiSerializer: ScriptSerializer[Semi] =
-    pure[Semi] { _ => "`;`" }
+    pure[Semi] { _ => ";" }
   implicit val newLineSerializer: ScriptSerializer[NewLine] =
     pure[NewLine] { _ => "\n" }
   implicit val amperSerializer: ScriptSerializer[Amper] =
@@ -123,7 +138,7 @@ object ScriptSerializer {
   implicit val stdOutSerializer: ScriptSerializer[StdOut] =
     pure[StdOut] { _ => ">" }
   implicit val stdErrSerializer: ScriptSerializer[StdErr] =
-    pure[StdErr] { _ => "`2>`" }
+    pure[StdErr] { _ => "2>" }
   implicit val appendStdOutSerializer: ScriptSerializer[AppendStdOut] =
     pure[AppendStdOut] { _ => ">>" }
   implicit val stdOutWithStdErrSerializer: ScriptSerializer[StdOutWithStdErr] =
@@ -133,7 +148,7 @@ object ScriptSerializer {
     pure[AppendStdOutWithStdErr] { _ => "&>>" }
   implicit val redirectStdOutWithStdErrSerializer
       : ScriptSerializer[RedirectStdOutWithStdErr] =
-    pure[RedirectStdOutWithStdErr] { _ => "`2>&1`" }
+    pure[RedirectStdOutWithStdErr] { _ => "2>&1" }
   implicit val closeStdOutSerializer: ScriptSerializer[CloseStdOut] =
     pure[CloseStdOut] { _ => "<&-" }
   implicit val closeStdInSerializer: ScriptSerializer[CloseStdIn] =
@@ -146,4 +161,5 @@ object ScriptSerializer {
     pure[ProcCommandStart] { _ => "<(" }
   implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
     pure[ProcCommandEnd] { _ => ")" }
+
 }

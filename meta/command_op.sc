@@ -61,7 +61,7 @@ val commandBuilder = s"""
 
     def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
       op match {
-        case ScriptBuilder(scripts) => 
+        case ScriptBuilder(scripts) =>
           scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
             acc ++ decomposeOnion(c)
           }
@@ -109,6 +109,8 @@ val domain =
       final case class BString(value: String) extends ${VariableValue}
       final case class BSubCommand(value: Vector[CommandOp]) extends ${VariableValue}
       final case class BEmpty() extends ${VariableValue}
+  
+      final case class RefVariable(name: String) extends CommandOp
      
       ${tmpl.toAdtValue(SheBang, shebangNames)}
 
@@ -120,6 +122,7 @@ val domain =
          }
          this.copy(value = BSubCommand(cmdOps))
         }
+        def $$ = RefVariable(name)
       }
       
       final case class ${FileTypeOp}(path: String) extends ${CommandOp}

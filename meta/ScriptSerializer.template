@@ -35,6 +35,15 @@ object ScriptSerializer {
       stringContext.s(serializedArgs :_*)
   }
 
+  implicit val closeFileDescriptorSerializer
+      : ScriptSerializer[CloseFileDescriptor] =
+    pure[CloseFileDescriptor] { cfd => s"${cfd.fileDescriptor}>&-" }
+    
+  implicit val mergeFileDescriptorsToSingleStreamSerializer
+      : ScriptSerializer[MergeFileDescriptorsToSingleStream] =
+    pure[MergeFileDescriptorsToSingleStream] { mfds => s"${mfds.descriptor1}>&${mfds.descriptor2}" }
+
+  implicit val refVariable: ScriptSerializer[RefVariable] = pure[RefVariable]{s => s"""$$${s.name}"""}
 
   implicit def bashVariable(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[BashVariable] = pure[BashVariable] {
    case BashVariable(name, variableValue)  =>

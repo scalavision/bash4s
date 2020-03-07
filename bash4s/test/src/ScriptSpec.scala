@@ -21,7 +21,7 @@ object ScriptSpec extends DefaultRunnableSpec(
         myVar `=` "Hello World"                         o
         myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
         time (ls"-h") | ls"-halt"                       !^
-        ls"end.txt" | ls"'yepp!'"                         &^
+        ls"end.txt" | ls"'yepp!'"                       &^
         ls"one" & ls"two" & ls"three"                   o 
         ls"one" && ls"two" && ls"three"                 o
         ls %(ls | ls || ls > ls ) | ls"yes"             o 
@@ -30,7 +30,8 @@ object ScriptSpec extends DefaultRunnableSpec(
         cat <( ls"start" | ls"end" ) | ls"nope"         o
         cat <( ls"start" | ls"end7" ) & ls"nope"        o
         du | ls"echo"                                   o
-        du.help | ls"hello"
+        du.help | ls"hello"                             o
+        ls > myVar.$ >&(2,1)                    
 
       val scriptTest2 = 
         du.help.toCmd  

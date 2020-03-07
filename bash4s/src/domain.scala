@@ -18,6 +18,8 @@ object domain {
   final case class BSubCommand(value: Vector[CommandOp]) extends VariableValue
   final case class BEmpty() extends VariableValue
 
+  final case class RefVariable(name: String) extends CommandOp
+
   sealed trait SheBang extends CommandOp
   final case class Bash(value: String) extends SheBang
   final case class Sh(value: String) extends SheBang
@@ -35,6 +37,7 @@ object domain {
       }
       this.copy(value = BSubCommand(cmdOps))
     }
+    def $ = RefVariable(name)
   }
 
   final case class FileTypeOp(path: String) extends CommandOp
