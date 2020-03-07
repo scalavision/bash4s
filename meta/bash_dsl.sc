@@ -66,6 +66,16 @@ package object bash {
 
   def bash_#! = ScriptBuilder(Vector())
 
+  def `/dev/stdin`  = domain.`/dev/stdin`
+  def `/dev/stdout`  = domain.`/dev/stdout`
+  def `/dev/stderr`  = domain.`/dev/stderr`
+
+  def `/dev/fd`(fileDescriptor: FileDescriptor)  = domain.`/dev/fd`(fileDescriptor)
+  def `/dev/tcp`(host: Host, port: Port)  = domain.`/dev/tcp`(host, port)
+  def `/dev/udp`(host: Host, port: Port)  = domain.`/dev/udp`(host, port)
+  def `/dev/null`  = domain.`/dev/null`
+  def `/dev/random` = domain.`/dev/random`
+
   ${toDef(cmd.helpers)}
 
   def $$(op: CommandOp) = 
@@ -88,7 +98,7 @@ def commandToolClass(name: String) =
     case class ${name.capFirst}Wrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("du", args)
+      def toCmd = SimpleCommand("$name", args)
       def help = copy(args = self.args :+ "--help")
     }
     """

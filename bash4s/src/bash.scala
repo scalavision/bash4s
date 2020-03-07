@@ -18,6 +18,17 @@ package object bash {
 
   def bash_#! = ScriptBuilder(Vector())
 
+  def `/dev/stdin` = domain.`/dev/stdin`
+  def `/dev/stdout` = domain.`/dev/stdout`
+  def `/dev/stderr` = domain.`/dev/stderr`
+
+  def `/dev/fd`(fileDescriptor: FileDescriptor) =
+    domain.`/dev/fd`(fileDescriptor)
+  def `/dev/tcp`(host: Host, port: Port) = domain.`/dev/tcp`(host, port)
+  def `/dev/udp`(host: Host, port: Port) = domain.`/dev/udp`(host, port)
+  def `/dev/null` = domain.`/dev/null`
+  def `/dev/random` = domain.`/dev/random`
+
   def End = END()
   def True = TRUE()
   def False = FALSE()

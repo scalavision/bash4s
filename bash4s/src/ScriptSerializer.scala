@@ -162,4 +162,22 @@ object ScriptSerializer {
   implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
     pure[ProcCommandEnd] { _ => ")" }
 
+  implicit val devFdSerializer: ScriptSerializer[`/dev/fd`] =
+    pure[`/dev/fd`] { df => s"/dev/fd/${df.fileDescriptor}" }
+  implicit val devTcpSerializer: ScriptSerializer[`/dev/tcp`] =
+    pure[`/dev/tcp`] { dt => s"/dev/tcp/${dt.host}/${dt.port}" }
+  implicit val devUdpSerializer: ScriptSerializer[`/dev/udp`] =
+    pure[`/dev/udp`] { dt => s"/dev/udp/${dt.host}/${dt.port}" }
+
+  implicit val devStdInSerializer: ScriptSerializer[`/dev/stdin`.type] =
+    pure[`/dev/stdin`.type] { _ => "/dev/stdin" }
+  implicit val devStdOutSerializer: ScriptSerializer[`/dev/stdout`.type] =
+    pure[`/dev/stdout`.type] { _ => "/dev/stdout" }
+  implicit val devStdErrSerializer: ScriptSerializer[`/dev/stderr`.type] =
+    pure[`/dev/stderr`.type] { _ => "/dev/stderr" }
+  implicit val devNullSerializer: ScriptSerializer[`/dev/null`.type] =
+    pure[`/dev/null`.type] { _ => "/dev/null" }
+  implicit val devRandomSerializer: ScriptSerializer[`/dev/random`.type] =
+    pure[`/dev/random`.type] { _ => "/dev/random" }
+
 }

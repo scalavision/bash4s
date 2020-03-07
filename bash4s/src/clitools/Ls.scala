@@ -7,7 +7,7 @@
     case class LsWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("du", args)
+      def toCmd = SimpleCommand("ls", args)
       def help = copy(args = self.args :+ "--help")
     }
     

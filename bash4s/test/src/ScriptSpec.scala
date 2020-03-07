@@ -15,11 +15,14 @@ object ScriptSpec extends DefaultRunnableSpec(
 //      implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => SimpleCommand = _.toCmd
 
       val myVar = Var
+      val myFile = Var
+      val myIterator = Var
 
       val scriptTest1 = bash_#!                         o
         ls"-halt"                                       o
         myVar `=` "Hello World"                         o
         myVar `=` $( ls"-halt" | ls"two" || ls"three" ) o
+        myFile `=` "./out.txt"                          o
         time (ls"-h") | ls"-halt"                       !^
         ls"end.txt" | ls"'yepp!'"                       &^
         ls"one" & ls"two" & ls"three"                   o 
@@ -31,16 +34,23 @@ object ScriptSpec extends DefaultRunnableSpec(
         cat <( ls"start" | ls"end7" ) & ls"nope"        o
         du | ls"echo"                                   o
         du.help | ls"hello"                             o
-        ls > myVar.$ >&(2,1)                    
+        ls > myFile.$ >&(2,1)                           o
+        ls > `/dev/stdin`                               o 
+        For(myIterator).In(myVar.$).Do {
+          du | ls"echo"
+        }.Done                                          o
+        ls | grep"hello"
 
       val scriptTest2 = 
-        du.help.toCmd  
+        ScriptInspector.bashRefs(scriptTest1)
      
-      val result = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest1)
-
+      val result1 = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest1)
+      val result2 = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest2)
+      
 //      pprint.pprintln(scriptTest1)
       pprint.pprintln(scriptTest2)
-      pprint.pprintln(result)
+      pprint.pprintln(result1)
+      pprint.pprintln(result2)
 
       assert(1, equalTo(1))
 

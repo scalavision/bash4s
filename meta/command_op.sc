@@ -8,6 +8,7 @@ val pipeSymbols = "| |& time !".list
 val pipeNames = "PipeStdOut PipeStdOutWithErr TimedPipeline NegatePipelineExitStatus".list
 val PipeOp = name
 val CommandOp = name
+val DebugString = name
 val CommandArg = name
 val CmdArgCtx = name
 val CmdArgs = name
@@ -97,6 +98,8 @@ val domain =
       object domain {
 
       sealed trait ${CommandOp}
+      
+      final case class ${DebugString}(value: String) extends ${CommandOp}
 
       sealed trait ${CommandArg} extends ${CommandOp}
       final case class ${CmdArgCtx}(args: Vector[Any], strCtx: StringContext) extends ${CommandArg}
@@ -110,7 +113,7 @@ val domain =
       final case class BSubCommand(value: Vector[CommandOp]) extends ${VariableValue}
       final case class BEmpty() extends ${VariableValue}
   
-      final case class RefVariable(name: String) extends CommandOp
+      final case class RefVariable(name: String, value: VariableValue) extends CommandOp
      
       ${tmpl.toAdtValue(SheBang, shebangNames)}
 
@@ -122,10 +125,34 @@ val domain =
          }
          this.copy(value = BSubCommand(cmdOps))
         }
-        def $$ = RefVariable(name)
+        def $$ = RefVariable(name, value)
       }
-      
-      final case class ${FileTypeOp}(path: String) extends ${CommandOp}
+     
+      final case class Host(value: String) extends AnyVal
+      final case class Port(value: Int) extends AnyVal
+      final case class FileDescriptor(value: Int) extends AnyVal
+      final case class FileExtension(extension: Vector[String])
+      final case class FolderPath(folders: Vector[String])
+      final case class BaseName(value: String) extends AnyVal
+
+      sealed trait ${FileTypeOp} extends ${CommandOp}
+      final case class FileName(baseName: BaseName, fileExtension: FileExtension)
+          extends FileTypeOp
+      final case class FilePath(
+          root: Char,
+          folderPath: FolderPath,
+          fileName: FileName
+      ) extends FileTypeOp
+      final case class RelPath(folderPath: FolderPath, fileName: FileName)
+          extends FileTypeOp
+      final case object `/dev/stdin` extends FileTypeOp
+      final case object `/dev/stdout` extends FileTypeOp
+      final case object `/dev/stderr` extends FileTypeOp
+      final case class `/dev/fd`(fileDescriptor: FileDescriptor) extends FileTypeOp
+      final case class `/dev/tcp`(host: Host, port: Port) extends FileTypeOp
+      final case class `/dev/udp`(host: Host, port: Port) extends FileTypeOp
+      final case object `/dev/null` extends FileTypeOp
+      final case object `/dev/random` extends FileTypeOp
       
       ${helpers.map(c => tmpl.toCmdOp(CommandOp)(c)).mkString("\n")} 
       ${tmpl.toAdt(PipeOp, pipeNames)}
