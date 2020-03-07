@@ -33,6 +33,13 @@ package object bash {
   def True = TRUE()
   def False = FALSE()
 
+  def For(b: BashVariable) = {
+    pprint.pprintln(b)
+    LFor()
+  }
+
+  def Done = LDone()
+
   def $(op: CommandOp) =
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
 

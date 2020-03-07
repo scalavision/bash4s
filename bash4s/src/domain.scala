@@ -94,7 +94,6 @@ object domain {
   final case class LDone() extends Loop
   final case class LIn() extends Loop
 
-
   sealed trait Conditional extends CommandOp
   final case class CIf() extends Conditional
   final case class CThen() extends Conditional
@@ -125,11 +124,7 @@ object domain {
       descriptor2: Int
   ) extends Redirections
 
-  final case class ForLoop(forLoop: For) extends CommandOp
-
   case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self =>
-
-    // def For(b: BashVariable) = ForB(b, acc)
 
     def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
       op match {
@@ -178,6 +173,18 @@ object domain {
       self.copy(acc = (acc :+ CloseStdOut()) ++ decomposeOnion(op))
     def >&-(op: CommandOp) =
       self.copy(acc = (acc :+ CloseStdIn()) ++ decomposeOnion(op))
+    def Until(op: CommandOp) =
+      self.copy(acc = (acc :+ LUntil()) ++ decomposeOnion(op))
+    def While(op: CommandOp) =
+      self.copy(acc = (acc :+ LFor()) ++ decomposeOnion(op))
+    def In(op: CommandOp) =
+      self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
+    def Do(op: CommandOp) =
+      self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
+    def Done(op: CommandOp) =
+      self.copy(acc = (acc :+ LIn()) ++ decomposeOnion(op))
+    def Done =
+      self.copy(acc = (acc :+ LDone()) )
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))
     def !^(op: CommandOp) =

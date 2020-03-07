@@ -55,6 +55,8 @@ val cmdListFns: List[(String, String)] = (commandListSymbols).zip(commandListNam
 val pipeFns: List[(String, String)] = pipeSymbols.zip(pipeNames)
 val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionNames)
 
+val loopFns: List[(String, String)] = loopSymbols.zip(loopNames)
+
 val shebangNames = "Bash Sh Zsh Scala Perl Python".list
 
 val commandBuilder = s"""
@@ -71,7 +73,7 @@ val commandBuilder = s"""
     }
 
     def `;\\n`(op: CommandOp) = self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
-    ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
+    ${((cmdListFns ++ pipeFns ++ redirectionFns ++ loopFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
     ${(commandListWithLineTerminator ++ pipelineLineTerminator).zip(List("Amper", "NegatePipelineExitStatus")).map(m => tmpl.toOpDefWithNewLineTerminator(m)).mkString("\n") }
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 

@@ -36,10 +36,10 @@ object ScriptSpec extends DefaultRunnableSpec(
         du.help | ls"hello"                             o
         ls > myFile.$ >&(2,1)                           o
         ls > `/dev/stdin`                               o 
-        For(myIterator).In(myVar.$).Do {
-          du | ls"echo"
-        }.Done                                          o
-        ls | grep"hello"
+        ls | grep"hello"                                o
+        For(myIterator) In myVar Do
+          ls | grep"hello"                              o 
+        Done
 
       val scriptTest2 = 
         ScriptInspector.bashRefs(scriptTest1)
