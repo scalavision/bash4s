@@ -34,7 +34,8 @@ package object bash {
   def Until(op: CommandOp) = LUntil(op)
   def For(op: CommandOp) = LFor(op)
   def While(op: CommandOp) = LWhile(op)
-
+  def If = ScriptBuilder(Vector(CIf()))
+  def Then(op: CommandOp) = ScriptBuilder(Vector(CThen(op)))
   def Done = LDone()
   def True = CTrue()
   def False = CFalse()
@@ -139,7 +140,6 @@ package object bash {
   def mv = clitools.MvWrapper()
   def chown = clitools.ChownWrapper()
   def cat = clitools.CatWrapper()
-  def cat(bv: BashVariable) = clitools.CatWrapper(CmdArgs(Vector(s"$$${bv.name}")))
   def kill = clitools.KillWrapper()
   def mktemp = clitools.MktempWrapper()
   def mkfifo = clitools.MkfifoWrapper()

@@ -96,12 +96,20 @@ object domain {
   final case class LDone() extends LoopCtrl
 
   sealed trait Conditional extends CommandOp
-  final case class CIf() extends Conditional
-  final case class CThen() extends Conditional
+  final case class CIf() extends CommandOp
+  /*
+  final case class CIf(ops: Vector[CommandOp] = Vector.empty[CommandOp]) extends Conditional { self =>
+    def `[[`(op: CommandOp) = copy(ops = self.ops :+ OpenSquareBracket() :+ op) 
+    def `]]` = copy(ops = self.ops :+ CloseSquareBracket())
+    def Then(op: CommandOp) = ScriptBuilder(ops :+ op)
+  }*/
+  final case class CThen(op: CommandOp) extends Conditional
   final case class CElse() extends Conditional
   final case class CFi() extends Conditional
   final case class CTrue() extends Conditional
   final case class CFalse() extends Conditional
+  final case class OpenSquareBracket() extends Conditional
+  final case class CloseSquareBracket() extends Conditional
 
   sealed trait CommandSubstitution extends CommandOp
   final case class SubCommandStart() extends CommandSubstitution
@@ -180,6 +188,20 @@ object domain {
       self.copy(acc = (acc :+ LIn()) ++ decomposeOnion(op))
     def Do(op: CommandOp) =
       self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
+/*    def Then(op: CommandOp) =
+      self.copy(acc = (acc :+ CThen()) ++ decomposeOnion(op))*/
+    def Else(op: CommandOp) =
+      self.copy(acc = (acc :+ CElse()) ++ decomposeOnion(op))
+    def Fi(op: CommandOp) =
+      self.copy(acc = (acc :+ CFi()) ++ decomposeOnion(op))
+    def True(op: CommandOp) =
+      self.copy(acc = (acc :+ CTrue()) ++ decomposeOnion(op))
+    def False(op: CommandOp) =
+      self.copy(acc = (acc :+ CFalse()) ++ decomposeOnion(op))
+    def `[[`(op: CommandOp) =
+      self.copy(acc = (acc :+ OpenSquareBracket()) ++ decomposeOnion(op))
+    def `]]`(op: CommandOp) =
+      self.copy(acc = (acc :+ CloseSquareBracket()) ++ decomposeOnion(op))
     def Done = self.copy(acc = acc :+ LDone())
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))
@@ -187,7 +209,6 @@ object domain {
       self.copy(acc =
         (acc :+ NegatePipelineExitStatus() :+ NewLine()) ++ decomposeOnion(op)
       )
-      
     def <(file: FileTypeOp) = self.copy(acc = acc :+ file)
 
     def <(p: ScriptBuilder) =

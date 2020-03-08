@@ -38,8 +38,8 @@ val commandListNames = "Semi Amper And Or NewLine".list
 val loopSymbols = "Until For While".list
 val loopCtrlSymbols = "In Do Done".list
 
-val conditionalSymbols = "If Then Else Fi True False".list
-val conditionalNames = "CIf CThen CElse CFi CTrue CFalse".list
+val conditionalSymbols = "If Then Else Fi True False `[[` `]]`".list
+val conditionalNames = "CIf CThen CElse CFi CTrue CFalse OpenSquareBracket CloseSquareBracket".list
 
 val commandSubstitutionNames = "SubCommandStart SubCommandEnd".list
 val processSubstitutionNames = "ProcCommandStart ProcCommandEnd".list
@@ -47,7 +47,6 @@ val helpers = "END".list
 
 val redirectionSymbols = 
   "> `2>` >> &> &>> `2>&1` <&- >&-".list
-
 val redirectionNames = 
   "StdOut StdErr AppendStdOut StdOutWithStdErr AppendStdOutWithStdErr RedirectStdOutWithStdErr CloseStdOut CloseStdIn".list
 
@@ -58,6 +57,7 @@ val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionN
 
 val loopFns: List[(String, String)] = loopSymbols.zip(loopSymbols.map("L" + _))
 val loopCtrlFns: List[(String, String)] = loopCtrlSymbols.zip(loopCtrlSymbols.map("L" + _))
+val conditionalFns: List[(String, String)] = conditionalSymbols.zip(conditionalNames)
 
 val shebangNames = "Bash Sh Zsh Scala Perl Python".list
 
@@ -77,6 +77,7 @@ val commandBuilder = s"""
     def `;\\n`(op: CommandOp) = self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
     ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
     ${loopCtrlFns.filterNot(s => s == ("Done", "LDone")).map(tmpl.toOpDef).mkString("\n")}
+    ${conditionalFns.map(tmpl.toOpDef).mkString("\n")}
     ${tmpl.toOpDefEmpty(("Done", "LDone"))}
     ${(commandListWithLineTerminator ++ pipelineLineTerminator).zip(List("Amper", "NegatePipelineExitStatus")).map(m => tmpl.toOpDefWithNewLineTerminator(m)).mkString("\n") }
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)

@@ -86,6 +86,7 @@ package object bash {
 
   ${toLoop(cmd.loopFns.map(_._1))}
 
+  def If = CIf()
   def Done = LDone()
   def True = CTrue()
   def False = CFalse()

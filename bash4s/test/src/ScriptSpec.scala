@@ -6,10 +6,11 @@ import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
 import bash._
-import dsl._
+//import dsl._
 
 object ScriptSpec extends DefaultRunnableSpec(
   suite("Bash Dsl")(
+    /*
     test("Test a simpel script") {
 
 //      implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => SimpleCommand = _.toCmd
@@ -52,6 +53,10 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls"-halt again"                                 o
         While(True) Do 
           ls | grep"hello" o
+        Done                                            o
+        ls"-ahlt ifelse"                                o
+        If `[[` ls"-halt" `]]` Then
+          echo"hello world" o
         Done
 
       val scriptTest2 = 
@@ -67,6 +72,17 @@ object ScriptSpec extends DefaultRunnableSpec(
 
       assert(1, equalTo(1))
 
-    }
-  )
-)
+    },
+    */
+    test("test if else for bash script") {
+      
+      val script = If `[[` ls"-halt" `]]` Then {
+        echo"hello world" | grep"hello" o
+        ls"-halt"
+      } o
+      Done
+      pprint.pprintln(script)
+
+      assert(1, equalTo(1))
+  }
+))

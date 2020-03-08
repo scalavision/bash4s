@@ -38,8 +38,8 @@ object ScriptSerializer {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
         case b: BashVariable => b.name
-        case c: CommandOp => enc.apply(c)
-        case other        => other
+        case c: CommandOp    => enc.apply(c)
+        case other           => other
       }
       stringContext.s(serializedArgs: _*)
   }
