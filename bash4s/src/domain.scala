@@ -104,7 +104,7 @@ object domain {
     def Then(op: CommandOp) = ScriptBuilder(ops :+ op)
   }*/
   final case class CThen(op: CommandOp) extends Conditional
-  final case class CElse() extends Conditional
+  final case class CElse(op: CommandOp) extends Conditional
   final case class CFi() extends Conditional
   final case class CTrue() extends Conditional
   final case class CFalse() extends Conditional
@@ -189,11 +189,11 @@ object domain {
     def Do(op: CommandOp) =
       self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
 /*    def Then(op: CommandOp) =
-      self.copy(acc = (acc :+ CThen()) ++ decomposeOnion(op))*/
+      self.copy(acc = (acc :+ CThen()) ++ decomposeOnion(op)) */
     def Else(op: CommandOp) =
-      self.copy(acc = (acc :+ CElse()) ++ decomposeOnion(op))
-    def Fi(op: CommandOp) =
-      self.copy(acc = (acc :+ CFi()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ CElse(op)) ++ decomposeOnion(op))
+    def Elif(op: CommandOp) =
+      self.copy(acc = (acc :+ CElse(op)) ++ decomposeOnion(op))
     def True(op: CommandOp) =
       self.copy(acc = (acc :+ CTrue()) ++ decomposeOnion(op))
     def False(op: CommandOp) =

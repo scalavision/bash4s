@@ -76,12 +76,29 @@ object ScriptSpec extends DefaultRunnableSpec(
     */
     test("test if else for bash script") {
       
-      val script = If `[[` ls"-halt" `]]` Then {
+      val script1 = If `[[` ls"-halt" `]]` Then {
         echo"hello world" | grep"hello" o
         ls"-halt"
-      } o
-      Done
-      pprint.pprintln(script)
+      } Else {
+        echo"hello"
+      }                                       o
+      Fi
+
+      val script2 = 
+      If `[[` ls"-halt" `]]` Then {
+        echo"hello world" | grep"hello" o
+        ls"-halt"
+      } Elif `[[` (ls"-halt") `]]` Then {
+        echo"hello"
+      } Elif `[[` (ls"-halt") `]]` Then {
+        echo"hello"
+      } Else {
+        echo"goodbye"
+      }                                       o 
+      Fi
+      
+      pprint.pprintln(script1)
+      pprint.pprintln(script2)
 
       assert(1, equalTo(1))
   }

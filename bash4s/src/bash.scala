@@ -36,7 +36,11 @@ package object bash {
   def While(op: CommandOp) = LWhile(op)
   def If = ScriptBuilder(Vector(CIf()))
   def Then(op: CommandOp) = ScriptBuilder(Vector(CThen(op)))
+  def Else(op: CommandOp) = ScriptBuilder(Vector(CElse(op)))
   def Done = LDone()
+  def Fi = CFi()
+  def `[[`(op: CommandOp) =
+      ScriptBuilder(Vector(OpenSquareBracket(), op))
   def True = CTrue()
   def False = CFalse()
 
