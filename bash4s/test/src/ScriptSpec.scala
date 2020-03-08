@@ -64,8 +64,6 @@ object ScriptSpec extends DefaultRunnableSpec(
       val result1 = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest1)
       val result2 = ScriptSerializer.gen[domain.CommandOp].apply(scriptTest2)
       
-//      pprint.pprintln(scriptTest1)
-      pprint.pprintln(scriptTest2)
       pprint.pprintln(result1)
       pprint.pprintln(result2)
 
@@ -89,20 +87,26 @@ object ScriptSpec extends DefaultRunnableSpec(
         myFile `=` "hello.txt"                  o
         If `[[` (ls"-halt") `]]` Then {
           echo"hello world" | grep"hello" o
-          ls"-halt"
+          ls"-halt" o
         } Elif `[[` (ls"-halt") `]]` Then {
-          echo"hello"
+          echo"hello" o
         } Elif `[[` (ls"-halt" && ls"oki" ) `]]` Then {
-          echo"hello"
+          echo"hello" o
         } Elif `[[` { -.a(myFile.$) } `]]` Then {
-          echo"unary"
+          echo"unary" o
          } Else {
-          echo"goodbye"
+          echo"goodbye" o
         } Fi
       
-      pprint.pprintln(script1)
-      pprint.pprintln(script2)
+//      pprint.pprintln(script1)
+//      pprint.pprintln(script2)
 
+      val result1 = ScriptSerializer.gen[domain.CommandOp].apply(script1)
+      val result2 = ScriptSerializer.gen[domain.CommandOp].apply(script2)
+
+      pprint.pprintln(result1)
+      pprint.pprintln(result2)
+      
       assert(1, equalTo(1))
   }
 ))

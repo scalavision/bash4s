@@ -69,6 +69,12 @@ object ScriptSerializer {
   ): ScriptSerializer[LWhile] = pure[LWhile] { f =>
     s"""while ${loopArgSerializer(f.op, enc)}"""
   }
+  
+  implicit def conditionalExpression(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[ConditionalExpression] = pure[ConditionalExpression] { ce =>
+    s"""-${ce.s} ${loopArgSerializer(ce.op, enc)}"""
+  }
 
   implicit val closeFileDescriptorSerializer
       : ScriptSerializer[CloseFileDescriptor] =
