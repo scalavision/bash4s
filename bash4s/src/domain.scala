@@ -187,6 +187,7 @@ object domain {
       self.copy(acc =
         (acc :+ NegatePipelineExitStatus() :+ NewLine()) ++ decomposeOnion(op)
       )
+      
     def <(file: FileTypeOp) = self.copy(acc = acc :+ file)
 
     def <(p: ScriptBuilder) =

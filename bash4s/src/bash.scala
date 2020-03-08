@@ -139,6 +139,7 @@ package object bash {
   def mv = clitools.MvWrapper()
   def chown = clitools.ChownWrapper()
   def cat = clitools.CatWrapper()
+  def cat(bv: BashVariable) = clitools.CatWrapper(CmdArgs(Vector(s"$$${bv.name}")))
   def kill = clitools.KillWrapper()
   def mktemp = clitools.MktempWrapper()
   def mkfifo = clitools.MkfifoWrapper()
