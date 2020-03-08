@@ -27,6 +27,18 @@ val fileTypeOpTemplate = s"""
     pure[`/dev/udp`] { dt => s"/dev/udp/$${dt.host}/$${dt.port}" }
 """
 
+def opContentTemplate(text: String, className: String) = 
+  s"""
+  implicit def ${className.capFirst}(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[$className] = pure[$className] { f =>
+    s"$text $${loopArgSerializer(f.op, enc)}"
+  }
+  """
+{
+
+}
+
 val symbolNames = (cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns ++ List(
   ("$(", "SubCommandStart"), (")", "SubCommandEnd"),
   ("<(", "ProcCommandStart"), (")", "ProcCommandEnd"),
@@ -39,6 +51,9 @@ val symbolNames = (cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirect
   case (symbol, name) =>
     val fixedSymbol = if(symbol == "Do") ";do\\n" else symbol.uncapFirst
     (fixedSymbol, name)
+} ++ cops.conditionalFns.filterNot(s => s._1 == "True" || s._1 == "False").map {
+  case (symbol, name)   =>
+    (symbol.filter(_ != '`').uncapFirst, name)
 }
 
 val serializeFileTypeOp: ((String, String)) => String = { case (symbol, name) => 
@@ -53,7 +68,13 @@ val serializeSymbols: ((String, String)) => String = { case (symbol, name) =>
 }
 
 def src: String =
-  s"""|${symbolNames.map(serializeSymbols).mkString("\n") + "\n" + fileTypeOpTemplate + "\n" + fileTypeOpNames.map(serializeFileTypeOp).mkString("\n")}
+  s"""|${symbolNames.map(serializeSymbols).mkString("\n")}
+      |${fileTypeOpTemplate} 
+      |${fileTypeOpNames.map(serializeFileTypeOp).mkString("\n")}
+      |${cops.conditionalExprFns.map { case (symbol, name) =>
+            val fixedSymbol = if(symbol == "Then") ";then\\n" else symbol.uncapFirst
+           opContentTemplate(fixedSymbol.filter(_ != '`').uncapFirst, name)
+      }.mkString("\n")}
   |""".stripMargin
 
 def generateSerializer(dest: os.Path): Unit = {

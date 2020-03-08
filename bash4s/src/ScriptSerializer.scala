@@ -198,6 +198,15 @@ object ScriptSerializer {
     pure[LDo] { _ => ";do\n" }
   implicit val lDoneSerializer: ScriptSerializer[LDone] =
     pure[LDone] { _ => "done" }
+  implicit val cIfSerializer: ScriptSerializer[CIf] =
+    pure[CIf] { _ => "if" }
+  implicit val cElifSerializer: ScriptSerializer[CElif] =
+    pure[CElif] { _ => "elif" }
+  implicit val cFiSerializer: ScriptSerializer[CFi] =
+    pure[CFi] { _ => "fi" }
+  implicit val closeSquareBracketSerializer
+      : ScriptSerializer[CloseSquareBracket] =
+    pure[CloseSquareBracket] { _ => "]]" }
 
   implicit val devFdSerializer: ScriptSerializer[`/dev/fd`] =
     pure[`/dev/fd`] { df => s"/dev/fd/${df.fileDescriptor}" }
@@ -216,5 +225,23 @@ object ScriptSerializer {
     pure[`/dev/null`.type] { _ => "/dev/null" }
   implicit val devRandomSerializer: ScriptSerializer[`/dev/random`.type] =
     pure[`/dev/random`.type] { _ => "/dev/random" }
+
+  implicit def CThen(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CThen] = pure[CThen] { f =>
+    s";then\n ${loopArgSerializer(f.op, enc)}"
+  }
+
+  implicit def CElse(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElse] = pure[CElse] { f =>
+    s"else ${loopArgSerializer(f.op, enc)}"
+  }
+
+  implicit def OpenSquareBracket(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[OpenSquareBracket] = pure[OpenSquareBracket] { f =>
+    s"[[ ${loopArgSerializer(f.op, enc)}"
+  }
 
 }

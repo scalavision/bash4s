@@ -5,6 +5,8 @@ object domain {
   sealed trait CommandOp
 
   final case class DebugString(value: String) extends CommandOp
+  final case class ConditionalExpression(s: String, op: CommandOp)
+      extends CommandOp
 
   sealed trait CommandArg extends CommandOp
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
@@ -42,8 +44,6 @@ object domain {
     }
     def $ = RefVariable(name, value)
   }
-
-  final case class ConditionalExpression(s: String, op: CommandOp) extends CommandOp
 
   final case class Host(value: String) extends AnyVal
   final case class Port(value: Int) extends AnyVal
@@ -92,25 +92,22 @@ object domain {
   final case class LFor(op: CommandOp) extends Loop
   final case class LWhile(op: CommandOp) extends Loop
 
+  sealed trait ConditionalExpr extends CommandOp
+  final case class CThen(op: CommandOp) extends ConditionalExpr
+  final case class CElse(op: CommandOp) extends ConditionalExpr
+  final case class OpenSquareBracket(op: CommandOp) extends ConditionalExpr
+
   sealed trait LoopCtrl extends CommandOp
   final case class LIn() extends LoopCtrl
   final case class LDo() extends LoopCtrl
   final case class LDone() extends LoopCtrl
 
   sealed trait Conditional extends CommandOp
-  final case class CIf() extends CommandOp
-  /*
-  final case class CIf(ops: Vector[CommandOp] = Vector.empty[CommandOp]) extends Conditional { self =>
-    def `[[`(op: CommandOp) = copy(ops = self.ops :+ OpenSquareBracket() :+ op) 
-    def `]]` = copy(ops = self.ops :+ CloseSquareBracket())
-    def Then(op: CommandOp) = ScriptBuilder(ops :+ op)
-  }*/
-  final case class CThen(op: CommandOp) extends Conditional
-  final case class CElse(op: CommandOp) extends Conditional
+  final case class CIf() extends Conditional
+  final case class CElif() extends Conditional
   final case class CFi() extends Conditional
   final case class CTrue() extends Conditional
   final case class CFalse() extends Conditional
-  final case class OpenSquareBracket() extends Conditional
   final case class CloseSquareBracket() extends Conditional
 
   sealed trait CommandSubstitution extends CommandOp
@@ -190,21 +187,26 @@ object domain {
       self.copy(acc = (acc :+ LIn()) ++ decomposeOnion(op))
     def Do(op: CommandOp) =
       self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
-/*    def Then(op: CommandOp) =
-      self.copy(acc = (acc :+ CThen()) ++ decomposeOnion(op)) */
-    def Else(op: CommandOp) =
-      self.copy(acc = (acc :+ CElse(op)) ++ decomposeOnion(op))
+    def If(op: CommandOp) =
+      self.copy(acc = (acc :+ CIf()) ++ decomposeOnion(op))
     def Elif(op: CommandOp) =
-      self.copy(acc = (acc :+ CElse(op)) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ CElif()) ++ decomposeOnion(op))
+    def Fi(op: CommandOp) =
+      self.copy(acc = (acc :+ CFi()) ++ decomposeOnion(op))
     def True(op: CommandOp) =
       self.copy(acc = (acc :+ CTrue()) ++ decomposeOnion(op))
     def False(op: CommandOp) =
       self.copy(acc = (acc :+ CFalse()) ++ decomposeOnion(op))
-    def `[[`(op: CommandOp) =
-      self.copy(acc = (acc :+ OpenSquareBracket()) ++ decomposeOnion(op))
     def `]]`(op: CommandOp) =
       self.copy(acc = (acc :+ CloseSquareBracket()) ++ decomposeOnion(op))
+    def Else(op: CommandOp) =
+      self.copy(acc = (acc :+ CElse(op)))
+    def `[[`(op: CommandOp) =
+      self.copy(acc = acc :+ OpenSquareBracket(op))
+    def Fi =
+      self.copy(acc = acc :+ CFi())
     def Done = self.copy(acc = acc :+ LDone())
+    def o = self.copy(acc = acc :+ NewLine())
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))
     def !^(op: CommandOp) =

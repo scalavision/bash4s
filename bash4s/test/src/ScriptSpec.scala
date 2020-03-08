@@ -1,16 +1,15 @@
 package bash
 
-//import scala.language.postfixOps
+import scala.language.postfixOps
 import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
 import bash._
-//import dsl._
+import dsl._
 
 object ScriptSpec extends DefaultRunnableSpec(
   suite("Bash Dsl")(
-    /*
     test("Test a simpel script") {
 
 //      implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => SimpleCommand = _.toCmd
@@ -54,10 +53,10 @@ object ScriptSpec extends DefaultRunnableSpec(
         While(True) Do 
           ls | grep"hello" o
         Done                                            o
-        ls"-ahlt ifelse"                                o
-        If `[[` ls"-halt" `]]` Then
+        ls"-ahlt ."                                     o
+        If `[[` ls"-halt" `]]` Then {
           echo"hello world" o
-        Done
+        } Fi
 
       val scriptTest2 = 
         ScriptInspector.bashRefs(scriptTest1)
@@ -73,31 +72,33 @@ object ScriptSpec extends DefaultRunnableSpec(
       assert(1, equalTo(1))
 
     },
-    */
     test("test if else for bash script") {
-      
-      val script1 = If `[[` ls"-halt" `]]` Then {
-        echo"hello world" | grep"hello" o
-        ls"-halt"
-      } Else {
-        echo"hello"
-      }                                       o
-      Fi
+     
+      val myFile = Var
 
-      val script2 = 
-      If `[[` (ls"-halt") `]]` Then {
-        echo"hello world" | grep"hello" o
-        ls"-halt"
-      } Elif `[[` (ls"-halt") `]]` Then {
-        echo"hello"
-      } Elif `[[` (ls"-halt" && ls"oki" ) `]]` Then {
-        echo"hello"
-      } Elif `[[` (-.a(ls"-halt")) `]]` Then{
-        echo"unary"
-       }Else {
-        echo"goodbye"
-      }                                       o 
-      Fi
+      val script1 = bash_#!                     o
+        If `[[` (ls"-halt") `]]` Then {
+          echo"hello world" | grep"hello" o
+          ls"-halt"
+        } Else {
+          echo"hello"
+        } Fi
+      ls"-halt"
+
+      val script2 = bash_#!                     o
+        myFile `=` "hello.txt"                  o
+        If `[[` (ls"-halt") `]]` Then {
+          echo"hello world" | grep"hello" o
+          ls"-halt"
+        } Elif `[[` (ls"-halt") `]]` Then {
+          echo"hello"
+        } Elif `[[` (ls"-halt" && ls"oki" ) `]]` Then {
+          echo"hello"
+        } Elif `[[` { -.a(myFile.$) } `]]` Then {
+          echo"unary"
+         } Else {
+          echo"goodbye"
+        } Fi
       
       pprint.pprintln(script1)
       pprint.pprintln(script2)

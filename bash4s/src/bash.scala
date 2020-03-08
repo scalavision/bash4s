@@ -34,25 +34,23 @@ package object bash {
   def Until(op: CommandOp) = LUntil(op)
   def For(op: CommandOp) = LFor(op)
   def While(op: CommandOp) = LWhile(op)
+  def Then(op: CommandOp) = CThen(op)
+  def Else(op: CommandOp) = CElse(op)
+  def `[[`(op: CommandOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
   def If = ScriptBuilder(Vector(CIf()))
-  def Then(op: CommandOp) = ScriptBuilder(Vector(CThen(op)))
-  def Else(op: CommandOp) = ScriptBuilder(Vector(CElse(op)))
+  def Elif = ScriptBuilder(Vector(CElif()))
   def Done = LDone()
-  def Fi = CFi()
-  def `[[`(op: CommandOp) =
-      ScriptBuilder(Vector(OpenSquareBracket(), op))
   def True = CTrue()
   def False = CFalse()
+
+  case object - {
+    def a(op: CommandOp) = ConditionalExpression("a", op)
+  }
 
   def $(op: CommandOp) =
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
 
   def * = RegexFileSearchApi()
-
-  case object - {
-    def a(op: CommandOp) = ConditionalExpression("a", op)
-  }
- // def - = ConditionalExpressions()
 
   def time(op: CommandOp) =
     ScriptBuilder(Vector(TimedPipeline(), op))

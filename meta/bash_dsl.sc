@@ -15,9 +15,9 @@ def toDef(helpers: List[String]): String = {
 
 }
 
-def toLoop(loop: List[String]): String = {
+def toLoop(prefix: Char)(loop: List[String]): String = {
   def t(name: String) =
-    s"""def ${name}(op: CommandOp) = L${name}(op)"""
+    s"""def ${name}(op: CommandOp) = ${prefix}${name}(op)"""
   loop.map(t).mkString("\n")
 }
 
@@ -84,12 +84,18 @@ package object bash {
 
   ${toDef(cmd.helpers)}
 
-  ${toLoop(cmd.loopFns.map(_._1))}
-
-  def If = CIf()
+  ${toLoop('L')(cmd.loopFns.map(_._1))}
+  ${toLoop('C')(cmd.conditionalExprSymbols.filter(_ != """`[[`"""))}
+  def `[[`(op: CommandOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
+  def If = ScriptBuilder(Vector(CIf()))
+  def Elif = ScriptBuilder(Vector(CElif()))
   def Done = LDone()
   def True = CTrue()
   def False = CFalse()
+
+  case object - {
+    def a(op: CommandOp) = ConditionalExpression("a", op)
+  }
 
   def $$(op: CommandOp) = 
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))

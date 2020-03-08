@@ -15,6 +15,7 @@ val CmdArgs = name
 val CommandList = name
 val SimpleCommand = name
 val Loop = name
+val ConditionalExpr = name
 val Conditional = name
 val CommandSubstitution = name
 val SubCommand = name
@@ -38,8 +39,11 @@ val commandListNames = "Semi Amper And Or NewLine".list
 val loopSymbols = "Until For While".list
 val loopCtrlSymbols = "In Do Done".list
 
-val conditionalSymbols = "If Then Else Fi True False `[[` `]]`".list
-val conditionalNames = "CIf CThen CElse CFi CTrue CFalse OpenSquareBracket CloseSquareBracket".list
+val conditionalExprSymbols = "Then Else `[[`".list
+val conditionalExprNames = conditionalExprSymbols.dropRight(1).map("C" + _) :+ "OpenSquareBracket"
+
+val conditionalSymbols = "If Elif Fi True False `]]`".list
+val conditionalNames = "CIf CElif CFi CTrue CFalse CloseSquareBracket".list
 
 val commandSubstitutionNames = "SubCommandStart SubCommandEnd".list
 val processSubstitutionNames = "ProcCommandStart ProcCommandEnd".list
@@ -58,6 +62,7 @@ val redirectionFns: List[(String, String)] = redirectionSymbols.zip(redirectionN
 val loopFns: List[(String, String)] = loopSymbols.zip(loopSymbols.map("L" + _))
 val loopCtrlFns: List[(String, String)] = loopCtrlSymbols.zip(loopCtrlSymbols.map("L" + _))
 val conditionalFns: List[(String, String)] = conditionalSymbols.zip(conditionalNames)
+val conditionalExprFns: List[(String, String)] = conditionalExprSymbols.zip(conditionalExprNames)
 
 val shebangNames = "Bash Sh Zsh Scala Perl Python".list
 
@@ -77,8 +82,15 @@ val commandBuilder = s"""
     def `;\\n`(op: CommandOp) = self.copy(acc = (acc :+ Semi() :+ NewLine()) ++ decomposeOnion(op))
     ${((cmdListFns ++ pipeFns ++ redirectionFns).map(m => tmpl.toOpDef(m))).mkString("\n")}
     ${loopCtrlFns.filterNot(s => s == ("Done", "LDone")).map(tmpl.toOpDef).mkString("\n")}
-    ${conditionalFns.map(tmpl.toOpDef).mkString("\n")}
+    ${(conditionalFns.map(tmpl.toOpDef).mkString("\n"))}
+    def Else(op: CommandOp) =
+      self.copy(acc = (acc :+ CElse(op)) )
+    def `[[`(op: CommandOp) =
+      self.copy(acc = acc :+ OpenSquareBracket(op))
+    def Fi =
+      self.copy(acc = acc :+ CFi())
     ${tmpl.toOpDefEmpty(("Done", "LDone"))}
+    ${tmpl.toOpDefEmpty(("o", "NewLine"))}
     ${(commandListWithLineTerminator ++ pipelineLineTerminator).zip(List("Amper", "NegatePipelineExitStatus")).map(m => tmpl.toOpDefWithNewLineTerminator(m)).mkString("\n") }
     def < (file: FileTypeOp) = self.copy( acc = acc :+ file)
 
@@ -107,6 +119,7 @@ val domain =
       sealed trait ${CommandOp}
       
       final case class ${DebugString}(value: String) extends ${CommandOp}
+      final case class ConditionalExpression(s: String, op: CommandOp) extends CommandOp
 
       sealed trait ${CommandArg} extends ${CommandOp}
       final case class ${CmdArgCtx}(args: Vector[Any], strCtx: StringContext) extends ${CommandArg}
@@ -166,6 +179,7 @@ val domain =
       ${tmpl.toAdt(PipeOp, pipeNames)}
       ${tmpl.toAdt(CommandList, commandListNames)}
       ${tmpl.toAdtOpValue(Loop, loopSymbols.map("L" + _))}
+      ${tmpl.toAdtOpValue(ConditionalExpr, conditionalExprNames)}
       ${tmpl.toAdt("LoopCtrl", loopCtrlSymbols.map("L" + _))}
       ${tmpl.toAdt(Conditional, conditionalNames)}
       ${tmpl.toAdt(CommandSubstitution, commandSubstitutionNames)}
