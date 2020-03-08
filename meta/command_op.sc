@@ -151,6 +151,7 @@ val domain =
       ) extends FileTypeOp
       final case class RelPath(folderPath: FolderPath, fileName: FileName)
           extends FileTypeOp
+      final case class RegexFileSearch(value: String) extends FileTypeOp
       final case object `/dev/stdin` extends FileTypeOp
       final case object `/dev/stdout` extends FileTypeOp
       final case object `/dev/stderr` extends FileTypeOp

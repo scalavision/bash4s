@@ -42,6 +42,8 @@ package object bash {
   def $(op: CommandOp) =
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
 
+  def * = RegexFileSearchApi()
+
   def time(op: CommandOp) =
     ScriptBuilder(Vector(TimedPipeline(), op))
 

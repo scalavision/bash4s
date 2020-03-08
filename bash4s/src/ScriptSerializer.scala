@@ -58,8 +58,19 @@ object ScriptSerializer {
   }
 
   implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
-   f => s"""for ${enc.apply(f.op)}""" 
+   f => 
+    val txt = f.op match {
+      case BashVariable(name, value) => 
+        value match {
+          case BEmpty() => name
+          case BString(value) => value
+          case BSubCommand(value) => value.map(enc.apply).mkString(" ")
+        }
+      case op: CommandOp => enc.apply(op)  
+    }
+   s"""for ${txt}""" 
   }
+
   implicit def bashVariable(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] {

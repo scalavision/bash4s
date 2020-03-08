@@ -18,6 +18,7 @@ object ScriptSpec extends DefaultRunnableSpec(
       val myFile = Var
       val myIterator = Var
       val myList = Var
+
       val scriptTest1 = bash_#!                         o
         ls"-halt"                                       o
         myVar `=` "Hello World"                         o
@@ -39,10 +40,14 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls > `/dev/stdin`                               o 
         ls | grep"hello"                                o
         For(myIterator) In myList.$ Do
-          ls | grep"hello"                              o 
-          echo"Hello World"                             o
+          ls | grep"hello"  o 
+          echo"Hello World" o
         Done                                            o
-        ls"-halt"
+        ls"-halt"                                       o
+        For(myIterator) In *.txt Do
+          ls | grep"hello"        o
+          echo"Goodbye World ;-9" o
+        Done
 
       val scriptTest2 = 
         ScriptInspector.bashRefs(scriptTest1)
