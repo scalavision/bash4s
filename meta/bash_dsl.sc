@@ -87,12 +87,14 @@ package object bash {
   ${toLoop(cmd.loopFns.map(_._1))}
 
   def Done = LDone()
+  def True = CTrue()
+  def False = CFalse()
 
   def $$(op: CommandOp) = 
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
 
   def * = RegexFileSearchApi()
-    
+
   def time(op: CommandOp) = 
     ScriptBuilder(Vector(TimedPipeline(), op))
 

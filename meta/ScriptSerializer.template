@@ -35,9 +35,8 @@ object ScriptSerializer {
       stringContext.s(serializedArgs :_*)
   }
 
-  implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
-   f => 
-    val txt = f.op match {
+  def loopArgSerializer(op: CommandOp, enc: ScriptSerializer[CommandOp]): String =
+    op match {
       case BashVariable(name, value) => 
         value match {
           case BEmpty() => name
@@ -46,7 +45,15 @@ object ScriptSerializer {
         }
       case op: CommandOp => enc.apply(op)  
     }
-   s"""for ${txt}""" 
+
+  implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
+   f => 
+   s"""for ${loopArgSerializer(f.op, enc)}""" 
+  }
+  
+  implicit def whileLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LWhile] = pure[LWhile] {
+   f => 
+   s"""while ${loopArgSerializer(f.op, enc)}""" 
   }
 
   implicit val closeFileDescriptorSerializer

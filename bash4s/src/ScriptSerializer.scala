@@ -43,6 +43,32 @@ object ScriptSerializer {
       stringContext.s(serializedArgs: _*)
   }
 
+  def loopArgSerializer(
+      op: CommandOp,
+      enc: ScriptSerializer[CommandOp]
+  ): String =
+    op match {
+      case BashVariable(name, value) =>
+        value match {
+          case BEmpty()           => name
+          case BString(value)     => value
+          case BSubCommand(value) => value.map(enc.apply).mkString(" ")
+        }
+      case op: CommandOp => enc.apply(op)
+    }
+
+  implicit def forLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[LFor] = pure[LFor] { f =>
+    s"""for ${loopArgSerializer(f.op, enc)}"""
+  }
+
+  implicit def whileLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[LWhile] = pure[LWhile] { f =>
+    s"""while ${loopArgSerializer(f.op, enc)}"""
+  }
+
   implicit val closeFileDescriptorSerializer
       : ScriptSerializer[CloseFileDescriptor] =
     pure[CloseFileDescriptor] { cfd => s"${cfd.fileDescriptor}>&-" }
@@ -55,20 +81,6 @@ object ScriptSerializer {
 
   implicit val refVariable: ScriptSerializer[RefVariable] = pure[RefVariable] {
     s => s"""$$${s.name}"""
-  }
-
-  implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
-   f => 
-    val txt = f.op match {
-      case BashVariable(name, value) => 
-        value match {
-          case BEmpty() => name
-          case BString(value) => value
-          case BSubCommand(value) => value.map(enc.apply).mkString(" ")
-        }
-      case op: CommandOp => enc.apply(op)  
-    }
-   s"""for ${txt}""" 
   }
 
   implicit def bashVariable(
@@ -175,6 +187,10 @@ object ScriptSerializer {
     pure[ProcCommandStart] { _ => "<(" }
   implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
     pure[ProcCommandEnd] { _ => ")" }
+  implicit val cTrueSerializer: ScriptSerializer[CTrue] =
+    pure[CTrue] { _ => "true" }
+  implicit val cFalseSerializer: ScriptSerializer[CFalse] =
+    pure[CFalse] { _ => "false" }
   implicit val lInSerializer: ScriptSerializer[LIn] =
     pure[LIn] { _ => "in" }
   implicit val lDoSerializer: ScriptSerializer[LDo] =

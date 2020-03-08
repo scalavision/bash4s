@@ -38,12 +38,12 @@ val commandListNames = "Semi Amper And Or NewLine".list
 val loopSymbols = "Until For While".list
 val loopCtrlSymbols = "In Do Done".list
 
-val conditionalSymbols = "If Then Else Fi".list
-val conditionalNames = "CIf CThen CElse CFi".list
+val conditionalSymbols = "If Then Else Fi True False".list
+val conditionalNames = "CIf CThen CElse CFi CTrue CFalse".list
 
 val commandSubstitutionNames = "SubCommandStart SubCommandEnd".list
 val processSubstitutionNames = "ProcCommandStart ProcCommandEnd".list
-val helpers = "END TRUE FALSE".list
+val helpers = "END".list
 
 val redirectionSymbols = 
   "> `2>` >> &> &>> `2>&1` <&- >&-".list

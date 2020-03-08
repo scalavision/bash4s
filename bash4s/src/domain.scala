@@ -71,8 +71,6 @@ object domain {
   final case object `/dev/random` extends FileTypeOp
 
   final case class END() extends CommandOp
-  final case class TRUE() extends CommandOp
-  final case class FALSE() extends CommandOp
 
   sealed trait PipeOp extends CommandOp
   final case class PipeStdOut() extends PipeOp
@@ -102,6 +100,8 @@ object domain {
   final case class CThen() extends Conditional
   final case class CElse() extends Conditional
   final case class CFi() extends Conditional
+  final case class CTrue() extends Conditional
+  final case class CFalse() extends Conditional
 
   sealed trait CommandSubstitution extends CommandOp
   final case class SubCommandStart() extends CommandSubstitution

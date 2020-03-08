@@ -15,6 +15,7 @@ val fileTypeOpNames = List(
   ( "`/dev/stderr`", "devStdErr" ),
   ( "`/dev/null`", "devNull" ),
   ( "`/dev/random`", "devRandom" )
+  
 )
 
 val fileTypeOpTemplate = s"""
@@ -29,6 +30,8 @@ val fileTypeOpTemplate = s"""
 val symbolNames = (cops.cmdListFns.dropRight(1) ++ cops.pipeFns ++ cops.redirectionFns ++ List(
   ("$(", "SubCommandStart"), (")", "SubCommandEnd"),
   ("<(", "ProcCommandStart"), (")", "ProcCommandEnd"),
+  ("true", "CTrue"),
+  ("false", "CFalse")
 )).map {
   case (symbol, name) =>
     (symbol.filter(_ != '`'), name)

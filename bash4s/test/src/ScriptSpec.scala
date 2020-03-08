@@ -47,6 +47,10 @@ object ScriptSpec extends DefaultRunnableSpec(
         For(myIterator) In *.txt Do
           ls | grep"hello"        o
           echo"Goodbye World ;-9" o
+        Done                                            o
+        ls"-halt again"                                 o
+        While(True) Do 
+          ls | grep"hello" o
         Done
 
       val scriptTest2 = 

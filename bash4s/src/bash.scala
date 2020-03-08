@@ -30,14 +30,14 @@ package object bash {
   def `/dev/random` = domain.`/dev/random`
 
   def End = END()
-  def True = TRUE()
-  def False = FALSE()
 
   def Until(op: CommandOp) = LUntil(op)
   def For(op: CommandOp) = LFor(op)
   def While(op: CommandOp) = LWhile(op)
 
   def Done = LDone()
+  def True = CTrue()
+  def False = CFalse()
 
   def $(op: CommandOp) =
     ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
