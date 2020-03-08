@@ -45,8 +45,9 @@ object ScriptSpec extends DefaultRunnableSpec(
         Done                                            o
         ls"-halt"                                       o
         For(myIterator) In *.txt Do
-          ls | grep"hello"        o
-          echo"Goodbye World ;-9" o
+          ls | grep"hello"          o
+          echo"Goodbye World ;-9"   o
+          cat"$myIterator" > myFile o
         Done                                            o
         ls"-halt again"                                 o
         While(True) Do 
