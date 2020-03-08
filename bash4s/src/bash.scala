@@ -49,6 +49,11 @@ package object bash {
 
   def * = RegexFileSearchApi()
 
+  case object - {
+    def a(op: CommandOp) = ConditionalExpression("a", op)
+  }
+ // def - = ConditionalExpressions()
+
   def time(op: CommandOp) =
     ScriptBuilder(Vector(TimedPipeline(), op))
 

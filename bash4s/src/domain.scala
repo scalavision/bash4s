@@ -43,6 +43,8 @@ object domain {
     def $ = RefVariable(name, value)
   }
 
+  final case class ConditionalExpression(s: String, op: CommandOp) extends CommandOp
+
   final case class Host(value: String) extends AnyVal
   final case class Port(value: Int) extends AnyVal
   final case class FileDescriptor(value: Int) extends AnyVal

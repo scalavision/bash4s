@@ -10,3 +10,7 @@ case class RegexFileSearchApi() {
   def bam = 
     RegexFileSearch("*.bam")
 }
+
+case class ConditionalExpressions() {
+  def a(op: CommandOp) = ConditionalExpression("a", op)
+}

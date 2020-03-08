@@ -85,14 +85,16 @@ object ScriptSpec extends DefaultRunnableSpec(
       Fi
 
       val script2 = 
-      If `[[` ls"-halt" `]]` Then {
+      If `[[` (ls"-halt") `]]` Then {
         echo"hello world" | grep"hello" o
         ls"-halt"
       } Elif `[[` (ls"-halt") `]]` Then {
         echo"hello"
-      } Elif `[[` (ls"-halt") `]]` Then {
+      } Elif `[[` (ls"-halt" && ls"oki" ) `]]` Then {
         echo"hello"
-      } Else {
+      } Elif `[[` (-.a(ls"-halt")) `]]` Then{
+        echo"unary"
+       }Else {
         echo"goodbye"
       }                                       o 
       Fi
