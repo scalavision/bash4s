@@ -90,7 +90,7 @@ package object bash {
   def If = ScriptBuilder(Vector(CIf()))
   def Until = ScriptBuilder(Vector(CUntil()))
   def Elif = ScriptBuilder(Vector(CElif()))
-  def Done = ScriptBuilder(Vector(LDone()))
+//  def Done = ScriptBuilder(Vector(LDone()))
   def True = CTrue()
   def False = CFalse()
 

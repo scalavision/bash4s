@@ -205,7 +205,7 @@ object domain {
     def Do(op: CommandOp) =
       self.copy(acc = (acc :+ CDo(op)))
     def Done(op: CommandOp) =
-      self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
+      self.copy(acc = (acc :+ LDone() :+ NewLine()) ++ decomposeOnion(op))
     def `[[`(op: CommandOp) =
       self.copy(acc = acc :+ OpenSquareBracket(op))
     def Fi =

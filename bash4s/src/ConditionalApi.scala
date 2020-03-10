@@ -11,7 +11,7 @@ case class FileConditional(
 
 final case class a(cmdOp: CommandOp) {
   def unary_- = ConditionalExprAccum(Vector(
-    FileConditional("a", cmdOp)
+    FileConditional('a', cmdOp)
   ))
 }
 
