@@ -32,14 +32,17 @@ package object bash {
   def End = END()
 
   def Until(op: CommandOp) = LUntil(op)
+  def Do(op: CommandOp) = LDo(op)
   def For(op: CommandOp) = LFor(op)
   def While(op: CommandOp) = LWhile(op)
   def Then(op: CommandOp) = CThen(op)
   def Else(op: CommandOp) = CElse(op)
   def `[[`(op: CommandOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
   def If = ScriptBuilder(Vector(CIf()))
+  def Until = ScriptBuilder(Vector(CUntil()))
   def Elif = ScriptBuilder(Vector(CElif()))
-  def Done = LDone()
+  def Done(op: CommandOp) = ScriptBuilder(Vector(LDone(), op))
+  //def Done = ScriptBuilder(Vector(LDone()))
   def True = CTrue()
   def False = CFalse()
 

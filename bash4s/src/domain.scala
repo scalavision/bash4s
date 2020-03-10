@@ -89,6 +89,7 @@ object domain {
 
   sealed trait Loop extends CommandOp
   final case class LUntil(op: CommandOp) extends Loop
+  final case class LDo(op: CommandOp) extends Loop
   final case class LFor(op: CommandOp) extends Loop
   final case class LWhile(op: CommandOp) extends Loop
 
@@ -99,11 +100,11 @@ object domain {
 
   sealed trait LoopCtrl extends CommandOp
   final case class LIn() extends LoopCtrl
-  final case class LDo() extends LoopCtrl
   final case class LDone() extends LoopCtrl
 
   sealed trait Conditional extends CommandOp
   final case class CIf() extends Conditional
+  final case class CUntil() extends Conditional
   final case class CElif() extends Conditional
   final case class CFi() extends Conditional
   final case class CTrue() extends Conditional
@@ -185,10 +186,10 @@ object domain {
       self.copy(acc = (acc :+ CloseStdIn()) ++ decomposeOnion(op))
     def In(op: CommandOp) =
       self.copy(acc = (acc :+ LIn()) ++ decomposeOnion(op))
-    def Do(op: CommandOp) =
-      self.copy(acc = (acc :+ LDo()) ++ decomposeOnion(op))
     def If(op: CommandOp) =
       self.copy(acc = (acc :+ CIf()) ++ decomposeOnion(op))
+    def Until(op: CommandOp) =
+      self.copy(acc = (acc :+ CUntil()) ++ decomposeOnion(op))
     def Elif(op: CommandOp) =
       self.copy(acc = (acc :+ CElif()) ++ decomposeOnion(op))
     def Fi(op: CommandOp) =
@@ -201,11 +202,14 @@ object domain {
       self.copy(acc = (acc :+ CloseSquareBracket()) ++ decomposeOnion(op))
     def Else(op: CommandOp) =
       self.copy(acc = (acc :+ CElse(op)))
+    def Do(op: CommandOp) =
+      self.copy(acc = (acc :+ LDo(op)))
     def `[[`(op: CommandOp) =
       self.copy(acc = acc :+ OpenSquareBracket(op))
     def Fi =
       self.copy(acc = acc :+ CFi())
     def Done = self.copy(acc = acc :+ LDone())
+    def Done(op: CommandOp) = self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
     def o = self.copy(acc = acc :+ NewLine())
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))

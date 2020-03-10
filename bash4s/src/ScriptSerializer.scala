@@ -69,11 +69,11 @@ object ScriptSerializer {
   ): ScriptSerializer[LWhile] = pure[LWhile] { f =>
     s"""while ${loopArgSerializer(f.op, enc)}"""
   }
-  
+
   implicit def conditionalExpression(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[ConditionalExpression] = pure[ConditionalExpression] { ce =>
-    s"""-${ce.s} ${loopArgSerializer(ce.op, enc)}"""
+  ): ScriptSerializer[ConditionalExpression] = pure[ConditionalExpression] {
+    ce => s"""-${ce.s} ${loopArgSerializer(ce.op, enc)}"""
   }
 
   implicit val closeFileDescriptorSerializer
@@ -200,12 +200,12 @@ object ScriptSerializer {
     pure[CFalse] { _ => "false" }
   implicit val lInSerializer: ScriptSerializer[LIn] =
     pure[LIn] { _ => "in" }
-  implicit val lDoSerializer: ScriptSerializer[LDo] =
-    pure[LDo] { _ => ";do\n" }
   implicit val lDoneSerializer: ScriptSerializer[LDone] =
     pure[LDone] { _ => "done" }
   implicit val cIfSerializer: ScriptSerializer[CIf] =
     pure[CIf] { _ => "if" }
+  implicit val cUntilSerializer: ScriptSerializer[CUntil] =
+    pure[CUntil] { _ => "until" }
   implicit val cElifSerializer: ScriptSerializer[CElif] =
     pure[CElif] { _ => "elif" }
   implicit val cFiSerializer: ScriptSerializer[CFi] =

@@ -12,8 +12,6 @@ object ScriptSpec extends DefaultRunnableSpec(
   suite("Bash Dsl")(
     test("Test a simpel script") {
 
-//      implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => SimpleCommand = _.toCmd
-
       val myVar = Var
       val myFile = Var
       val myIterator = Var
@@ -39,20 +37,20 @@ object ScriptSpec extends DefaultRunnableSpec(
         ls > myFile.$ >&(2,1)                           o
         ls > `/dev/stdin`                               o 
         ls | grep"hello"                                o
-        For(myIterator) In myList.$ Do
+        For(myIterator) In myList.$ Do {
           ls | grep"hello"  o 
           echo"Hello World" o
-        Done                                            o
+        } Done                                          
         ls"-halt"                                       o
-        For(myIterator) In *.txt Do
+        For(myIterator) In *.txt Do {
           ls | grep"hello"          o
           echo"Goodbye World ;-9"   o
           cat"$myIterator" > myFile o
-        Done                                            o
+        } Done
         ls"-halt again"                                 o
-        While(True) Do 
+        While(True) Do {
           ls | grep"hello" o
-        Done                                            o
+        } Done                                          
         ls"-ahlt ."                                     o
         If `[[` ls"-halt" `]]` Then {
           echo"hello world" o
@@ -97,15 +95,19 @@ object ScriptSpec extends DefaultRunnableSpec(
          } Else {
           echo"goodbye" o
         } Fi
-      
-//      pprint.pprintln(script1)
-//      pprint.pprintln(script2)
 
+        val script3 = bash_#! o
+          Until `[[` (myFile) `]]` Do {
+            echo"Hello World" o
+          } Done
+      
       val result1 = ScriptSerializer.gen[domain.CommandOp].apply(script1)
       val result2 = ScriptSerializer.gen[domain.CommandOp].apply(script2)
+      val result3 = ScriptSerializer.gen[domain.CommandOp].apply(script3)
 
       pprint.pprintln(result1)
       pprint.pprintln(result2)
+      pprint.pprintln(result3)
       
       assert(1, equalTo(1))
   }

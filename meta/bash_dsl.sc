@@ -88,8 +88,9 @@ package object bash {
   ${toLoop('C')(cmd.conditionalExprSymbols.filter(_ != """`[[`"""))}
   def `[[`(op: CommandOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
   def If = ScriptBuilder(Vector(CIf()))
+  def Until = ScriptBuilder(Vector(CUntil()))
   def Elif = ScriptBuilder(Vector(CElif()))
-  def Done = LDone()
+  def Done = ScriptBuilder(Vector(LDone()))
   def True = CTrue()
   def False = CFalse()
 
