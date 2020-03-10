@@ -4,8 +4,15 @@ import domain._
 
 sealed trait ConditionalExpr
 
-final case class a(f: FileTypeOp) extends ConditionalExpr {
-  def unary_- = ConditionalExprAccum(Vector(this))
+case class FileConditional(
+  param: Char,
+  exp: CommandOp
+) extends ConditionalExpr
+
+final case class a(cmdOp: CommandOp) {
+  def unary_- = ConditionalExprAccum(Vector(
+    FileConditional("a", cmdOp)
+  ))
 }
 
 case class ConditionalExprAccum(
@@ -14,5 +21,3 @@ case class ConditionalExprAccum(
   def && (ce: ConditionalExpr) = 
     copy(accum = accum :+ ce)
 }
-
-
