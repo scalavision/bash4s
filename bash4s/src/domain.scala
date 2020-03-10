@@ -89,11 +89,11 @@ object domain {
 
   sealed trait Loop extends CommandOp
   final case class LUntil(op: CommandOp) extends Loop
-  final case class LDo(op: CommandOp) extends Loop
   final case class LFor(op: CommandOp) extends Loop
   final case class LWhile(op: CommandOp) extends Loop
 
   sealed trait ConditionalExpr extends CommandOp
+  final case class CDo(op: CommandOp) extends ConditionalExpr
   final case class CThen(op: CommandOp) extends ConditionalExpr
   final case class CElse(op: CommandOp) extends ConditionalExpr
   final case class OpenSquareBracket(op: CommandOp) extends ConditionalExpr
@@ -203,13 +203,14 @@ object domain {
     def Else(op: CommandOp) =
       self.copy(acc = (acc :+ CElse(op)))
     def Do(op: CommandOp) =
-      self.copy(acc = (acc :+ LDo(op)))
+      self.copy(acc = (acc :+ CDo(op)))
+    def Done(op: CommandOp) =
+      self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
     def `[[`(op: CommandOp) =
       self.copy(acc = acc :+ OpenSquareBracket(op))
     def Fi =
       self.copy(acc = acc :+ CFi())
     def Done = self.copy(acc = acc :+ LDone())
-    def Done(op: CommandOp) = self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
     def o = self.copy(acc = acc :+ NewLine())
     def &^(op: CommandOp) =
       self.copy(acc = (acc :+ Amper() :+ NewLine()) ++ decomposeOnion(op))

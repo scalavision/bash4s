@@ -232,6 +232,12 @@ object ScriptSerializer {
   implicit val devRandomSerializer: ScriptSerializer[`/dev/random`.type] =
     pure[`/dev/random`.type] { _ => "/dev/random" }
 
+  implicit def CDo(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CDo] = pure[CDo] { f =>
+    s";do\n ${loopArgSerializer(f.op, enc)}"
+  }
+
   implicit def CThen(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CThen] = pure[CThen] { f =>

@@ -72,7 +72,7 @@ def src: String =
       |${fileTypeOpTemplate} 
       |${fileTypeOpNames.map(serializeFileTypeOp).mkString("\n")}
       |${cops.conditionalExprFns.map { case (symbol, name) =>
-            val fixedSymbol = if(symbol == "Then") ";then\\n" else symbol.uncapFirst
+            val fixedSymbol = if(symbol == "Then") ";then\\n" else if(symbol == "Do") ";do\\n" else symbol.uncapFirst
            opContentTemplate(fixedSymbol.filter(_ != '`').uncapFirst, name)
       }.mkString("\n")}
   |""".stripMargin

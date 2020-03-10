@@ -36,10 +36,10 @@ val pipelineLineTerminator = "!".list
 
 val commandListNames = "Semi Amper And Or NewLine".list
 
-val loopSymbols = "Until Do For While".list
+val loopSymbols = "Until For While".list
 val loopCtrlSymbols = "In Done".list
 
-val conditionalExprSymbols = "Then Else `[[`".list
+val conditionalExprSymbols = "Do Then Else `[[`".list
 val conditionalExprNames = conditionalExprSymbols.dropRight(1).map("C" + _) :+ "OpenSquareBracket"
 
 val conditionalSymbols = "If Until Elif Fi True False `]]`".list
@@ -86,7 +86,9 @@ val commandBuilder = s"""
     def Else(op: CommandOp) =
       self.copy(acc = (acc :+ CElse(op)) )
     def Do(op: CommandOp) =
-      self.copy(acc = (acc :+ LDo(op)) )
+      self.copy(acc = (acc :+ CDo(op)) )
+    def Done(op: CommandOp) = 
+      self.copy(acc = (acc :+ LDone()) ++ decomposeOnion(op))
     def `[[`(op: CommandOp) =
       self.copy(acc = acc :+ OpenSquareBracket(op))
     def Fi =

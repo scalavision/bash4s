@@ -90,7 +90,7 @@ object ScriptSpec extends DefaultRunnableSpec(
           echo"hello" o
         } Elif `[[` (ls"-halt" && ls"oki" ) `]]` Then {
           echo"hello" o
-        } Elif `[[` { -.a(myFile.$) } `]]` Then {
+        } Elif `[[` (True) `]]` Then {
           echo"unary" o
          } Else {
           echo"goodbye" o
