@@ -9,7 +9,7 @@ import bash._
 import dsl._
 
 object ScriptSpec extends DefaultRunnableSpec(
-  suite("Bash Dsl")(
+  suite("Bash Dsl for Commands")(
     test("Test a simpel script") {
 
       val myVar = Var
@@ -75,7 +75,7 @@ object ScriptSpec extends DefaultRunnableSpec(
       val script1 = bash_#!                     o
         If `[[` (ls"-halt") `]]` Then {
           echo"hello world" | grep"hello" o
-          ls"-halt"
+          ls"-halt" o
         } Else {
           echo"hello"
         } Fi
