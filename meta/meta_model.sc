@@ -77,7 +77,7 @@ def redirectFunctions = (cmdRedirectionSymbols.zip(cmdRedirectionSymbols.map(toC
 val pipeSymbols = "| |&".list
 val pipelineClasses = tmpl.toAdtSuper("CommandListOp", "PipelineOp", pipeSymbols.map(extract))
 
-val leftOvers = "`{` Do Then Else ElseIf Until For While Done If Fi `}` $".list
+val leftOvers = "`{` Do Then Else ElseIf Until For Done If Fi `}` $".list
 val leftOverClasses = (leftOvers.map(extract).map(tmpl.toCmdOp()(_))).mkString("\n") //tmpl.toAdt("CommandOp", )
 
 val template = s"""|package bash4s
@@ -166,11 +166,11 @@ val template = s"""|package bash4s
    |
    |   def unary_! = self.copy(Negate() +: cmds) 
    |
-   |   def || (pipelineOp: PipelineOp) =
-   |     copy(cmds = (self.cmds :+ Or()) :+ pipelineOp)
+   |   def || (cmdListOp: CommandListOp) =
+   |     copy(cmds = (self.cmds :+ Or()) :+ cmdListOp)
    |
-   |    def && (pipelineOp: PipelineOp) =
-   |     copy(cmds = (self.cmds :+ And()) :+ pipelineOp)
+   |    def && (cmdListOp: CommandListOp) =
+   |     copy(cmds = (self.cmds :+ And()) :+ cmdListOp)
    |
    |   def & = 
    |    self.copy(cmds = (OpenSubShellEnv() +: self.cmds) ++ Vector(CloseSubShellEnv(), Amper()))
@@ -186,8 +186,35 @@ val template = s"""|package bash4s
    |
    |    def |& (simpleCommand: SimpleCommand) =
    |     copy(cmds = (self.cmds :+ PipeWithError()) :+ simpleCommand)
-   |  }
    |
+   |    def `]]` = copy(cmds = self.cmds :+ CloseDoubleSquareBracket())
+   |
+   |}
+   |
+      final case class CloseDoubleSquareBracket() extends CommandOp
+      final case class OpenDoubleSquareBracket()  extends CommandOp
+      
+      def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
+        Vector(OpenDoubleSquareBracket(), op)
+      )
+
+      final case class CWhile(testCommands: Vector[CommandOp], conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]) extends CommandOp { self =>
+
+        def `]]` = 
+          copy(conseqCmds = self.conseqCmds :+ CloseDoubleSquareBracket()) 
+
+        def Do(cons: CommandOp) = 
+          copy(conseqCmds = self.conseqCmds :+ CDo() :+ cons) 
+
+        def Done =
+          copy(conseqCmds = self.conseqCmds :+ CDone()) 
+
+      }
+
+      object While {
+        def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+      }
+
    |  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self => 
    |
    |    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
@@ -205,9 +232,6 @@ val template = s"""|package bash4s
    |   }
    |
    |  final case class SheBang(s: String) extends CommandOp
-   | 
-   |
-   | def `[[`(op: CommandOp) = OpenDoubleSquareBracket(op)
    |
    | implicit class CmdSyntax(s: StringContext) {
    |   def du(args: Any*) =

@@ -13,13 +13,11 @@ object dsl {
   }
   final case class EmptyArg() extends CommandArg
   final case class OpenCommandList() extends CommandOp
-  final case class CDo() extends CommandOp
   final case class CThen() extends CommandOp
   final case class CElse() extends CommandOp
   final case class CElseIf() extends CommandOp
   final case class CUntil() extends CommandOp
   final case class CFor() extends CommandOp
-  final case class CWhile() extends CommandOp
   final case class CDone() extends CommandOp
   final case class CIf() extends CommandOp
   final case class CFi() extends CommandOp
@@ -138,11 +136,11 @@ object dsl {
 
     def unary_! = self.copy(Negate() +: cmds)
 
-    def ||(pipelineOp: CommandListOp) =
-      copy(cmds = (self.cmds :+ Or()) :+ pipelineOp)
+    def ||(cmdListOp: CommandListOp) =
+      copy(cmds = (self.cmds :+ Or()) :+ cmdListOp)
 
-    def &&(pipelineOp: CommandListOp) =
-      copy(cmds = (self.cmds :+ And()) :+ pipelineOp)
+    def &&(cmdListOp: CommandListOp) =
+      copy(cmds = (self.cmds :+ And()) :+ cmdListOp)
 
     def & =
       self.copy(cmds =
@@ -162,6 +160,35 @@ object dsl {
       copy(cmds = (self.cmds :+ PipeWithError()) :+ simpleCommand)
 
     def `]]` = copy(cmds = self.cmds :+ CloseDoubleSquareBracket())
+
+  }
+
+  final case class CloseDoubleSquareBracket() extends CommandOp
+  final case class OpenDoubleSquareBracket() extends CommandOp
+
+  def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
+    Vector(OpenDoubleSquareBracket(), op)
+  )
+
+  final case class CDo(op: CommandOp) extends CommandOp
+
+  final case class CWhile(
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]` (doCommand: CDo) =
+      copy(conseqCmds = self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand)
+
+    def Done =
+      ScriptBuilder(Vector(self, CDone()))
+      
+  }
+
+  def Do(op: CommandOp) = CDo(op)
+
+  object While {
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
 
   final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
@@ -177,19 +204,19 @@ object dsl {
       }
     }
 
+    def END = self
+    
+    def Done(op: CommandOp) =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
+
+
     def o(op: CommandOp) =
       self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
+
 
   }
 
   final case class SheBang(s: String) extends CommandOp
-
-  final case class CloseDoubleSquareBracket() extends CommandOp
-  final case class OpenDoubleSquareBracket()  extends CommandOp
-  
-  def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
-    Vector(OpenDoubleSquareBracket(), op)
-  )
 
   implicit class CmdSyntax(s: StringContext) {
     def du(args: Any*) =

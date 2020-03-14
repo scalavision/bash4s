@@ -1,6 +1,6 @@
 package bash4s
 
-//import scala.language.postfixOps
+import scala.language.postfixOps
 import dsl._
 
 object Main {
@@ -20,13 +20,21 @@ object Main {
       du"goodybe"                                                   o
       du"oki".$( du"sub" | du"hello" )                              o 
       du"now" o
-      du"oki".$( du"sub" | du"hello" )  o
-      `[[` (du"hello" && du"yes").`]]` && `[[` (du"goodbye").`]]` && du"good"
+      du"oki".$( du"sub" | du"hello" )                              o
+      `[[` (du"hello" && du"yes").`]]` && `[[` (du"goodbye").`]]` && du"good" o
+      While `[[` du"hello" `]]` Do {
+        du"ls"
+      } Done
+      du"ls"
 
-      //o
-      //du"done"
+    val testWhile = 
+      While `[[` du"hello" `]]` Do {
+        du"ls"
+      } Done 
 
     pprint.pprintln(serializer.apply(script))
+    pprint.pprintln(testWhile)
+
   }
 
 }
