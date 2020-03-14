@@ -77,7 +77,7 @@ def redirectFunctions = (cmdRedirectionSymbols.zip(cmdRedirectionSymbols.map(toC
 val pipeSymbols = "| |&".list
 val pipelineClasses = tmpl.toAdtSuper("CommandListOp", "PipelineOp", pipeSymbols.map(extract))
 
-val leftOvers = "`{` Do Then Else ElseIf Until For Done If Fi `}` $".list
+val leftOvers = "`{` Until For Done Fi `}` $".list
 val leftOverClasses = (leftOvers.map(extract).map(tmpl.toCmdOp()(_))).mkString("\n") //tmpl.toAdt("CommandOp", )
 
 val template = s"""|package bash4s
@@ -193,43 +193,99 @@ val template = s"""|package bash4s
    |
       final case class CloseDoubleSquareBracket() extends CommandOp
       final case class OpenDoubleSquareBracket()  extends CommandOp
+  def `[[`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
+
+  def &&(op: CommandOp) = Vector(And(), op)
+ 
+  final case class CDo(op: CommandOp) extends CommandOp
+
+  final case class CWhile(
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]` (doCommand: CDo) =
+      copy(conseqCmds = self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand)
+
+    def Done =
+      ScriptBuilder(Vector(self, CDone()))
       
-      def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
-        Vector(OpenDoubleSquareBracket(), op)
+  }
+
+  def Do(op: CommandOp) = CDo(op)
+
+  object While {
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+  }
+
+  final case class CThen(op: CommandOp) extends CommandOp
+  final case class CElse(op: CommandOp) extends CommandOp
+
+  final case class CElseIf(      
+    testCommands: Vector[CommandOp],
+    conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+    def `]]`(thenCommand: CThen) = 
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
       )
+  }
 
-      final case class CWhile(testCommands: Vector[CommandOp], conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]) extends CommandOp { self =>
+  object ElseIf {
+    def `[[`(op: CommandOp) = CElseIf(Vector(OpenDoubleSquareBracket(), op))
+  }
+  
+  final case class CIf(
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
 
-        def `]]` = 
-          copy(conseqCmds = self.conseqCmds :+ CloseDoubleSquareBracket()) 
+    def `]]`(thenCommand: CThen) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
+      )
+      
+    def Else(op: CommandOp) =
+      copy(conseqCmds = self.conseqCmds :+ CElse(op))
 
-        def Do(cons: CommandOp) = 
-          copy(conseqCmds = self.conseqCmds :+ CDo() :+ cons) 
+    def Fi =
+      ScriptBuilder(Vector(self, CDone()))
 
-        def Done =
-          copy(conseqCmds = self.conseqCmds :+ CDone()) 
+  }
+  
+  def Then(op: CommandOp) = CThen(op)
+  
+  object If {
+    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
+  }
 
+  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
+    self =>
+
+    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
+      op match {
+        case ScriptBuilder(scripts) =>
+          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+            acc ++ decomposeOnion(c)
+          }
+        case _ => Vector(op)
       }
+    }
+    
+    def Done(op: CommandOp) =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
 
-      object While {
-        def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
-      }
+    def Done =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine())
 
-   |  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self => 
-   |
-   |    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
-   |      op match {
-   |        case ScriptBuilder(scripts) =>
-   |          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
-   |            acc ++ decomposeOnion(c)
-   |          }
-   |        case _ => Vector(op)
-   |      }
-   |    }
-   |
-   |    def o(op: CommandOp) = self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
-   |
-   |   }
+    
+    def o(op: CommandOp) =
+      self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
+
+
+  }
+      
    |
    |  final case class SheBang(s: String) extends CommandOp
    |

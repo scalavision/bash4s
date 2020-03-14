@@ -32,15 +32,24 @@ object Main {
       While `[[` du"hello" `]]` Do {
         du"ls"
       } Done 
+    
+    val testIf = 
+      If `[[` du"hello" `]]` Then {
+        du"ls"
+      } ElseIf `[[` (du"lovely").`]]` Then {
+        du"ls" o
+        du"oki"
+      } Else {
+        du"done"
+      } Fi
 
     val testBashCond = 
       `[[` (du"hello").`]]` && `[[` (du"hello") `]]`
 
-//    val testIf = ???
-
     pprint.pprintln(serializer.apply(script))
     pprint.pprintln(testWhile)
     pprint.pprintln(testBashCond)
+    pprint.pprintln(testIf)
 
   }
 
