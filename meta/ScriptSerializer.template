@@ -1,7 +1,7 @@
-package bash
+package bash4s
 
 import magnolia._
-import domain._
+import dsl._
 
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
@@ -10,7 +10,8 @@ import scala.annotation.implicitNotFound
   """Cannot find an BiologySerializer for type ${T}.
      The script serialization is derived automatically for basic Scala types, case classes and sealed traits, but
      you need to manually provide an implicit BiologySerializer for other types that could be nested in ${T}.
-  """)
+  """
+)
 trait ScriptSerializer[T] {
   def apply(t: T): String
 }
@@ -18,88 +19,58 @@ object ScriptSerializer {
 
   type Typeclass[T] = ScriptSerializer[T]
 
-  def pure[A](func: A => String): ScriptSerializer[A] = new ScriptSerializer[A] {
-    def apply(value: A ): String = func(value)
+  def pure[A](func: A => String): ScriptSerializer[A] =
+    new ScriptSerializer[A] {
+      def apply(value: A): String = func(value)
+    }
+
+  implicit val stringSerializer: ScriptSerializer[String] = pure[String] {
+    _.toString()
+  }
+  implicit val intSerializer: ScriptSerializer[Int] = pure[Int] { _.toString() }
+  implicit val charSerializer: ScriptSerializer[Char] = pure[Char] {
+    _.toString()
   }
 
-  implicit val stringSerializer: ScriptSerializer[String] = pure[String] { _.toString() }
-  implicit val intSerializer: ScriptSerializer[Int] = pure[Int] { _.toString() }
-  implicit val charSerializer: ScriptSerializer[Char] = pure[Char] { _.toString() }
-
-  implicit def cmdArgCtx(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx]{
+  implicit def cmdArgCtx(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
-        case b: BashVariable => b.name
-        case c: CommandOp => enc.apply(c)
-        case other => other
+        case c: CommandOp    => enc.apply(c)
+        case other           => other
       }
-      stringContext.s(serializedArgs :_*)
+      stringContext.s(serializedArgs: _*)
   }
 
-  def loopArgSerializer(op: CommandOp, enc: ScriptSerializer[CommandOp]): String =
-    op match {
-      case BashVariable(name, value) => 
-        value match {
-          case BEmpty() => name
-          case BString(value) => value
-          case BSubCommand(value) => value.map(enc.apply).mkString(" ")
-        }
-      case op: CommandOp => enc.apply(op)  
-    }
-
-  implicit def forLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LFor] = pure[LFor] {
-   f => 
-   s"""for ${loopArgSerializer(f.op, enc)}""" 
-  }
-  
-  implicit def whileLoop(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[LWhile] = pure[LWhile] {
-   f => 
-   s"""while ${loopArgSerializer(f.op, enc)}""" 
-  }
-
-  implicit def conditionalExpression(
+  implicit def simpleCommand(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[ConditionalExpression] = pure[ConditionalExpression] { ce =>
-    s"""-${ce.s} ${loopArgSerializer(ce.op, enc)}"""
-  }
-
-  implicit val closeFileDescriptorSerializer
-      : ScriptSerializer[CloseFileDescriptor] =
-    pure[CloseFileDescriptor] { cfd => s"${cfd.fileDescriptor}>&-" }
-    
-  implicit val mergeFileDescriptorsToSingleStreamSerializer
-      : ScriptSerializer[MergeFileDescriptorsToSingleStream] =
-    pure[MergeFileDescriptorsToSingleStream] { mfds => s"${mfds.descriptor1}>&${mfds.descriptor2}" }
-
-  implicit val refVariable: ScriptSerializer[RefVariable] = pure[RefVariable]{s => s"""$$${s.name}"""}
-
-  implicit def bashVariable(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[BashVariable] = pure[BashVariable] {
-   case BashVariable(name, variableValue)  =>
-    s"""$name=${variableValue match {
-        case BString(value)     => s""""${value}""""
-        case BSubCommand(value) => s"${value.map(enc.apply).mkString(" ")}"
-        case BEmpty() =>"''"
-      }}"""
-    }
-  
-  implicit def simpleCommand(implicit enc: ScriptSerializer[CmdArgCtx]): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
-    s"""${sc.name} ${sc.args match {
+  ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
+    s"""${sc.name} ${sc.arg match {
       case CmdArgs(args) => args.mkString(" ")
-      case c: CmdArgCtx => enc.apply(c)
-    }}"""
+      case c: CmdArgCtx  => enc.apply(c)
+      case EmptyArg()    => "()"
+    }} ${sc.cmds.map(enc.apply).mkString(" ")}"""
   }
 
-  implicit def vectorSerializerAny(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[Vector[Any]] = 
-    pure[Vector[Any]]{ _.map { 
-      case c: CommandOp => enc.apply(c)
-      case a: Any => a.toString()
-    }.mkString(" ")}
+  implicit def vectorSerializerAny(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[Vector[Any]] =
+    pure[Vector[Any]] {
+      _.map {
+        case c: CommandOp => enc.apply(c)
+        case a: Any       => a.toString()
+      }.mkString(" ")
+    }
 
-
-  implicit def vectorSerializer[A](implicit enc: ScriptSerializer[A]): ScriptSerializer[Vector[A]] = 
+  implicit def vectorSerializer[A](
+      implicit enc: ScriptSerializer[A]
+  ): ScriptSerializer[Vector[A]] =
     pure[Vector[A]] { _.map(enc.apply).mkString(" ") }
 
-  def combine[T](caseClass: CaseClass[ScriptSerializer, T]): ScriptSerializer[T] = new ScriptSerializer[T]{
+  def combine[T](
+      caseClass: CaseClass[ScriptSerializer, T]
+  ): ScriptSerializer[T] = new ScriptSerializer[T] {
     def apply(t: T) = {
       val paramString = caseClass.parameters.map { p =>
         p.typeclass.apply(p.dereference(t))
@@ -108,7 +79,9 @@ object ScriptSerializer {
     }
   }
 
-  def dispatch[T](sealedTrait: SealedTrait[ScriptSerializer, T]): ScriptSerializer[T] = new ScriptSerializer[T]{
+  def dispatch[T](
+      sealedTrait: SealedTrait[ScriptSerializer, T]
+  ): ScriptSerializer[T] = new ScriptSerializer[T] {
     def apply(t: T) = {
       sealedTrait.dispatch(t) { subtype =>
         subtype.typeclass.apply(subtype.cast(t))
@@ -117,5 +90,12 @@ object ScriptSerializer {
   }
 
   implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
-
+  
+  implicit def dollarSerializer: ScriptSerializer[Dollar] = pure[Dollar] { _ =>
+    "$"
+  }
+  
+  implicit def subShellExpSerializer: ScriptSerializer[OpenSubShellExp] = pure[OpenSubShellExp] { _ =>
+    "$("
+  }
 }

@@ -18,11 +18,13 @@ val symbolToName = Map(
   "`[[`" -> "OpenDoubleSquareBracket",
   "`]]`" -> "CloseDoubleSquareBracket",
   "`(`" -> "OpenSubShellEnv",
+  "$(" -> "OpenSubShellExp",
   "`)`" -> "CloseSubShellEnv",
   "`{`" -> "OpenCommandList",
   "`}`" -> "CloseCommandList",
   "!" -> "Negate",
   "&" -> "Amper",
+  "$" -> "Dollar",
   "`;`" -> "Semi",
   "`\\n`" -> "NewLine",
   "`2>&1`" -> "RedirectStdOutWithStdErr",
@@ -63,7 +65,7 @@ val cmdTerminatorSymbols = "& `;` `\\n`".list
 val cmdTerminators = (cmdTerminatorSymbols.zip(cmdTerminatorSymbols.map(extract))).map(terminateFn).mkString("\n")
 
 val commandListSymbols = "|| &&".list
-val commandListClasses = tmpl.toAdt("CommandListOp", commandListSymbols.map(extract) ++ cmdTerminatorSymbols.map(extract))
+val commandListClasses = tmpl.toAdt("CommandListOp", commandListSymbols.map(extract) ++ cmdTerminatorSymbols.map(extract) ++ List("`(`", "`)`", "$(").map(extract))
 
 val toCommandArgName = toName("CmdArg")
 def redirectClasses = tmpl.toAdt("CommandRedirection", cmdRedirectionSymbols.map(toCommandArgName))
@@ -72,8 +74,11 @@ def redirectFunctions = (cmdRedirectionSymbols.zip(cmdRedirectionSymbols.map(toC
 val pipeSymbols = "| |&".list
 val pipelineClasses = tmpl.toAdtSuper("CommandListOp", "PipelineOp", pipeSymbols.map(extract))
 
+val leftOvers = "`[[` `{` Do Then Else ElseIf Until For While Done If Fi `]]` `}` $".list
+val leftOverClasses = (leftOvers.map(extract).map(tmpl.toCmdOp()(_))).mkString("\n") //tmpl.toAdt("CommandOp", )
+
 val template = s"""|package bash4s
-   |object experimental {
+   |object dsl {
    |
    |  sealed abstract class CommandOp()
    |  final case class ScriptLine() extends CommandOp
@@ -86,7 +91,7 @@ val template = s"""|package bash4s
    |    def :+(arg: String) = copy(args = self.args :+ arg)
    |  }
    |  final case class EmptyArg() extends CommandArg
-   |
+   |  ${leftOverClasses}
    |  ${redirectClasses}
    |  ${pipelineClasses}
    |  final case class Negate() extends PipelineOp
@@ -101,7 +106,13 @@ val template = s"""|package bash4s
    |
    |    ${cmdTerminators}
    |
+   |   def $$(cmdList: CommandListOp) =
+   |    copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv()) 
+   |
    |   def & (cmdList: CommandListOp) =
+   |     CommandListBuilder(Vector(self, Amper(), cmdList))
+   |
+   |   def `;` (cmdList: CommandListOp) =
    |     CommandListBuilder(Vector(self, Amper(), cmdList))
    |
    |    def o(op: CommandOp) = 
@@ -125,13 +136,13 @@ val template = s"""|package bash4s
    |   def unary_! = self.copy(Negate() +: cmds) 
    |    
    |   def & = 
-   |     CommandListBuilder(Vector(SubShellStart(), self, Amper(), SubShellEnd()))
+   |     CommandListBuilder(Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), Amper() ))
    |
    |   def `;` = copy(cmds = self.cmds :+ Semi())
-   |     CommandListBuilder(Vector(SubShellStart(), self, Semi(), SubShellEnd()))
+   |     CommandListBuilder(Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), Semi() ))
    |
    |   def `\\n` =
-   |     CommandListBuilder(Vector(SubShellStart(), self, NewLine(), SubShellEnd()))
+   |     CommandListBuilder(Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), NewLine() ))
    |
    |   def | (simpleCommand: SimpleCommand) =
    |     copy(cmds = (self.cmds :+ PipeWithStdOut()) :+ simpleCommand)
@@ -157,9 +168,15 @@ val template = s"""|package bash4s
    |
    |    def && (pipelineOp: PipelineOp) =
    |     copy(cmds = (self.cmds :+ And()) :+ pipelineOp)
+   |
+   |   def & = 
+   |    self.copy(cmds = (OpenSubShellEnv() +: self.cmds) ++ Vector(CloseSubShellEnv(), Amper()))
    | 
    |   def & (cmdList: CommandListOp) =
    |     copy(cmds = (self.cmds :+ Amper()) :+ cmdList)
+   |
+   |   def `;` (cmdList: CommandListOp) =
+   |     copy(cmds = (self.cmds :+ Semi()) :+ cmdList)
    |
    |   def | (simpleCommand: SimpleCommand) =
    |     copy(cmds = (self.cmds :+ PipeWithStdOut()) :+ simpleCommand)
@@ -167,9 +184,6 @@ val template = s"""|package bash4s
    |    def |& (simpleCommand: SimpleCommand) =
    |     copy(cmds = (self.cmds :+ PipeWithError()) :+ simpleCommand)
    |  }
-   |  
-   |  final case class SubShellStart() extends CommandListOp
-   |  final case class SubShellEnd() extends CommandListOp
    |
    |  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp { self => 
    |

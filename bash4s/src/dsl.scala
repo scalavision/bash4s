@@ -1,5 +1,5 @@
 package bash4s
-object experimental {
+object dsl {
 
   sealed abstract class CommandOp()
   final case class ScriptLine() extends CommandOp
@@ -12,6 +12,21 @@ object experimental {
     def :+(arg: String) = copy(args = self.args :+ arg)
   }
   final case class EmptyArg() extends CommandArg
+  final case class OpenDoubleSquareBracket() extends CommandOp
+  final case class OpenCommandList() extends CommandOp
+  final case class CDo() extends CommandOp
+  final case class CThen() extends CommandOp
+  final case class CElse() extends CommandOp
+  final case class CElseIf() extends CommandOp
+  final case class CUntil() extends CommandOp
+  final case class CFor() extends CommandOp
+  final case class CWhile() extends CommandOp
+  final case class CDone() extends CommandOp
+  final case class CIf() extends CommandOp
+  final case class CFi() extends CommandOp
+  final case class CloseDoubleSquareBracket() extends CommandOp
+  final case class CloseCommandList() extends CommandOp
+  final case class Dollar() extends CommandOp
 
   sealed trait CommandRedirection extends CommandOp
   final case class StdOut() extends CommandRedirection
@@ -52,7 +67,13 @@ object experimental {
     def `;` = copy(cmds = self.cmds :+ Semi())
     def `\n` = copy(cmds = self.cmds :+ NewLine())
 
+    def $(cmdList: CommandListOp) =
+      copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
+
     def &(cmdList: CommandListOp) =
+      CommandListBuilder(Vector(self, Amper(), cmdList))
+
+    def `;`(cmdList: CommandListOp) =
       CommandListBuilder(Vector(self, Amper(), cmdList))
 
     def o(op: CommandOp) =
@@ -77,14 +98,18 @@ object experimental {
     def unary_! = self.copy(Negate() +: cmds)
 
     def & =
-      CommandListBuilder(Vector(SubShellStart(), self, Amper(), SubShellEnd()))
+      CommandListBuilder(
+        Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), Amper())
+      )
 
     def `;` = copy(cmds = self.cmds :+ Semi())
-    CommandListBuilder(Vector(SubShellStart(), self, Semi(), SubShellEnd()))
+    CommandListBuilder(
+      Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), Semi())
+    )
 
     def `\n` =
       CommandListBuilder(
-        Vector(SubShellStart(), self, NewLine(), SubShellEnd())
+        Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), NewLine())
       )
 
     def |(simpleCommand: SimpleCommand) =
@@ -106,6 +131,9 @@ object experimental {
   final case class Amper() extends CommandListOp
   final case class Semi() extends CommandListOp
   final case class NewLine() extends CommandListOp
+  final case class OpenSubShellEnv() extends CommandListOp
+  final case class CloseSubShellEnv() extends CommandListOp
+  final case class OpenSubShellExp() extends CommandListOp
 
   final case class CommandListBuilder(cmds: Vector[CommandListOp])
       extends CommandListOp { self =>
@@ -118,8 +146,16 @@ object experimental {
     def &&(pipelineOp: PipelineOp) =
       copy(cmds = (self.cmds :+ And()) :+ pipelineOp)
 
+    def & =
+      self.copy(cmds =
+        (OpenSubShellEnv() +: self.cmds) ++ Vector(CloseSubShellEnv(), Amper())
+      )
+
     def &(cmdList: CommandListOp) =
       copy(cmds = (self.cmds :+ Amper()) :+ cmdList)
+
+    def `;`(cmdList: CommandListOp) =
+      copy(cmds = (self.cmds :+ Semi()) :+ cmdList)
 
     def |(simpleCommand: SimpleCommand) =
       copy(cmds = (self.cmds :+ PipeWithStdOut()) :+ simpleCommand)
@@ -127,9 +163,6 @@ object experimental {
     def |&(simpleCommand: SimpleCommand) =
       copy(cmds = (self.cmds :+ PipeWithError()) :+ simpleCommand)
   }
-
-  final case class SubShellStart() extends CommandListOp
-  final case class SubShellEnd() extends CommandListOp
 
   final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
     self =>

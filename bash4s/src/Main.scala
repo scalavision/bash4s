@@ -1,21 +1,27 @@
 package bash4s
 
 //import scala.language.postfixOps
-import experimental._
+import dsl._
 
 object Main {
 
+  val serializer = ScriptSerializer.gen[CommandOp]
+
   def main(args: Array[String]): Unit = {
 
-    val script = du"ok" > du"hello" > du"goodbye"                   o
-      du"ok" > du"hello" > du"goodbye" | du"pipeline"               o
+    val script = du"ok" > du"hello" o
+      du"ok" | du"pipeline"                                         o
       !(du"ok"  | du"pipeline"  | du"next").&                       o
+      !(du"ok"  `;` du"pipeline"  & du"next").&                     o
       du"last" || du"last" || du"first" | du"end"                   o
       du"hello".&                                                   o
       du"one" & du"two" && du"three"                                o
-      du"goodybe"
+      du"goodybe"                                                   o
+      du"oki".$( du"sub" | du"hello" )                              o 
+      du"now" o
+      du"oki".$( du"sub" | du"hello" ) 
 
-    pprint.pprintln(script)
+    pprint.pprintln(serializer.apply(script))
   }
 
 }

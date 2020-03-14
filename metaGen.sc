@@ -18,8 +18,10 @@ def generateDomain(dest: os.Path): Unit = {
   createCommandToolClasses(bashcliPath)
 */
 
-  val expPath = dest / "experimental.scala"
+  val expPath = dest / "dsl.scala"
   os.write.over(expPath, Formatter.style(meta_model.template, expPath))
-
+  serializer.generateSerializer(dest)
+  serializer.generateSerializer(dest)
+  
 }
 

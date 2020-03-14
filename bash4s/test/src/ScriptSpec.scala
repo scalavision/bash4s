@@ -1,4 +1,4 @@
-package bash
+package bash4s
 
 import scala.language.postfixOps
 import zio.test.{assert, suite, test, DefaultRunnableSpec}
