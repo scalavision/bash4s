@@ -193,6 +193,7 @@ object dsl {
   final case class CElse(op: CommandOp) extends CommandOp
   final case class CElseIf(op: CommandOp) extends CommandOp
 
+  def Then(op: CommandOp) = CThen(op)
 
   final case class CIf(
       testCommands: Vector[CommandOp],
@@ -204,13 +205,13 @@ object dsl {
         self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
       )
 
-   def ElseIf(op: CommandListOp) = {
+    def ElseIf(op: CommandListOp) = {
       copy(conseqCmds =
-        self.conseqCmds :+ CElseIf(op) 
+        self.conseqCmds :+ CElseIf(op)
       )
-   }
+    }
 
-    def Then(op: CommandOp) = 
+    def Then(op: CommandOp) =
       copy(conseqCmds =
         self.conseqCmds :+ CThen(op)
       )
@@ -219,11 +220,12 @@ object dsl {
       copy(conseqCmds = self.conseqCmds :+ CElse(op))
 
     def Fi =
-      ScriptBuilder(Vector(self, CDone()))
+      ScriptBuilder(Vector(self, CFi()))
+
+    def Fi(op: CommandOp) =
+      ScriptBuilder(Vector(self, CFi(), op))
 
   }
-
-  def Then(op: CommandOp) = CThen(op)
 
   object If {
     def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
@@ -247,6 +249,12 @@ object dsl {
 
     def Done =
       self.copy(acc = acc :+ CDone() :+ ScriptLine())
+
+    def Fi(op: CommandOp) =
+      self.copy(acc = acc :+ CFi() :+ ScriptLine() :+ op)
+
+    def Fi =
+      self.copy(acc = acc :+ CFi() :+ ScriptLine())
 
     def o(op: CommandOp) =
       self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))

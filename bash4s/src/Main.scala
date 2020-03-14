@@ -42,6 +42,7 @@ object Main {
       } Else {
         du"done"
       } Fi
+      du"if then else is done"
 
     val testBashCond = 
       `[[` (du"hello").`]]` && `[[` (du"hello") `]]`
