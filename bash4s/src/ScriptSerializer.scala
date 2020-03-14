@@ -97,6 +97,7 @@ object ScriptSerializer {
 
   implicit def subShellExpSerializer: ScriptSerializer[OpenSubShellExp] =
     pure[OpenSubShellExp] { _ => "$(" }
+
   implicit def openDoubleSquareBracketSerializer
       : ScriptSerializer[OpenDoubleSquareBracket] =
     pure[OpenDoubleSquareBracket] { _ => "[[" }

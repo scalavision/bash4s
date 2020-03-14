@@ -12,7 +12,6 @@ object dsl {
     def :+(arg: String) = copy(args = self.args :+ arg)
   }
   final case class EmptyArg() extends CommandArg
-  final case class OpenDoubleSquareBracket() extends CommandOp
   final case class OpenCommandList() extends CommandOp
   final case class CDo() extends CommandOp
   final case class CThen() extends CommandOp
@@ -24,7 +23,6 @@ object dsl {
   final case class CDone() extends CommandOp
   final case class CIf() extends CommandOp
   final case class CFi() extends CommandOp
-  final case class CloseDoubleSquareBracket() extends CommandOp
   final case class CloseCommandList() extends CommandOp
   final case class Dollar() extends CommandOp
 
@@ -135,15 +133,15 @@ object dsl {
   final case class CloseSubShellEnv() extends CommandListOp
   final case class OpenSubShellExp() extends CommandListOp
 
-  final case class CommandListBuilder(cmds: Vector[CommandListOp])
+  final case class CommandListBuilder(cmds: Vector[CommandOp])
       extends CommandListOp { self =>
 
     def unary_! = self.copy(Negate() +: cmds)
 
-    def ||(pipelineOp: PipelineOp) =
+    def ||(pipelineOp: CommandListOp) =
       copy(cmds = (self.cmds :+ Or()) :+ pipelineOp)
 
-    def &&(pipelineOp: PipelineOp) =
+    def &&(pipelineOp: CommandListOp) =
       copy(cmds = (self.cmds :+ And()) :+ pipelineOp)
 
     def & =
@@ -162,6 +160,8 @@ object dsl {
 
     def |&(simpleCommand: SimpleCommand) =
       copy(cmds = (self.cmds :+ PipeWithError()) :+ simpleCommand)
+
+    def `]]` = copy(cmds = self.cmds :+ CloseDoubleSquareBracket())
   }
 
   final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
@@ -183,6 +183,13 @@ object dsl {
   }
 
   final case class SheBang(s: String) extends CommandOp
+
+  final case class CloseDoubleSquareBracket() extends CommandOp
+  final case class OpenDoubleSquareBracket()  extends CommandOp
+  
+  def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
+    Vector(OpenDoubleSquareBracket(), op)
+  )
 
   implicit class CmdSyntax(s: StringContext) {
     def du(args: Any*) =

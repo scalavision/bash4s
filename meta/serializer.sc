@@ -93,7 +93,8 @@ val others = List(
 val cmb = (tps.zip(tps.map(mm.extract)) ++ others).map(seria).mkString("\n")
 
 def src: String = 
-  s"""|${cmb}""".stripMargin
+  s"""|
+      |${cmb}""".stripMargin
 
 def generateSerializer(dest: os.Path): Unit = {
   val template = os.read( os.pwd / "meta" / "ScriptSerializer.template").lines.toList.dropRight(1).mkString("\n")

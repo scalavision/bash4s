@@ -9,7 +9,8 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val script = du"ok" > du"hello" o
+    val script = du"ok" > du"hello"                                 o
+      du"in" < du"out" | du"ok"                                     o
       du"ok" | du"pipeline"                                         o
       !(du"ok"  | du"pipeline"  | du"next").&                       o
       !(du"ok"  `;` du"pipeline"  & du"next").&                     o
@@ -19,7 +20,11 @@ object Main {
       du"goodybe"                                                   o
       du"oki".$( du"sub" | du"hello" )                              o 
       du"now" o
-      du"oki".$( du"sub" | du"hello" ) 
+      du"oki".$( du"sub" | du"hello" )  o
+      `[[` (du"hello" && du"yes").`]]` && `[[` (du"goodbye").`]]` && du"good"
+
+      //o
+      //du"done"
 
     pprint.pprintln(serializer.apply(script))
   }

@@ -65,7 +65,10 @@ val cmdTerminatorSymbols = "& `;` `\\n`".list
 val cmdTerminators = (cmdTerminatorSymbols.zip(cmdTerminatorSymbols.map(extract))).map(terminateFn).mkString("\n")
 
 val commandListSymbols = "|| &&".list
-val commandListClasses = tmpl.toAdt("CommandListOp", commandListSymbols.map(extract) ++ cmdTerminatorSymbols.map(extract) ++ List("`(`", "`)`", "$(").map(extract))
+val commandListClasses = tmpl.toAdt(
+  "CommandListOp", 
+  commandListSymbols.map(extract) ++ cmdTerminatorSymbols.map(extract) ++ 
+  List("`(`", "`)`", "$(" ).map(extract))
 
 val toCommandArgName = toName("CmdArg")
 def redirectClasses = tmpl.toAdt("CommandRedirection", cmdRedirectionSymbols.map(toCommandArgName))
@@ -74,7 +77,7 @@ def redirectFunctions = (cmdRedirectionSymbols.zip(cmdRedirectionSymbols.map(toC
 val pipeSymbols = "| |&".list
 val pipelineClasses = tmpl.toAdtSuper("CommandListOp", "PipelineOp", pipeSymbols.map(extract))
 
-val leftOvers = "`[[` `{` Do Then Else ElseIf Until For While Done If Fi `]]` `}` $".list
+val leftOvers = "`{` Do Then Else ElseIf Until For While Done If Fi `}` $".list
 val leftOverClasses = (leftOvers.map(extract).map(tmpl.toCmdOp()(_))).mkString("\n") //tmpl.toAdt("CommandOp", )
 
 val template = s"""|package bash4s
@@ -159,7 +162,7 @@ val template = s"""|package bash4s
    |  
    |  ${commandListClasses}
    |
-   |  final case class CommandListBuilder(cmds: Vector[CommandListOp]) extends CommandListOp { self =>
+   |  final case class CommandListBuilder(cmds: Vector[CommandOp]) extends CommandListOp { self =>
    |
    |   def unary_! = self.copy(Negate() +: cmds) 
    |
@@ -202,6 +205,9 @@ val template = s"""|package bash4s
    |   }
    |
    |  final case class SheBang(s: String) extends CommandOp
+   | 
+   |
+   | def `[[`(op: CommandOp) = OpenDoubleSquareBracket(op)
    |
    | implicit class CmdSyntax(s: StringContext) {
    |   def du(args: Any*) =
