@@ -166,9 +166,10 @@ object dsl {
   final case class CloseDoubleSquareBracket() extends CommandOp
   final case class OpenDoubleSquareBracket() extends CommandOp
 
-  def `[[`(op: CommandOp): CommandListBuilder = CommandListBuilder(
-    Vector(OpenDoubleSquareBracket(), op)
-  )
+  def `[[`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
+
+  def &&(op: CommandOp) = Vector(And(), op)
 
   final case class CDo(op: CommandOp) extends CommandOp
 
@@ -187,6 +188,11 @@ object dsl {
 
   def Do(op: CommandOp) = CDo(op)
 
+
+  object If {
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+  }
+  
   object While {
     def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -203,11 +209,12 @@ object dsl {
         case _ => Vector(op)
       }
     }
-
-    def END = self
     
     def Done(op: CommandOp) =
       self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
+
+    def Done =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine())
 
 
     def o(op: CommandOp) =

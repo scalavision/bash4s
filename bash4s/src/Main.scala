@@ -19,21 +19,28 @@ object Main {
       du"one" & du"two" && du"three"                                o
       du"goodybe"                                                   o
       du"oki".$( du"sub" | du"hello" )                              o 
-      du"now" o
+      du"now"                                                       o
       du"oki".$( du"sub" | du"hello" )                              o
-      `[[` (du"hello" && du"yes").`]]` && `[[` (du"goodbye").`]]` && du"good" o
+      `[[` (du"hello" && du"yes").`]]` && 
+        `[[` (du"goodbye").`]]` || du"good"                         o 
       While `[[` du"hello" `]]` Do {
         du"ls"
-      } Done
-      du"ls"
+      } Done 
+      du"no"
 
     val testWhile = 
       While `[[` du"hello" `]]` Do {
         du"ls"
       } Done 
 
+    val testBashCond = 
+      `[[` (du"hello").`]]` && `[[` (du"hello") `]]`
+
+//    val testIf = ???
+
     pprint.pprintln(serializer.apply(script))
     pprint.pprintln(testWhile)
+    pprint.pprintln(testBashCond)
 
   }
 
