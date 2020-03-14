@@ -32,6 +32,13 @@ def toAdt(ext: String, subClasses: List[String]) = {
   """
 }
 
+def toAdtSuper(superTrait: String, ext: String, subClasses: List[String]) = {
+  s"""
+  sealed trait $ext extends $superTrait
+  ${subClasses.map(s => toCmdOp(ext)(s)).mkString("\n")}
+  """
+}
+
 def toOpDef(fnMeta: (String, String)) = {
     s"""def ${fnMeta._1}(op: CommandOp) = self.copy(acc = (acc :+ ${fnMeta._2}())  ++ decomposeOnion(op))"""
 }
@@ -44,3 +51,5 @@ def toOpDefEmpty(fnMeta: (String, String)) = {
     s"""def ${fnMeta._1} = self.copy(acc = acc :+ ${fnMeta._2}())"""
 }
 
+def emptyDefBuilder(fnMeta: (String, String)) =
+  s"""def ${fnMeta._1} = ${fnMeta._2}()"""
