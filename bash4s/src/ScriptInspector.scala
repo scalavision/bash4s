@@ -1,9 +1,10 @@
-package bash
+package bash4s
 
-import domain._
+//import domain._
 
 object ScriptInspector {
 
+  /*
   val serializer = ScriptSerializer.gen[CommandOp]
 
   case class ScriptContent(
@@ -42,7 +43,7 @@ object ScriptInspector {
 
   def bashRefs(builder: ScriptBuilder): ScriptBuilder =
     ScriptBuilder(traverse(builder.acc))
-    
+  */  
   /*
     builder.copy(acc = builder.acc.map {
       case RefVariable(_, bValue) =>

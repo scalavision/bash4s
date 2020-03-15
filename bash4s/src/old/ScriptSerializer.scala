@@ -1,4 +1,4 @@
-package bash
+package old.bash
 
 import magnolia._
 import domain._

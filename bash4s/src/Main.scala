@@ -1,11 +1,10 @@
 package bash4s
 
 import scala.language.postfixOps
-import domain._
+import bash4s._
 
 object Main {
 
-  val serializer = ScriptSerializer.gen[CommandOp]
 
   def main(args: Array[String]): Unit = {
 
@@ -52,11 +51,11 @@ object Main {
     val testBashCond = 
       `[[` (du"hello").`]]` && `[[` (du"hello") `]]`
 
-    pprint.pprintln(serializer.apply(script))
-    pprint.pprintln(serializer.apply(testWhile))
-    pprint.pprintln(serializer.apply(testBashCond))
-    pprint.pprintln(serializer.apply(testIf))
-    pprint.pprintln(serializer.apply(testUntil))
+    script.print()
+    testWhile.print()
+    testBashCond.print()
+    testIf.print()
+    testUntil.print()
 
   }
 

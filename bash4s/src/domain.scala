@@ -2,7 +2,13 @@ package bash4s
 
 object domain {
 
-  sealed abstract class CommandOp()
+  sealed abstract class CommandOp() {
+    val serializer = ScriptSerializer.gen[CommandOp]
+    def script = serializer.apply(this)
+    def print() = println(serializer.apply(this))
+    def printRich() = pprint.pprintln(serializer.apply(this))
+  }
+
   final case class ScriptLine() extends CommandOp
   sealed trait CommandArg extends CommandOp
 
@@ -164,10 +170,6 @@ object domain {
   final case class CloseDoubleSquareBracket() extends CommandOp
   final case class OpenDoubleSquareBracket() extends CommandOp
 
-  def `[[`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
-
-  def &&(op: CommandOp) = Vector(And(), op)
 
   final case class CDo(op: CommandOp) extends CommandOp
 
@@ -188,8 +190,6 @@ object domain {
       ScriptBuilder(Vector(self, CDone(), op))
   }
 
-  def Do(op: CommandOp) = CDo(op)
-  def Then(op: CommandOp) = CThen(op)
 
   case class CUntil(
       testCommands: Vector[CommandOp],
@@ -208,13 +208,6 @@ object domain {
       ScriptBuilder(Vector(self, CDone(), op))
   }
 
-  object Until {
-    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
-  }
-
-  object While {
-    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
-  }
 
   final case class CThen(op: CommandOp) extends CommandOp
   final case class CElse(op: CommandOp) extends CommandOp
@@ -254,9 +247,6 @@ object domain {
 
   }
 
-  object If {
-    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
-  }
 
   final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
     self =>
@@ -290,8 +280,4 @@ object domain {
 
   final case class SheBang(s: String) extends CommandOp
 
-  implicit class CmdSyntax(s: StringContext) {
-    def du(args: Any*) =
-      SimpleCommand("du", CmdArgCtx(args.toVector, s))
-  }
 }

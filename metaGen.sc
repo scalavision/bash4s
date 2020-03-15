@@ -10,8 +10,6 @@ def generateDomain(dest: os.Path): Unit = {
   val domainPath = dest / "domain.scala"
   os.write.over(domainPath, Formatter.style(domain, domainPath))
 
-  val bashPath = dest / "bash.scala"
-  os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
  
   serializer.generateSerializer(dest)
   val bashcliPath = dest / "clitools"
@@ -22,6 +20,12 @@ def generateDomain(dest: os.Path): Unit = {
   serializer.generateSerializer(dest)
   serializer.generateSerializer(dest)
 */
+
+//  val bashPath = dest / "bash4s.scala"
+//  os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
   
+//  val bashcliPath = dest / "clitools"
+//  createCommandToolClasses(bashcliPath)
+
 }
 
