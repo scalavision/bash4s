@@ -44,6 +44,7 @@ object domain {
     }
     def $ = RefVariable(name, value)
   }
+  
 
   final case class Host(value: String) extends AnyVal
   final case class Port(value: Int) extends AnyVal

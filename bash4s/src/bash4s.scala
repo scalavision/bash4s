@@ -10,7 +10,6 @@ package object bash4s {
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
-  // Helper commands
   object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -34,127 +33,367 @@ package object bash4s {
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
-  // Tools
+  def R(args: String*) = clitools.RWrapper(CmdArgs(args.toVector))
   def R = clitools.RWrapper()
+
+  def arp(args: String*) = clitools.ArpWrapper(CmdArgs(args.toVector))
   def arp = clitools.ArpWrapper()
+
+  def b2sum(args: String*) = clitools.B2sumWrapper(CmdArgs(args.toVector))
   def b2sum = clitools.B2sumWrapper()
+
+  def base32(args: String*) = clitools.Base32Wrapper(CmdArgs(args.toVector))
   def base32 = clitools.Base32Wrapper()
+
+  def base64(args: String*) = clitools.Base64Wrapper(CmdArgs(args.toVector))
   def base64 = clitools.Base64Wrapper()
+
+  def basename(args: String*) = clitools.BasenameWrapper(CmdArgs(args.toVector))
   def basename = clitools.BasenameWrapper()
+
+  def basenc(args: String*) = clitools.BasencWrapper(CmdArgs(args.toVector))
   def basenc = clitools.BasencWrapper()
+
+  def bash(args: String*) = clitools.BashWrapper(CmdArgs(args.toVector))
   def bash = clitools.BashWrapper()
+
+  def cat(args: String*) = clitools.CatWrapper(CmdArgs(args.toVector))
   def cat = clitools.CatWrapper()
+
+  def chcon(args: String*) = clitools.ChconWrapper(CmdArgs(args.toVector))
   def chcon = clitools.ChconWrapper()
+
+  def chgrp(args: String*) = clitools.ChgrpWrapper(CmdArgs(args.toVector))
   def chgrp = clitools.ChgrpWrapper()
+
+  def chmod(args: String*) = clitools.ChmodWrapper(CmdArgs(args.toVector))
   def chmod = clitools.ChmodWrapper()
+
+  def chown(args: String*) = clitools.ChownWrapper(CmdArgs(args.toVector))
   def chown = clitools.ChownWrapper()
+
+  def chroot(args: String*) = clitools.ChrootWrapper(CmdArgs(args.toVector))
   def chroot = clitools.ChrootWrapper()
+
+  def cksum(args: String*) = clitools.CksumWrapper(CmdArgs(args.toVector))
   def cksum = clitools.CksumWrapper()
+
+  def comm(args: String*) = clitools.CommWrapper(CmdArgs(args.toVector))
   def comm = clitools.CommWrapper()
+
+  def cp(args: String*) = clitools.CpWrapper(CmdArgs(args.toVector))
   def cp = clitools.CpWrapper()
+
+  def csplit(args: String*) = clitools.CsplitWrapper(CmdArgs(args.toVector))
   def csplit = clitools.CsplitWrapper()
+
+  def cut(args: String*) = clitools.CutWrapper(CmdArgs(args.toVector))
   def cut = clitools.CutWrapper()
+
+  def date(args: String*) = clitools.DateWrapper(CmdArgs(args.toVector))
   def date = clitools.DateWrapper()
+
+  def dd(args: String*) = clitools.DdWrapper(CmdArgs(args.toVector))
   def dd = clitools.DdWrapper()
+
+  def df(args: String*) = clitools.DfWrapper(CmdArgs(args.toVector))
   def df = clitools.DfWrapper()
+
+  def dir(args: String*) = clitools.DirWrapper(CmdArgs(args.toVector))
   def dir = clitools.DirWrapper()
+
+  def dircolors(args: String*) =
+    clitools.DircolorsWrapper(CmdArgs(args.toVector))
   def dircolors = clitools.DircolorsWrapper()
+
+  def dirname(args: String*) = clitools.DirnameWrapper(CmdArgs(args.toVector))
   def dirname = clitools.DirnameWrapper()
+
+  def du(args: String*) = clitools.DuWrapper(CmdArgs(args.toVector))
   def du = clitools.DuWrapper()
+
+  def echo(args: String*) = clitools.EchoWrapper(CmdArgs(args.toVector))
   def echo = clitools.EchoWrapper()
+
+  def env(args: String*) = clitools.EnvWrapper(CmdArgs(args.toVector))
   def env = clitools.EnvWrapper()
+
+  def expand(args: String*) = clitools.ExpandWrapper(CmdArgs(args.toVector))
   def expand = clitools.ExpandWrapper()
+
+  def expr(args: String*) = clitools.ExprWrapper(CmdArgs(args.toVector))
   def expr = clitools.ExprWrapper()
+
+  def factor(args: String*) = clitools.FactorWrapper(CmdArgs(args.toVector))
   def factor = clitools.FactorWrapper()
+
+  def fmt(args: String*) = clitools.FmtWrapper(CmdArgs(args.toVector))
   def fmt = clitools.FmtWrapper()
+
+  def fold(args: String*) = clitools.FoldWrapper(CmdArgs(args.toVector))
   def fold = clitools.FoldWrapper()
+
+  def grep(args: String*) = clitools.GrepWrapper(CmdArgs(args.toVector))
   def grep = clitools.GrepWrapper()
+
+  def groups(args: String*) = clitools.GroupsWrapper(CmdArgs(args.toVector))
   def groups = clitools.GroupsWrapper()
+
+  def head(args: String*) = clitools.HeadWrapper(CmdArgs(args.toVector))
   def head = clitools.HeadWrapper()
+
+  def hostid(args: String*) = clitools.HostidWrapper(CmdArgs(args.toVector))
   def hostid = clitools.HostidWrapper()
+
+  def id(args: String*) = clitools.IdWrapper(CmdArgs(args.toVector))
   def id = clitools.IdWrapper()
+
+  def ifconfig(args: String*) = clitools.IfconfigWrapper(CmdArgs(args.toVector))
   def ifconfig = clitools.IfconfigWrapper()
+
+  def install(args: String*) = clitools.InstallWrapper(CmdArgs(args.toVector))
   def install = clitools.InstallWrapper()
+
+  def join(args: String*) = clitools.JoinWrapper(CmdArgs(args.toVector))
   def join = clitools.JoinWrapper()
+
+  def kill(args: String*) = clitools.KillWrapper(CmdArgs(args.toVector))
   def kill = clitools.KillWrapper()
+
+  def link(args: String*) = clitools.LinkWrapper(CmdArgs(args.toVector))
   def link = clitools.LinkWrapper()
+
+  def ln(args: String*) = clitools.LnWrapper(CmdArgs(args.toVector))
   def ln = clitools.LnWrapper()
+
+  def logname(args: String*) = clitools.LognameWrapper(CmdArgs(args.toVector))
   def logname = clitools.LognameWrapper()
+
+  def ls(args: String*) = clitools.LsWrapper(CmdArgs(args.toVector))
   def ls = clitools.LsWrapper()
+
+  def md5sum(args: String*) = clitools.Md5sumWrapper(CmdArgs(args.toVector))
   def md5sum = clitools.Md5sumWrapper()
+
+  def mkdir(args: String*) = clitools.MkdirWrapper(CmdArgs(args.toVector))
   def mkdir = clitools.MkdirWrapper()
+
+  def mkfifo(args: String*) = clitools.MkfifoWrapper(CmdArgs(args.toVector))
   def mkfifo = clitools.MkfifoWrapper()
+
+  def mknod(args: String*) = clitools.MknodWrapper(CmdArgs(args.toVector))
   def mknod = clitools.MknodWrapper()
+
+  def mktemp(args: String*) = clitools.MktempWrapper(CmdArgs(args.toVector))
   def mktemp = clitools.MktempWrapper()
+
+  def mv(args: String*) = clitools.MvWrapper(CmdArgs(args.toVector))
   def mv = clitools.MvWrapper()
+
+  def nice(args: String*) = clitools.NiceWrapper(CmdArgs(args.toVector))
   def nice = clitools.NiceWrapper()
+
+  def nl(args: String*) = clitools.NlWrapper(CmdArgs(args.toVector))
   def nl = clitools.NlWrapper()
+
+  def nohup(args: String*) = clitools.NohupWrapper(CmdArgs(args.toVector))
   def nohup = clitools.NohupWrapper()
+
+  def nproc(args: String*) = clitools.NprocWrapper(CmdArgs(args.toVector))
   def nproc = clitools.NprocWrapper()
+
+  def numfmt(args: String*) = clitools.NumfmtWrapper(CmdArgs(args.toVector))
   def numfmt = clitools.NumfmtWrapper()
+
+  def od(args: String*) = clitools.OdWrapper(CmdArgs(args.toVector))
   def od = clitools.OdWrapper()
+
+  def paste(args: String*) = clitools.PasteWrapper(CmdArgs(args.toVector))
   def paste = clitools.PasteWrapper()
+
+  def pathchk(args: String*) = clitools.PathchkWrapper(CmdArgs(args.toVector))
   def pathchk = clitools.PathchkWrapper()
+
+  def ping(args: String*) = clitools.PingWrapper(CmdArgs(args.toVector))
   def ping = clitools.PingWrapper()
+
+  def pinky(args: String*) = clitools.PinkyWrapper(CmdArgs(args.toVector))
   def pinky = clitools.PinkyWrapper()
+
+  def pr(args: String*) = clitools.PrWrapper(CmdArgs(args.toVector))
   def pr = clitools.PrWrapper()
+
+  def printenv(args: String*) = clitools.PrintenvWrapper(CmdArgs(args.toVector))
   def printenv = clitools.PrintenvWrapper()
+
+  def printf(args: String*) = clitools.PrintfWrapper(CmdArgs(args.toVector))
   def printf = clitools.PrintfWrapper()
+
+  def ptx(args: String*) = clitools.PtxWrapper(CmdArgs(args.toVector))
   def ptx = clitools.PtxWrapper()
+
+  def pwd(args: String*) = clitools.PwdWrapper(CmdArgs(args.toVector))
   def pwd = clitools.PwdWrapper()
+
+  def py(args: String*) = clitools.PyWrapper(CmdArgs(args.toVector))
   def py = clitools.PyWrapper()
+
+  def readlink(args: String*) = clitools.ReadlinkWrapper(CmdArgs(args.toVector))
   def readlink = clitools.ReadlinkWrapper()
+
+  def realpath(args: String*) = clitools.RealpathWrapper(CmdArgs(args.toVector))
   def realpath = clitools.RealpathWrapper()
+
+  def rm(args: String*) = clitools.RmWrapper(CmdArgs(args.toVector))
   def rm = clitools.RmWrapper()
+
+  def rmdir(args: String*) = clitools.RmdirWrapper(CmdArgs(args.toVector))
   def rmdir = clitools.RmdirWrapper()
+
+  def rsync(args: String*) = clitools.RsyncWrapper(CmdArgs(args.toVector))
   def rsync = clitools.RsyncWrapper()
+
+  def runcon(args: String*) = clitools.RunconWrapper(CmdArgs(args.toVector))
   def runcon = clitools.RunconWrapper()
+
+  def scala(args: String*) = clitools.ScalaWrapper(CmdArgs(args.toVector))
   def scala = clitools.ScalaWrapper()
+
+  def seq(args: String*) = clitools.SeqWrapper(CmdArgs(args.toVector))
   def seq = clitools.SeqWrapper()
+
+  def sh(args: String*) = clitools.ShWrapper(CmdArgs(args.toVector))
   def sh = clitools.ShWrapper()
+
+  def sha1sum(args: String*) = clitools.Sha1sumWrapper(CmdArgs(args.toVector))
   def sha1sum = clitools.Sha1sumWrapper()
+
+  def sha224sum(args: String*) =
+    clitools.Sha224sumWrapper(CmdArgs(args.toVector))
   def sha224sum = clitools.Sha224sumWrapper()
+
+  def sha256sum(args: String*) =
+    clitools.Sha256sumWrapper(CmdArgs(args.toVector))
   def sha256sum = clitools.Sha256sumWrapper()
+
+  def sha384sum(args: String*) =
+    clitools.Sha384sumWrapper(CmdArgs(args.toVector))
   def sha384sum = clitools.Sha384sumWrapper()
+
+  def sha512sum(args: String*) =
+    clitools.Sha512sumWrapper(CmdArgs(args.toVector))
   def sha512sum = clitools.Sha512sumWrapper()
+
+  def shred(args: String*) = clitools.ShredWrapper(CmdArgs(args.toVector))
   def shred = clitools.ShredWrapper()
+
+  def shuf(args: String*) = clitools.ShufWrapper(CmdArgs(args.toVector))
   def shuf = clitools.ShufWrapper()
+
+  def sleep(args: String*) = clitools.SleepWrapper(CmdArgs(args.toVector))
   def sleep = clitools.SleepWrapper()
+
+  def sort(args: String*) = clitools.SortWrapper(CmdArgs(args.toVector))
   def sort = clitools.SortWrapper()
+
+  def split(args: String*) = clitools.SplitWrapper(CmdArgs(args.toVector))
   def split = clitools.SplitWrapper()
+
+  def ssh(args: String*) = clitools.SshWrapper(CmdArgs(args.toVector))
   def ssh = clitools.SshWrapper()
+
+  def stat(args: String*) = clitools.StatWrapper(CmdArgs(args.toVector))
   def stat = clitools.StatWrapper()
+
+  def stdbuf(args: String*) = clitools.StdbufWrapper(CmdArgs(args.toVector))
   def stdbuf = clitools.StdbufWrapper()
+
+  def stty(args: String*) = clitools.SttyWrapper(CmdArgs(args.toVector))
   def stty = clitools.SttyWrapper()
+
+  def sum(args: String*) = clitools.SumWrapper(CmdArgs(args.toVector))
   def sum = clitools.SumWrapper()
+
+  def sync(args: String*) = clitools.SyncWrapper(CmdArgs(args.toVector))
   def sync = clitools.SyncWrapper()
+
+  def tac(args: String*) = clitools.TacWrapper(CmdArgs(args.toVector))
   def tac = clitools.TacWrapper()
+
+  def tail(args: String*) = clitools.TailWrapper(CmdArgs(args.toVector))
   def tail = clitools.TailWrapper()
+
+  def tee(args: String*) = clitools.TeeWrapper(CmdArgs(args.toVector))
   def tee = clitools.TeeWrapper()
+
+  def test(args: String*) = clitools.TestWrapper(CmdArgs(args.toVector))
   def test = clitools.TestWrapper()
+
+  def timeout(args: String*) = clitools.TimeoutWrapper(CmdArgs(args.toVector))
   def timeout = clitools.TimeoutWrapper()
+
+  def touch(args: String*) = clitools.TouchWrapper(CmdArgs(args.toVector))
   def touch = clitools.TouchWrapper()
+
+  def tr(args: String*) = clitools.TrWrapper(CmdArgs(args.toVector))
   def tr = clitools.TrWrapper()
+
+  def truncate(args: String*) = clitools.TruncateWrapper(CmdArgs(args.toVector))
   def truncate = clitools.TruncateWrapper()
+
+  def tsort(args: String*) = clitools.TsortWrapper(CmdArgs(args.toVector))
   def tsort = clitools.TsortWrapper()
+
+  def tty(args: String*) = clitools.TtyWrapper(CmdArgs(args.toVector))
   def tty = clitools.TtyWrapper()
+
+  def uname(args: String*) = clitools.UnameWrapper(CmdArgs(args.toVector))
   def uname = clitools.UnameWrapper()
+
+  def unexpand(args: String*) = clitools.UnexpandWrapper(CmdArgs(args.toVector))
   def unexpand = clitools.UnexpandWrapper()
+
+  def uniq(args: String*) = clitools.UniqWrapper(CmdArgs(args.toVector))
   def uniq = clitools.UniqWrapper()
+
+  def unlink(args: String*) = clitools.UnlinkWrapper(CmdArgs(args.toVector))
   def unlink = clitools.UnlinkWrapper()
+
+  def uptime(args: String*) = clitools.UptimeWrapper(CmdArgs(args.toVector))
   def uptime = clitools.UptimeWrapper()
+
+  def users(args: String*) = clitools.UsersWrapper(CmdArgs(args.toVector))
   def users = clitools.UsersWrapper()
+
+  def vdir(args: String*) = clitools.VdirWrapper(CmdArgs(args.toVector))
   def vdir = clitools.VdirWrapper()
+
+  def wc(args: String*) = clitools.WcWrapper(CmdArgs(args.toVector))
   def wc = clitools.WcWrapper()
+
+  def who(args: String*) = clitools.WhoWrapper(CmdArgs(args.toVector))
   def who = clitools.WhoWrapper()
+
+  def whoami(args: String*) = clitools.WhoamiWrapper(CmdArgs(args.toVector))
   def whoami = clitools.WhoamiWrapper()
+
+  def yes(args: String*) = clitools.YesWrapper(CmdArgs(args.toVector))
   def yes = clitools.YesWrapper()
+
+  def zsh(args: String*) = clitools.ZshWrapper(CmdArgs(args.toVector))
   def zsh = clitools.ZshWrapper()
+
   implicit class CmdSyntax(s: StringContext) {
+
+    def $(args: Any*) =
+      LocalizationString(CmdArgCtx(args.toVector, s))
+    
+    def $$(args: Any*) =
+      AnsiCQuoted(CmdArgCtx(args.toVector, s))
 
     def txt(args: Any*) =
       TextVariable(CmdArgCtx(args.toVector, s))
-      
+
     def array(args: Any*) =
       ArrayVariable(CmdArgCtx(args.toVector, s))
 

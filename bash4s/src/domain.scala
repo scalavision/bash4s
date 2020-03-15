@@ -4,7 +4,7 @@ object domain {
 
   sealed abstract class CommandOp() {
     val serializer = ScriptSerializer.gen[CommandOp]
-    def script = serializer.apply(this)
+    def txt = serializer.apply(this)
     def print() = println(serializer.apply(this))
     def printRich() = pprint.pprintln(serializer.apply(this))
   }
@@ -59,6 +59,9 @@ object domain {
     def o(op: CommandOp) =
       ScriptBuilder(Vector(self, ScriptLine(), op))
   }
+  
+  final case class LocalizationString(value: CmdArgCtx) extends CommandOp
+  final case class AnsiCQuoted(value: CmdArgCtx) extends CommandOp
 
   final case class Negate() extends PipelineOp
 

@@ -109,6 +109,19 @@ object ScriptSerializer {
     }
 
   }
+
+  implicit def localizationSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[LocalizationString] = pure[LocalizationString] { l =>
+    s"""$$"${enc.apply(l.value)}""""
+  }
+
+  implicit def ansiCQuotedSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[AnsiCQuoted] = pure[AnsiCQuoted] { l =>
+    s"""$$'${enc.apply(l.value)}'"""
+  }
+
   implicit def cDoneSerializer: ScriptSerializer[CDone] =
     pure[CDone] { _ => "done" }
 

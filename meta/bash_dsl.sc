@@ -9,7 +9,10 @@ val tmpl = templates
 def toDef(helpers: List[String]): String = {
 
   def t(name: String) = 
-    s"""def ${name.head + name.tail.map(_.toLower)} = clitools.${name.capFirst}Wrapper()"""
+    s"""
+    def ${name.head + name.tail.map(_.toLower)}(args: String *) = clitools.${name.capFirst}Wrapper(CmdArgs(args.toVector))
+    def ${name.head + name.tail.map(_.toLower)} = clitools.${name.capFirst}Wrapper()
+    """
 
   helpers.map(t).mkString("\n")
 
@@ -71,6 +74,8 @@ package object bash4s {
   def Do(op: CommandOp) = CDo(op)
 
   def Then(op: CommandOp) = CThen(op)
+
+  def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
   
   ${toDef(commands.sorted)}
   ${tmpl.cli(commands.sorted)}

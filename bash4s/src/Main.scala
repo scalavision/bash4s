@@ -58,10 +58,10 @@ object Main {
       While `[[` MY_VAR.$ `]]` Do {
         echo"$MY_VAR"
       } Done
-      echo""""hello world $MY_VAR""""
+      echo""""hello world $MY_VAR"""" o
+      echo("hello", "world", s"${MY_VAR.$.txt}")
 
     myVar.print()
-
     script.print()
     testWhile.print()
     testBashCond.print()

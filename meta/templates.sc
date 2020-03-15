@@ -64,6 +64,13 @@ def cliTool(tool: String) =
   
 def cli(tools: List[String]) = 
   s"""|implicit class CmdSyntax(s: StringContext) {
+      |  
+      |  def txt(args: Any*) =
+      |    TextVariable(CmdArgCtx(args.toVector, s))
+      |    
+      |  def array(args: Any*) =
+      |    ArrayVariable(CmdArgCtx(args.toVector, s))
+      |
       |  ${tools.map(cliTool).mkString("\n  ")}
       |}""".stripMargin
 
