@@ -54,11 +54,14 @@ object ScriptSerializer {
     val args = sc.arg match {
       case CmdArgs(args) => args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
-      case EmptyArg()    => "()"
+      case EmptyArg()    => ""
     }
 
-    val argTxt = if(quoted) s""""${args}"""" else args
-    s"""${sc.name} ${argTxt} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+    if(args.isEmpty()) s"${sc.name} ${sc.cmds.map(enc.apply).mkString(" ")}"
+    else {
+      val argTxt = if(quoted) s""""${args}"""" else args
+      s"""${sc.name} ${argTxt} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+    }
     
   }
 

@@ -17,9 +17,9 @@ object Main {
       ! du"hello".&                                                 o
       du"one" & du"two" && ! du"three"                              o
       du"goodybe"                                                   o
-      du"oki".$( du"sub" | du"hello" )                              o 
+      du"oki" %( du"sub" | du"hello" )                              o 
       du"now"                                                       o
-      du"oki".$( du"sub" | du"hello" )                              o
+      du"oki" %( du"sub" | du"hello" )                              o
       `[[` (du"hello" && du"yes").`]]` && 
         `[[` (du"goodbye").`]]` || du"good"                         o 
       While `[[` du"hello" `]]` Do {
@@ -68,6 +68,7 @@ object Main {
         echo"iterating $MY_INDEX"
       } Done
 
+    val subscript = echo %(echo"hello" %(echo"goodbye")) || echo"oki"
 
     myVar.print()
     script.print()
@@ -76,6 +77,8 @@ object Main {
     testIf.print()
     testUntil.print()
     forTest.print()
+    subscript.printRich()
+
 /*
     val HelloWorld = echo"hello world is working"
     val HelloWorld2 = echo("hello", "world", "simple args")

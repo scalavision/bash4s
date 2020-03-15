@@ -119,7 +119,7 @@ object domain {
 
     def unary_! = self.copy(cmds = Negate() +: self.cmds)
 
-    def $(cmdList: CommandListOp) =
+    def %(cmdList: CommandListOp) =
       copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
 
     def &(cmdList: CommandListOp) =
