@@ -1,7 +1,7 @@
 package bash4s
 
 import scala.language.postfixOps
-import dsl._
+import domain._
 
 object Main {
 
@@ -41,7 +41,7 @@ object Main {
     val testIf = 
       If `[[` du"hello" `]]` Then {
         du"ls in if"
-      } ElseIf `[[` (du"lovely").`]]` Then {
+      } Elif `[[` (du"lovely").`]]` Then {
         du"ls in elif" o
         du"this is elif"
       } Else {

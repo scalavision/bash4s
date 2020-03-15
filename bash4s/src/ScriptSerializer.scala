@@ -1,7 +1,7 @@
 package bash4s
 
 import magnolia._
-import dsl._
+import domain._
 
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
@@ -90,10 +90,10 @@ object ScriptSerializer {
   ): ScriptSerializer[CElse] =
     pure[CElse] { cdo => s"else\n${enc.apply(cdo.op)}\n" }
 
-  implicit def cElseIfSerializer(
+  implicit def cElifSerializer(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[CElseIf] =
-    pure[CElseIf] { elseif => s"elif ${enc.apply(elseif.op)}" }
+  ): ScriptSerializer[CElif] =
+    pure[CElif] { elseif => s"elif ${enc.apply(elseif.op)}" }
 
   implicit def cIfSerializer(
       implicit enc: ScriptSerializer[CommandOp]

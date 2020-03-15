@@ -1,5 +1,6 @@
 package bash4s
-object dsl {
+
+object domain {
 
   sealed abstract class CommandOp()
   final case class ScriptLine() extends CommandOp
@@ -188,6 +189,7 @@ object dsl {
   }
 
   def Do(op: CommandOp) = CDo(op)
+  def Then(op: CommandOp) = CThen(op)
 
   case class CUntil(
       testCommands: Vector[CommandOp],
@@ -216,9 +218,7 @@ object dsl {
 
   final case class CThen(op: CommandOp) extends CommandOp
   final case class CElse(op: CommandOp) extends CommandOp
-  final case class CElseIf(op: CommandOp) extends CommandOp
-
-  def Then(op: CommandOp) = CThen(op)
+  final case class CElif(op: CommandOp) extends CommandOp
 
   final case class CIf(
       testCommands: Vector[CommandOp],
@@ -230,9 +230,9 @@ object dsl {
         self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
       )
 
-    def ElseIf(op: CommandListOp) = {
+    def Elif(op: CommandListOp) = {
       copy(conseqCmds =
-        self.conseqCmds :+ CElseIf(op)
+        self.conseqCmds :+ CElif(op)
       )
     }
 
