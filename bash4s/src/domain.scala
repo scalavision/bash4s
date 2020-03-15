@@ -3,10 +3,41 @@ package bash4s
 object domain {
 
   sealed abstract class CommandOp() {
+
     val serializer = ScriptSerializer.gen[CommandOp]
-    def txt = serializer.apply(this)
-    def print() = println(serializer.apply(this))
-    def printRich() = pprint.pprintln(serializer.apply(this))
+
+    def txt = s"""#!/usr/bin/env bash
+    |
+    |${serializer.apply(this)}
+    |""".stripMargin
+
+    def print() = println(txt)
+    def printRich() = pprint.pprintln(txt)
+
+    def runScript(
+      script: String,
+      scriptPath: os.Path,
+      runPath: os.Path
+    ) = {
+      os.write.over(scriptPath, script)
+      os.perms.set(scriptPath, "rwxr-xr-x") 
+      os.proc(scriptPath).call(runPath)
+    }
+
+    def run(name: String = "")(implicit implicitName: sourcecode.Name): Unit = {
+
+      if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
+
+      val fileName = if(name.isEmpty()) implicitName.value else name
+      val wd = os.pwd
+      val result = runScript(txt, wd / s"$fileName", wd)
+      println(result.exitCode)
+      
+    }
+
+    def save(path: os.Path) = 
+      os.write.over(path, txt)
+
   }
 
   final case class ScriptLine() extends CommandOp

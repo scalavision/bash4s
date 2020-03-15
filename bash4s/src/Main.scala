@@ -68,6 +68,7 @@ object Main {
         echo"iterating $MY_INDEX"
       } Done
 
+
     myVar.print()
     script.print()
     testWhile.print()
@@ -75,6 +76,15 @@ object Main {
     testIf.print()
     testUntil.print()
     forTest.print()
+/*
+    val HelloWorld = echo"hello world is working"
+    val HelloWorld2 = echo("hello", "world", "simple args")
+    val exe = HelloWorld.run()
+    println(exe)
+
+    HelloWorld.save(os.pwd / "hello_world")
+    HelloWorld2.save(os.pwd / "helloworld2")
+    */
 
   }
 

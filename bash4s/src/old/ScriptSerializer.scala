@@ -104,10 +104,15 @@ object ScriptSerializer {
   implicit def simpleCommand(
       implicit enc: ScriptSerializer[CmdArgCtx]
   ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
-    s"""${sc.name} ${sc.args match {
+    val quoted = if(sc.name == "echo") true else false
+    val args =  sc.args match {
       case CmdArgs(args) => args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
-    }}"""
+    }
+
+    val argTxt = if(quoted) s"""${} "${args}"""" else args
+    s"""${sc.name} ${argTxt}"""
+
   }
 
   implicit def vectorSerializerAny(

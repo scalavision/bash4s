@@ -48,11 +48,18 @@ object ScriptSerializer {
   implicit def simpleCommand(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
-    s"""${sc.name} ${sc.arg match {
+
+    val quoted = if(sc.name == "echo") true else false
+    
+    val args = sc.arg match {
       case CmdArgs(args) => args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
       case EmptyArg()    => "()"
-    }} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+    }
+
+    val argTxt = if(quoted) s""""${args}"""" else args
+    s"""${sc.name} ${argTxt} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+    
   }
 
   implicit def untilLoop(
