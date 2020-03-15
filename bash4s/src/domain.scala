@@ -20,7 +20,6 @@ object domain {
   }
   final case class EmptyArg() extends CommandArg
   final case class OpenCommandList() extends CommandOp
-  final case class CFor() extends CommandOp
   final case class CDone() extends CommandOp
   final case class CFi() extends CommandOp
   final case class CloseCommandList() extends CommandOp
@@ -194,6 +193,7 @@ object domain {
 
 
   final case class CDo(op: CommandOp) extends CommandOp
+  final case class CIn(op: CommandOp) extends CommandOp
 
   final case class CWhile(
       testCommands: Vector[CommandOp],
@@ -212,6 +212,20 @@ object domain {
       ScriptBuilder(Vector(self, CDone(), op))
   }
 
+  final case class CFor(args: Vector[CommandOp]) extends CommandOp { self =>
+    
+    def In(op: CommandOp) =
+      copy(args = self.args :+ CIn(op))
+
+    def Do(op: CommandOp) =
+      copy(args = self.args :+ CDo(op))
+
+    def Done =
+      ScriptBuilder(Vector(CFor(self.args :+ CDone())))
+
+    def Done(op: CommandOp) =
+      ScriptBuilder(Vector(CFor(self.args :+ CDone() :+ op)))
+  }
 
   case class CUntil(
       testCommands: Vector[CommandOp],

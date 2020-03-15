@@ -31,6 +31,11 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
+  object For {
+    def apply(indexVariable: CommandOp) = 
+      CFor(Vector(indexVariable))
+  }
+
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
   def R(args: String*) = clitools.RWrapper(CmdArgs(args.toVector))

@@ -71,6 +71,22 @@ object ScriptSerializer {
       .mkString(" ")}"""
   }
 
+  implicit def cInSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CIn] =
+    pure[CIn] { cdo => s"in ${enc.apply(cdo.op)}" }
+
+  implicit def forLoopSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CFor] = pure[CFor] { w =>
+    val indexer = w.args.head match {
+      case BashVariable(name, _, _) => 
+        s"$name"
+      case _ => enc.apply(w.args.head)
+    }
+    s"""for $indexer ${w.args.tail.map(enc.apply).mkString(" ")}"""
+  }
+
   //TODO: need a test for this !
   def quote(left: String, tmp: String, quoted: Boolean, accum: Vector[String]): Vector[String] = {
     if(left.isEmpty()) accum
@@ -209,9 +225,6 @@ object ScriptSerializer {
 
   implicit def openCommandListSerializer: ScriptSerializer[OpenCommandList] =
     pure[OpenCommandList] { _ => "{" }
-
-  implicit def cForSerializer: ScriptSerializer[CFor] =
-    pure[CFor] { _ => "For" }
 
   implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
     pure[PipeWithStdOut] { _ => "|" }

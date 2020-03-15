@@ -52,6 +52,7 @@ object Main {
       `[[` (du"hello").`]]` && `[[` (du"hello").`]]` && echo"yes"
       
     val MY_VAR = Var
+    val MY_INDEX = Var
 
     val myVar = 
       MY_VAR `=` array"""Hello Goodbye "John the ultimate" """ o
@@ -61,12 +62,19 @@ object Main {
       echo""""hello world $MY_VAR"""" o
       echo("hello", "world", s"${MY_VAR.$.txt}")
 
+    val forTest = 
+      MY_VAR `=` array"one two three" o
+      For(MY_INDEX).In(MY_VAR.$).Do {
+        echo"iterating $MY_INDEX"
+      } Done
+
     myVar.print()
     script.print()
     testWhile.print()
     testBashCond.print()
     testIf.print()
     testUntil.print()
+    forTest.print()
 
   }
 
