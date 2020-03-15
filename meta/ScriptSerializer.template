@@ -52,7 +52,52 @@ object ScriptSerializer {
       case EmptyArg()    => "()"
     }} ${sc.cmds.map(enc.apply).mkString(" ")}"""
   }
+  
+  implicit def untilLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CUntil] = pure[CUntil] { w =>
+    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds.map(enc.apply).mkString(" ")}"""
+  }
+  
+  implicit def whileLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CWhile] = pure[CWhile] { w =>
+    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds.map(enc.apply).mkString(" ")}"""
+  }
+  
+  implicit def cDoneSerializer: ScriptSerializer[CDone] =
+    pure[CDone] { _ => "done" }
 
+  implicit def cFiSerializer: ScriptSerializer[CFi] =
+    pure[CFi] { _ => "fi" }
+    
+  implicit def cDoSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CDo] =
+    pure[CDo] { cdo => s"do;\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cThenSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CThen] =
+    pure[CThen] { cdo => s";then\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cElseSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElse] =
+    pure[CElse] { cdo => s"else\n${enc.apply(cdo.op)}\n" }
+  
+  implicit def cElseIfSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElseIf] =
+    pure[CElseIf] { elseif => 
+    s"elif ${enc.apply(elseif.op)}" 
+  }
+    
+  implicit def cIfSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CIf] =
+    pure[CIf] { iff => s"if ${iff.testCommands.map(enc.apply).mkString(" ")} ${iff.conseqCmds.map(enc.apply).mkString(" ")}"}
+   
   implicit def vectorSerializerAny(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[Vector[Any]] =

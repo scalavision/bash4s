@@ -247,10 +247,10 @@ object dsl {
     // These are used for standalone CIf, or if script is started
     // with a CIf
     def Fi =
-      ScriptBuilder(Vector(self, CFi()))
+      ScriptBuilder(Vector(self, CFi(), NewLine()))
 
     def Fi(op: CommandOp) =
-      ScriptBuilder(Vector(self, CFi(), op))
+      ScriptBuilder(Vector(self, CFi(), NewLine(), op))
 
   }
 

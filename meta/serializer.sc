@@ -79,13 +79,20 @@ def src2: String =
 
 
 val tps = 
-  mm.symbolsInit ++ mm.symbolsWithArg ++ mm.symbolsNoArgWithArg
+  (mm.symbolsInit ++ mm.symbolsWithArg ++ mm.symbolsNoArgWithArg).filterNot(w => 
+    w  == "While" || w == "Until" || w == "Do" || 
+    w == "Fi" || w == "Done" || w == "Then" || w == "If" ||
+    w == "ElseIf" || w == "Elif" || w == "Else"
+  )
 
 val seria: ((String, String)) => String = {
   case (symbol,name) => 
     val fixedSymbol = symbol.filterNot(_ == '`')
-    s"""implicit def ${name.uncapFirst}Serializer: ScriptSerializer[$name] = pure[$name] { _ => "$fixedSymbol" }"""
+    s"""|implicit def ${name.uncapFirst}Serializer: ScriptSerializer[$name] = 
+        |pure[$name] { _ => "$fixedSymbol" }
+        |""".stripMargin
 }
+
 
 val others = List(
   ("\\n", "ScriptLine")

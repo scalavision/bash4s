@@ -53,6 +53,55 @@ object ScriptSerializer {
     }} ${sc.cmds.map(enc.apply).mkString(" ")}"""
   }
 
+  implicit def untilLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CUntil] = pure[CUntil] { w =>
+    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
+      .map(enc.apply)
+      .mkString(" ")}"""
+  }
+
+  implicit def whileLoop(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CWhile] = pure[CWhile] { w =>
+    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
+      .map(enc.apply)
+      .mkString(" ")}"""
+  }
+
+  implicit def cDoneSerializer: ScriptSerializer[CDone] =
+    pure[CDone] { _ => "done" }
+
+  implicit def cFiSerializer: ScriptSerializer[CFi] =
+    pure[CFi] { _ => "fi" }
+
+  implicit def cDoSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CDo] =
+    pure[CDo] { cdo => s"do;\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cThenSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CThen] =
+    pure[CThen] { cdo => s";then\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cElseSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElse] =
+    pure[CElse] { cdo => s"else\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cElseIfSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElseIf] =
+    pure[CElseIf] { elseif => s"elif ${enc.apply(elseif.op)}" }
+
+  implicit def cIfSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CIf] =
+    pure[CIf] { iff =>
+      s"if ${iff.testCommands.map(enc.apply).mkString(" ")} ${iff.conseqCmds.map(enc.apply).mkString(" ")}"
+    }
+
   implicit def vectorSerializerAny(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[Vector[Any]] =
@@ -101,81 +150,80 @@ object ScriptSerializer {
   implicit def openDoubleSquareBracketSerializer
       : ScriptSerializer[OpenDoubleSquareBracket] =
     pure[OpenDoubleSquareBracket] { _ => "[[" }
+
   implicit def openSubShellEnvSerializer: ScriptSerializer[OpenSubShellEnv] =
     pure[OpenSubShellEnv] { _ => "(" }
+
   implicit def openCommandListSerializer: ScriptSerializer[OpenCommandList] =
     pure[OpenCommandList] { _ => "{" }
-  implicit def cDoSerializer: ScriptSerializer[CDo] = pure[CDo] { _ => "Do" }
-  implicit def cThenSerializer: ScriptSerializer[CThen] = pure[CThen] { _ =>
-    "Then"
-  }
-  implicit def cElseSerializer: ScriptSerializer[CElse] = pure[CElse] { _ =>
-    "Else"
-  }
-  implicit def cElseIfSerializer: ScriptSerializer[CElseIf] = pure[CElseIf] {
-    _ => "ElseIf"
-  }
-  implicit def cUntilSerializer: ScriptSerializer[CUntil] = pure[CUntil] { _ =>
-    "Until"
-  }
-  implicit def cForSerializer: ScriptSerializer[CFor] = pure[CFor] { _ =>
-    "For"
-  }
-  implicit def cWhileSerializer: ScriptSerializer[CWhile] = pure[CWhile] { _ =>
-    "While"
-  }
+
+  implicit def cForSerializer: ScriptSerializer[CFor] =
+    pure[CFor] { _ => "For" }
+
   implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
     pure[PipeWithStdOut] { _ => "|" }
+
   implicit def pipeWithErrorSerializer: ScriptSerializer[PipeWithError] =
     pure[PipeWithError] { _ => "|&" }
-  implicit def orSerializer: ScriptSerializer[Or] = pure[Or] { _ => "||" }
-  implicit def andSerializer: ScriptSerializer[And] = pure[And] { _ => "&&" }
-  implicit def stdOutSerializer: ScriptSerializer[StdOut] = pure[StdOut] { _ =>
-    ">"
-  }
-  implicit def stdErrSerializer: ScriptSerializer[StdErr] = pure[StdErr] { _ =>
-    "2>"
-  }
+
+  implicit def orSerializer: ScriptSerializer[Or] =
+    pure[Or] { _ => "||" }
+
+  implicit def andSerializer: ScriptSerializer[And] =
+    pure[And] { _ => "&&" }
+
+  implicit def stdOutSerializer: ScriptSerializer[StdOut] =
+    pure[StdOut] { _ => ">" }
+
+  implicit def stdErrSerializer: ScriptSerializer[StdErr] =
+    pure[StdErr] { _ => "2>" }
+
   implicit def appendStdOutSerializer: ScriptSerializer[AppendStdOut] =
     pure[AppendStdOut] { _ => ">>" }
+
   implicit def stdOutWithStdErrSerializer: ScriptSerializer[StdOutWithStdErr] =
     pure[StdOutWithStdErr] { _ => "&>" }
+
   implicit def appendStdOutWithSdErrSerializer
-      : ScriptSerializer[AppendStdOutWithSdErr] = pure[AppendStdOutWithSdErr] {
-    _ => "&>>"
-  }
-  implicit def stdInSerializer: ScriptSerializer[StdIn] = pure[StdIn] { _ =>
-    "<"
-  }
-  implicit def cIfSerializer: ScriptSerializer[CIf] = pure[CIf] { _ => "If" }
-  implicit def negateSerializer: ScriptSerializer[Negate] = pure[Negate] { _ =>
-    "!"
-  }
-  implicit def amperSerializer: ScriptSerializer[Amper] = pure[Amper] { _ =>
-    "&"
-  }
-  implicit def semiSerializer: ScriptSerializer[Semi] = pure[Semi] { _ => ";" }
-  implicit def newLineSerializer: ScriptSerializer[NewLine] = pure[NewLine] {
-    _ => "\n"
-  }
-  implicit def cDoneSerializer: ScriptSerializer[CDone] = pure[CDone] { _ =>
-    "Done"
-  }
-  implicit def cFiSerializer: ScriptSerializer[CFi] = pure[CFi] { _ => "Fi" }
+      : ScriptSerializer[AppendStdOutWithSdErr] =
+    pure[AppendStdOutWithSdErr] { _ => "&>>" }
+
+  implicit def stdInSerializer: ScriptSerializer[StdIn] =
+    pure[StdIn] { _ => "<" }
+
+  implicit def negateSerializer: ScriptSerializer[Negate] =
+    pure[Negate] { _ => "!" }
+
+  implicit def amperSerializer: ScriptSerializer[Amper] =
+    pure[Amper] { _ => "&" }
+
+  implicit def semiSerializer: ScriptSerializer[Semi] =
+    pure[Semi] { _ => ";" }
+
+  implicit def newLineSerializer: ScriptSerializer[NewLine] =
+    pure[NewLine] { _ => "\n" }
+
   implicit def redirectStdOutWithStdErrSerializer
       : ScriptSerializer[RedirectStdOutWithStdErr] =
     pure[RedirectStdOutWithStdErr] { _ => "2>&1" }
+
   implicit def closeStdInSerializer: ScriptSerializer[CloseStdIn] =
     pure[CloseStdIn] { _ => "<&-" }
+
   implicit def closeStdOutSerializer: ScriptSerializer[CloseStdOut] =
     pure[CloseStdOut] { _ => ">&-" }
+
   implicit def closeDoubleSquareBracketSerializer
       : ScriptSerializer[CloseDoubleSquareBracket] =
     pure[CloseDoubleSquareBracket] { _ => "]]" }
+
   implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
     pure[CloseSubShellEnv] { _ => ")" }
+
   implicit def closeCommandListSerializer: ScriptSerializer[CloseCommandList] =
     pure[CloseCommandList] { _ => "}" }
+
   implicit def scriptLineSerializer: ScriptSerializer[ScriptLine] =
     pure[ScriptLine] { _ => "\n" }
+
 }
