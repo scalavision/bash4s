@@ -48,12 +48,12 @@ object domain {
   final case class TextVariable(value: CmdArgCtx) extends VariableValue
   final case class ArrayVariable(value: CmdArgCtx) extends VariableValue
   final case class UnsetVariable() extends VariableValue
-  final case class Variable(
+  final case class BashVariable(
     name: String, 
     value: VariableValue = UnsetVariable(),
-    expanded: Boolean = false
+    isExpanded: Boolean = false
   ) extends BashParameter { self =>
-    def $ = copy(expanded = true)
+    def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
     def `=` (array: ArrayVariable) = copy(value = array)
     def o(op: CommandOp) =

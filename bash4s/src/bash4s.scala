@@ -32,7 +32,7 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
-  def Var(implicit name: sourcecode.Name) = Variable(name.value)
+  def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
   // Tools
   def R = clitools.RWrapper()

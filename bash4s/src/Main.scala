@@ -54,11 +54,11 @@ object Main {
     val MY_VAR = Var
 
     val myVar = 
-      MY_VAR `=` txt"Hello" o
+      MY_VAR `=` array"""Hello Goodbye "John the ultimate" """ o
       While `[[` MY_VAR.$ `]]` Do {
         echo"$MY_VAR"
       } Done
-      echo"hello world $MY_VAR"
+      echo""""hello world $MY_VAR""""
 
     myVar.print()
 

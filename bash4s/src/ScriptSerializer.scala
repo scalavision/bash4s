@@ -38,6 +38,7 @@ object ScriptSerializer {
   ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
+        case b: BashVariable => "\"" + "$" + b.name.trim() + "\"" 
         case c: CommandOp => enc.apply(c)
         case other        => other
       }
@@ -57,7 +58,7 @@ object ScriptSerializer {
   implicit def untilLoop(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CUntil] = pure[CUntil] { w =>
-    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
+    s"""until ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
       .map(enc.apply)
       .mkString(" ")}"""
   }
@@ -70,6 +71,44 @@ object ScriptSerializer {
       .mkString(" ")}"""
   }
 
+  //TODO: need a test for this !
+  def quote(left: String, tmp: String, quoted: Boolean, accum: Vector[String]): Vector[String] = {
+    if(left.isEmpty()) accum
+    else {
+      left.head match {
+        case '"' => 
+          if(tmp.isEmpty()) quote(left.tail, "", true, accum)
+          else quote(left.tail, "", false, accum :+ tmp) 
+        case ' ' =>
+          if(tmp.isEmpty()) quote(left.tail, "", quoted, accum)
+          else if(quoted){
+            quote(left.tail, tmp :+ left.head, quoted,  accum)
+          }
+          else quote(left.tail, "", quoted, accum :+ tmp) 
+        case _ =>
+          quote(left.tail, tmp :+ left.head, quoted,  accum)
+      }
+    }
+  }
+
+  implicit def bashVariableSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
+
+    if(b.isExpanded) s"$$${b.name}"
+    else {
+      b.value match {
+        case UnsetVariable() => s"unset $$${b.name}"
+        case TextVariable(value) => s"""$$${b.name}="${enc.apply(value)}""""
+        case ArrayVariable(value) => 
+          val txt = enc.apply(value)
+          val splitOnQuote = quote(txt, "", false, Vector.empty[String])
+          val quoted = splitOnQuote.map(s => "\"" + s + "\"")
+          s"""$$${b.name}=(${quoted.mkString(" ")})"""
+      }
+    }
+
+  }
   implicit def cDoneSerializer: ScriptSerializer[CDone] =
     pure[CDone] { _ => "done" }
 
