@@ -15,8 +15,8 @@ object Main {
       !(du"ok"  | du"pipeline"  | du"next").&                       o
       !(du"ok"  `;` du"pipeline"  & du"next").&                     o
       du"last" || du"last" || du"first" | du"end"                   o
-      du"hello".&                                                   o
-      du"one" & du"two" && du"three"                                o
+      ! du"hello".&                                                 o
+      du"one" & du"two" && ! du"three"                              o
       du"goodybe"                                                   o
       du"oki".$( du"sub" | du"hello" )                              o 
       du"now"                                                       o

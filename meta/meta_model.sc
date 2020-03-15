@@ -77,9 +77,138 @@ def redirectFunctions = (cmdRedirectionSymbols.zip(cmdRedirectionSymbols.map(toC
 val pipeSymbols = "| |&".list
 val pipelineClasses = tmpl.toAdtSuper("CommandListOp", "PipelineOp", pipeSymbols.map(extract))
 
-val leftOvers = "`{` Until For Done Fi `}` $".list
+val leftOvers = "`{` For Done Fi `}` $".list
 val leftOverClasses = (leftOvers.map(extract).map(tmpl.toCmdOp()(_))).mkString("\n") //tmpl.toAdt("CommandOp", )
 
+val conditional_and_loop_template =
+"""final case class CloseDoubleSquareBracket() extends CommandOp
+  final case class OpenDoubleSquareBracket() extends CommandOp
+  
+  def `[[`(op: CommandOp) =
+    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
+
+  def &&(op: CommandOp) = Vector(And(), op)
+
+  final case class CDo(op: CommandOp) extends CommandOp
+
+  final case class CWhile(
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]`(doCommand: CDo) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand
+      )
+
+    def Done =
+      ScriptBuilder(Vector(self, CDone()))
+
+    def Done(op: CommandOp) =
+      ScriptBuilder(Vector(self, CDone(), op))
+  }
+
+  def Do(op: CommandOp) = CDo(op)
+
+  case class CUntil(
+    testCommands: Vector[CommandOp],
+    conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]`(doCommand: CDo) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand
+      )
+
+    def Done =
+      ScriptBuilder(Vector(self, CDone()))
+    
+    def Done(op: CommandOp) =
+      ScriptBuilder(Vector(self, CDone(), op))
+  }
+
+  object Until {
+    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
+  }
+  
+  object While {
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+  }
+
+  final case class CThen(op: CommandOp) extends CommandOp
+  final case class CElse(op: CommandOp) extends CommandOp
+  final case class CElseIf(op: CommandOp) extends CommandOp
+
+  def Then(op: CommandOp) = CThen(op)
+  
+  final case class CIf(
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]`(thenCommand: CThen) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
+      )
+
+    def ElseIf(op: CommandListOp) = {
+      copy(conseqCmds =
+        self.conseqCmds :+ CElseIf(op)
+      )
+    }
+
+    def Then(op: CommandOp) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CThen(op)
+      )
+
+    def Else(op: CommandOp) =
+      copy(conseqCmds = self.conseqCmds :+ CElse(op))
+
+    // These are used for standalone CIf, or if script is started
+    // with a CIf
+    def Fi =
+      ScriptBuilder(Vector(self, CFi()))
+
+    def Fi(op: CommandOp) =
+      ScriptBuilder(Vector(self, CFi(), op))
+
+  }
+
+  object If {
+    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
+  }
+
+  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
+    self =>
+
+    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
+      op match {
+        case ScriptBuilder(scripts) =>
+          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+            acc ++ decomposeOnion(c)
+          }
+        case _ => Vector(op)
+      }
+    }
+
+    // These are used when the Conditional or Loop are used within a script
+    def Done(op: CommandOp) =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
+
+    def Done =
+      self.copy(acc = acc :+ CDone() :+ ScriptLine())
+
+    def Fi(op: CommandOp) =
+      self.copy(acc = acc :+ CFi() :+ ScriptLine() :+ op)
+
+    def Fi =
+      self.copy(acc = acc :+ CFi() :+ ScriptLine())
+
+    def o(op: CommandOp) =
+      self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
+  }"""
+   
 val template = s"""|package bash4s
    |object dsl {
    |
@@ -108,6 +237,8 @@ val template = s"""|package bash4s
    |    ${redirectFunctions}
    |
    |    ${cmdTerminators}
+   | 
+   |   def unary_! = self.copy(cmds = Negate() +: self.cmds)
    |
    |   def $$(cmdList: CommandListOp) =
    |    copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv()) 
@@ -136,7 +267,7 @@ val template = s"""|package bash4s
    |  
    |  final case class PipelineBuilder(cmds: Vector[CommandOp]) extends PipelineOp { self =>
    |
-   |   def unary_! = self.copy(Negate() +: cmds) 
+   |   def unary_! = self.copy(cmds = Negate() +: self.cmds) 
    |    
    |   def & = 
    |     CommandListBuilder(Vector(OpenSubShellEnv(), self, CloseSubShellEnv(), Amper() ))
@@ -191,108 +322,7 @@ val template = s"""|package bash4s
    |
    |}
    |
-      final case class CloseDoubleSquareBracket() extends CommandOp
-      final case class OpenDoubleSquareBracket()  extends CommandOp
-  def `[[`(op: CommandOp) = 
-    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
-
-  def &&(op: CommandOp) = Vector(And(), op)
- 
-  final case class CDo(op: CommandOp) extends CommandOp
-
-  final case class CWhile(
-      testCommands: Vector[CommandOp],
-      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
-  ) extends CommandOp { self =>
-
-    def `]]` (doCommand: CDo) =
-      copy(conseqCmds = self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand)
-
-    def Done =
-      ScriptBuilder(Vector(self, CDone()))
-      
-  }
-
-  def Do(op: CommandOp) = CDo(op)
-
-  object While {
-    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
-  }
-
-  final case class CThen(op: CommandOp) extends CommandOp
-  final case class CElse(op: CommandOp) extends CommandOp
-  final case class CElseIf(op: CommandOp) extends CommandOp
-  
-  def Then(op: CommandOp) = CThen(op)
-  
-  final case class CIf(
-      testCommands: Vector[CommandOp],
-      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
-  ) extends CommandOp { self =>
-
-    def `]]`(thenCommand: CThen) =
-      copy(conseqCmds =
-        self.conseqCmds :+ CloseDoubleSquareBracket() :+ thenCommand
-      )
-
-   def ElseIf(op: CommandListOp) = {
-      copy(conseqCmds =
-        self.conseqCmds :+ CElseIf(op) 
-      )
-   }
-
-    def Then(op: CommandOp) = 
-      copy(conseqCmds =
-        self.conseqCmds :+ CThen(op)
-      )
-
-    def Else(op: CommandOp) =
-      copy(conseqCmds = self.conseqCmds :+ CElse(op))
-
-    def Fi =
-      ScriptBuilder(Vector(self, CFi()))
-
-    def Fi(op: CommandOp) =
-      ScriptBuilder(Vector(self, CFi(), op))
-
-  }
-
-  
-  object If {
-    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
-  }
-
-  final case class ScriptBuilder(acc: Vector[CommandOp]) extends CommandOp {
-    self =>
-
-    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
-      op match {
-        case ScriptBuilder(scripts) =>
-          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
-            acc ++ decomposeOnion(c)
-          }
-        case _ => Vector(op)
-      }
-    }
-    
-    def Done(op: CommandOp) =
-      self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
-
-    def Done =
-      self.copy(acc = acc :+ CDone() :+ ScriptLine())
-    
-    def Fi(op: CommandOp) =
-      self.copy(acc = acc :+ CFi() :+ ScriptLine() :+ op)
-
-    def Fi =
-      self.copy(acc = acc :+ CFi() :+ ScriptLine())
-
-    def o(op: CommandOp) =
-      self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
-
-
-  }
-      
+   |  ${conditional_and_loop_template}  
    |
    |  final case class SheBang(s: String) extends CommandOp
    |

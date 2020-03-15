@@ -58,6 +58,8 @@ object dsl {
     def `;` = copy(cmds = self.cmds :+ Semi())
     def `\n` = copy(cmds = self.cmds :+ NewLine())
 
+    def unary_! = self.copy(cmds = Negate() +: self.cmds)
+
     def $(cmdList: CommandListOp) =
       copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
 
@@ -86,7 +88,7 @@ object dsl {
   final case class PipelineBuilder(cmds: Vector[CommandOp]) extends PipelineOp {
     self =>
 
-    def unary_! = self.copy(Negate() +: cmds)
+    def unary_! = self.copy(cmds = Negate() +: self.cmds)
 
     def & =
       CommandListBuilder(
@@ -160,6 +162,7 @@ object dsl {
 
   final case class CloseDoubleSquareBracket() extends CommandOp
   final case class OpenDoubleSquareBracket() extends CommandOp
+
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
@@ -187,8 +190,8 @@ object dsl {
   def Do(op: CommandOp) = CDo(op)
 
   case class CUntil(
-    testCommands: Vector[CommandOp],
-    conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+      testCommands: Vector[CommandOp],
+      conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
   ) extends CommandOp { self =>
 
     def `]]`(doCommand: CDo) =
@@ -198,7 +201,7 @@ object dsl {
 
     def Done =
       ScriptBuilder(Vector(self, CDone()))
-    
+
     def Done(op: CommandOp) =
       ScriptBuilder(Vector(self, CDone(), op))
   }
@@ -206,7 +209,7 @@ object dsl {
   object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
-  
+
   object While {
     def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -283,7 +286,6 @@ object dsl {
 
     def o(op: CommandOp) =
       self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
-
   }
 
   final case class SheBang(s: String) extends CommandOp
