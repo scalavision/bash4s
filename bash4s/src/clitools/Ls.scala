@@ -1,8 +1,8 @@
 
-    package bash.clitools
+    package bash4s.clitools
 
-    import bash.domain._
-    import bash.BashCommandAdapter
+    import bash4s.domain._
+    import bash4s.BashCommandAdapter
 
     case class LsWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])

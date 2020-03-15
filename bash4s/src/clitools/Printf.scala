@@ -1,13 +1,13 @@
 
-    package bash.clitools
+    package bash4s.clitools
 
-    import bash.domain._
-    import bash.BashCommandAdapter
+    import bash4s.domain._
+    import bash4s.BashCommandAdapter
 
     case class PrintfWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("du", args)
+      def toCmd = SimpleCommand("printf", args)
       def help = copy(args = self.args :+ "--help")
     }
     

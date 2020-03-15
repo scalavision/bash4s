@@ -9,7 +9,10 @@ val tmpl = templates
 def toDef(helpers: List[String]): String = {
 
   def t(name: String) = 
-    s"""def ${name.head + name.tail.map(_.toLower)} = $name()"""
+    s"""
+    def ${name.head + name.tail.map(_.toLower)}(args: String *) = clitools.${name.capFirst}Wrapper(CmdArgs(args.toVector))
+    def ${name.head + name.tail.map(_.toLower)} = clitools.${name.capFirst}Wrapper()
+    """
 
   helpers.map(t).mkString("\n")
 
@@ -37,23 +40,51 @@ def readDat(file: String)(transformer: String => String): List[String] =
         case s: String => s
     }.filter(_.nonEmpty) ++ readDat("basic_ops.dat"){ case s => s }
 
-def implicitCommand(name: String) =
- s"""
-     def $name(args: Any*) = 
-       ScriptBuilder(Vector(SimpleCommand("$name", CmdArgCtx(args.toVector, s))))
- """
+def bashDsl = s"""
+package bash4s
 
-def commandTool(name: String) = 
-  s"""def $name = clitools.${name.capFirst}Wrapper()"""
+import domain._
 
-def commandTemplate = s"""
-  ${commands.map(commandTool).mkString("\n")}
-  implicit class CmdSyntax(s: StringContext)  {
-    ${commands.map(implicitCommand).mkString("\n")}
+trait BashCommandAdapter {
+  def toCmd: SimpleCommand
+}
+
+package object bash4s {
+
+  implicit def cmdAliasConverter: 
+    BashCommandAdapter => SimpleCommand = _.toCmd
+  
+  object Until {
+    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
+
+  object While {
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+  }
+  
+  object If {
+    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
+  }
+
+  def `[[`(op: CommandOp) =
+    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
+
+  def &&(op: CommandOp) = Vector(And(), op)
+  
+  def Do(op: CommandOp) = CDo(op)
+
+  def Then(op: CommandOp) = CThen(op)
+
+  def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
+  
+  ${toDef(commands.sorted)}
+  ${tmpl.cli(commands.sorted)}
+  
+}
 """
 
-def bashDsl = s"""package bash
+/*
+def bashDslOld = s"""package bash
 import domain._
 
 trait BashCommandAdapter {
@@ -124,9 +155,10 @@ def commandToolClass(name: String) =
       def help = copy(args = self.args :+ "--help")
     }
     """
+*/
 
 def createCommandToolClasses(path: os.Path): Unit =
-  commands.map(commandToolClass).zip(commands).foreach {
+  commands.map(tmpl.cliAlias).zip(commands).foreach {
     case (src, name)  =>
       os.write.over(path / s"${name.capFirst}.scala", src)
   }

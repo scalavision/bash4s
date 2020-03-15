@@ -1,13 +1,13 @@
 import $file.syntax, syntax._
 import SyntaxEnhancer._
-
 import $file.formatter, formatter._
-
 import $file.templates
 val tmpl = templates
-
 import $file.command_op 
 val cops = command_op
+
+import $file.meta_model
+val mm = meta_model
 
 val fileTypeOpNames = List(
   ( "`/dev/stdin`", "devStdIn" ),
@@ -67,7 +67,7 @@ val serializeSymbols: ((String, String)) => String = { case (symbol, name) =>
       | pure[${name}] { _ => "${symbolFixed}" }""".stripMargin
 }
 
-def src: String =
+def src2: String =
   s"""|${symbolNames.map(serializeSymbols).mkString("\n")}
       |${fileTypeOpTemplate} 
       |${fileTypeOpNames.map(serializeFileTypeOp).mkString("\n")}
@@ -77,9 +77,34 @@ def src: String =
       }.mkString("\n")}
   |""".stripMargin
 
+
+val tps = 
+  (mm.symbolsInit ++ mm.symbolsWithArg ++ mm.symbolsNoArgWithArg).filterNot(w => 
+    w  == "While" || w == "Until" || w == "Do" || 
+    w == "Fi" || w == "Done" || w == "Then" || w == "If" ||
+    w == "ElseIf" || w == "Elif" || w == "Else"
+  )
+
+val seria: ((String, String)) => String = {
+  case (symbol,name) => 
+    val fixedSymbol = symbol.filterNot(_ == '`')
+    s"""|implicit def ${name.uncapFirst}Serializer: ScriptSerializer[$name] = 
+        |pure[$name] { _ => "$fixedSymbol" }
+        |""".stripMargin
+}
+
+
+val others = List(
+  ("\\n", "ScriptLine")
+)
+val cmb = (tps.zip(tps.map(mm.extract)) ++ others).map(seria).mkString("\n")
+
+def src: String = 
+  s"""|
+      |${cmb}""".stripMargin
+
 def generateSerializer(dest: os.Path): Unit = {
   val template = os.read( os.pwd / "meta" / "ScriptSerializer.template").lines.toList.dropRight(1).mkString("\n")
-
   val path = dest / "ScriptSerializer.scala"
   val scriptSerializerSrc = Formatter.style(template + "\n" + src + "\n}", path)
   os.write.over(path, scriptSerializerSrc) 

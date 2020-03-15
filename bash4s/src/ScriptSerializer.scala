@@ -1,4 +1,4 @@
-package bash
+package bash4s
 
 import magnolia._
 import domain._
@@ -27,6 +27,7 @@ object ScriptSerializer {
   implicit val stringSerializer: ScriptSerializer[String] = pure[String] {
     _.toString()
   }
+  implicit val booleanSerializer: ScriptSerializer[Boolean] = pure[Boolean] {b: Boolean =>  b.toString() }
   implicit val intSerializer: ScriptSerializer[Int] = pure[Int] { _.toString() }
   implicit val charSerializer: ScriptSerializer[Char] = pure[Char] {
     _.toString()
@@ -37,78 +38,145 @@ object ScriptSerializer {
   ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
-        case b: BashVariable => b.name
-        case c: CommandOp    => enc.apply(c)
-        case other           => other
+        case b: BashVariable => "\"" + "$" + b.name.trim() + "\"" 
+        case c: CommandOp => enc.apply(c)
+        case other        => other
       }
       stringContext.s(serializedArgs: _*)
   }
 
-  def loopArgSerializer(
-      op: CommandOp,
-      enc: ScriptSerializer[CommandOp]
-  ): String =
-    op match {
-      case BashVariable(name, value) =>
-        value match {
-          case BEmpty()           => name
-          case BString(value)     => value
-          case BSubCommand(value) => value.map(enc.apply).mkString(" ")
-        }
-      case op: CommandOp => enc.apply(op)
+  implicit def simpleCommand(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
+
+    val quoted = if(sc.name == "echo") true else false
+    
+    val args = sc.arg match {
+      case CmdArgs(args) => args.mkString(" ")
+      case c: CmdArgCtx  => enc.apply(c)
+      case EmptyArg()    => "()"
     }
 
-  implicit def forLoop(
+    val argTxt = if(quoted) s""""${args}"""" else args
+    s"""${sc.name} ${argTxt} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+    
+  }
+
+  implicit def untilLoop(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[LFor] = pure[LFor] { f =>
-    s"""for ${loopArgSerializer(f.op, enc)}"""
+  ): ScriptSerializer[CUntil] = pure[CUntil] { w =>
+    s"""until ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
+      .map(enc.apply)
+      .mkString(" ")}"""
   }
 
   implicit def whileLoop(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[LWhile] = pure[LWhile] { f =>
-    s"""while ${loopArgSerializer(f.op, enc)}"""
+  ): ScriptSerializer[CWhile] = pure[CWhile] { w =>
+    s"""while ${w.testCommands.map(enc.apply).mkString(" ")} ${w.conseqCmds
+      .map(enc.apply)
+      .mkString(" ")}"""
   }
 
-  implicit def conditionalExpression(
+  implicit def cInSerializer(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[ConditionalExpression] = pure[ConditionalExpression] {
-    ce => s"""-${ce.s} ${loopArgSerializer(ce.op, enc)}"""
+  ): ScriptSerializer[CIn] =
+    pure[CIn] { cdo => s"in ${enc.apply(cdo.op)}" }
+
+  implicit def forLoopSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CFor] = pure[CFor] { w =>
+    val indexer = w.args.head match {
+      case BashVariable(name, _, _) => 
+        s"$name"
+      case _ => enc.apply(w.args.head)
+    }
+    s"""for $indexer ${w.args.tail.map(enc.apply).mkString(" ")}"""
   }
 
-  implicit val closeFileDescriptorSerializer
-      : ScriptSerializer[CloseFileDescriptor] =
-    pure[CloseFileDescriptor] { cfd => s"${cfd.fileDescriptor}>&-" }
+  //TODO: need a test for this !
+  def quote(left: String, tmp: String, quoted: Boolean, accum: Vector[String]): Vector[String] = {
+    if(left.isEmpty()) accum
+    else {
+      left.head match {
+        case '"' => 
+          if(tmp.isEmpty()) quote(left.tail, "", true, accum)
+          else quote(left.tail, "", false, accum :+ tmp) 
+        case ' ' =>
+          if(tmp.isEmpty()) quote(left.tail, "", quoted, accum)
+          else if(quoted){
+            quote(left.tail, tmp :+ left.head, quoted,  accum)
+          }
+          else quote(left.tail, "", quoted, accum :+ tmp) 
+        case _ =>
+          quote(left.tail, tmp :+ left.head, quoted,  accum)
+      }
+    }
+  }
 
-  implicit val mergeFileDescriptorsToSingleStreamSerializer
-      : ScriptSerializer[MergeFileDescriptorsToSingleStream] =
-    pure[MergeFileDescriptorsToSingleStream] { mfds =>
-      s"${mfds.descriptor1}>&${mfds.descriptor2}"
+  implicit def bashVariableSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
+
+    if(b.isExpanded) s"$$${b.name}"
+    else {
+      b.value match {
+        case UnsetVariable() => s"unset $$${b.name}"
+        case TextVariable(value) => s"""$$${b.name}="${enc.apply(value)}""""
+        case ArrayVariable(value) => 
+          val txt = enc.apply(value)
+          val splitOnQuote = quote(txt, "", false, Vector.empty[String])
+          val quoted = splitOnQuote.map(s => "\"" + s + "\"")
+          s"""$$${b.name}=(${quoted.mkString(" ")})"""
+      }
     }
 
-  implicit val refVariable: ScriptSerializer[RefVariable] = pure[RefVariable] {
-    s => s"""$$${s.name}"""
   }
 
-  implicit def bashVariable(
+  implicit def localizationSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[LocalizationString] = pure[LocalizationString] { l =>
+    s"""$$"${enc.apply(l.value)}""""
+  }
+
+  implicit def ansiCQuotedSerializer(
+    implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[AnsiCQuoted] = pure[AnsiCQuoted] { l =>
+    s"""$$'${enc.apply(l.value)}'"""
+  }
+
+  implicit def cDoneSerializer: ScriptSerializer[CDone] =
+    pure[CDone] { _ => "done" }
+
+  implicit def cFiSerializer: ScriptSerializer[CFi] =
+    pure[CFi] { _ => "fi" }
+
+  implicit def cDoSerializer(
       implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[BashVariable] = pure[BashVariable] {
-    case BashVariable(name, variableValue) =>
-      s"""$name=${variableValue match {
-        case BString(value)     => s""""${value}""""
-        case BSubCommand(value) => s"${value.map(enc.apply).mkString(" ")}"
-        case BEmpty()           => "''"
-      }}"""
-  }
+  ): ScriptSerializer[CDo] =
+    pure[CDo] { cdo => s"do;\n${enc.apply(cdo.op)}\n" }
 
-  implicit def simpleCommand(
-      implicit enc: ScriptSerializer[CmdArgCtx]
-  ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
-    s"""${sc.name} ${sc.args match {
-      case CmdArgs(args) => args.mkString(" ")
-      case c: CmdArgCtx  => enc.apply(c)
-    }}"""
-  }
+  implicit def cThenSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CThen] =
+    pure[CThen] { cdo => s";then\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cElseSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElse] =
+    pure[CElse] { cdo => s"else\n${enc.apply(cdo.op)}\n" }
+
+  implicit def cElifSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CElif] =
+    pure[CElif] { elseif => s"elif ${enc.apply(elseif.op)}" }
+
+  implicit def cIfSerializer(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[CIf] =
+    pure[CIf] { iff =>
+      s"if ${iff.testCommands.map(enc.apply).mkString(" ")} ${iff.conseqCmds.map(enc.apply).mkString(" ")}"
+    }
 
   implicit def vectorSerializerAny(
       implicit enc: ScriptSerializer[CommandOp]
@@ -148,112 +216,87 @@ object ScriptSerializer {
 
   implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
 
-  implicit val semiSerializer: ScriptSerializer[Semi] =
-    pure[Semi] { _ => ";" }
-  implicit val newLineSerializer: ScriptSerializer[NewLine] =
-    pure[NewLine] { _ => "\n" }
-  implicit val amperSerializer: ScriptSerializer[Amper] =
-    pure[Amper] { _ => "&" }
-  implicit val andSerializer: ScriptSerializer[And] =
-    pure[And] { _ => "&&" }
-  implicit val orSerializer: ScriptSerializer[Or] =
+  implicit def dollarSerializer: ScriptSerializer[Dollar] = pure[Dollar] { _ =>
+    "$"
+  }
+
+  implicit def subShellExpSerializer: ScriptSerializer[OpenSubShellExp] =
+    pure[OpenSubShellExp] { _ => "$(" }
+
+  implicit def openDoubleSquareBracketSerializer
+      : ScriptSerializer[OpenDoubleSquareBracket] =
+    pure[OpenDoubleSquareBracket] { _ => "[[" }
+
+  implicit def openSubShellEnvSerializer: ScriptSerializer[OpenSubShellEnv] =
+    pure[OpenSubShellEnv] { _ => "(" }
+
+  implicit def openCommandListSerializer: ScriptSerializer[OpenCommandList] =
+    pure[OpenCommandList] { _ => "{" }
+
+  implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
+    pure[PipeWithStdOut] { _ => "|" }
+
+  implicit def pipeWithErrorSerializer: ScriptSerializer[PipeWithError] =
+    pure[PipeWithError] { _ => "|&" }
+
+  implicit def orSerializer: ScriptSerializer[Or] =
     pure[Or] { _ => "||" }
-  implicit val pipeStdOutSerializer: ScriptSerializer[PipeStdOut] =
-    pure[PipeStdOut] { _ => "|" }
-  implicit val pipeStdOutWithErrSerializer
-      : ScriptSerializer[PipeStdOutWithErr] =
-    pure[PipeStdOutWithErr] { _ => "|&" }
-  implicit val timedPipelineSerializer: ScriptSerializer[TimedPipeline] =
-    pure[TimedPipeline] { _ => "time" }
-  implicit val negatePipelineExitStatusSerializer
-      : ScriptSerializer[NegatePipelineExitStatus] =
-    pure[NegatePipelineExitStatus] { _ => "!" }
-  implicit val stdOutSerializer: ScriptSerializer[StdOut] =
+
+  implicit def andSerializer: ScriptSerializer[And] =
+    pure[And] { _ => "&&" }
+
+  implicit def stdOutSerializer: ScriptSerializer[StdOut] =
     pure[StdOut] { _ => ">" }
-  implicit val stdErrSerializer: ScriptSerializer[StdErr] =
+
+  implicit def stdErrSerializer: ScriptSerializer[StdErr] =
     pure[StdErr] { _ => "2>" }
-  implicit val appendStdOutSerializer: ScriptSerializer[AppendStdOut] =
+
+  implicit def appendStdOutSerializer: ScriptSerializer[AppendStdOut] =
     pure[AppendStdOut] { _ => ">>" }
-  implicit val stdOutWithStdErrSerializer: ScriptSerializer[StdOutWithStdErr] =
+
+  implicit def stdOutWithStdErrSerializer: ScriptSerializer[StdOutWithStdErr] =
     pure[StdOutWithStdErr] { _ => "&>" }
-  implicit val appendStdOutWithStdErrSerializer
-      : ScriptSerializer[AppendStdOutWithStdErr] =
-    pure[AppendStdOutWithStdErr] { _ => "&>>" }
-  implicit val redirectStdOutWithStdErrSerializer
+
+  implicit def appendStdOutWithSdErrSerializer
+      : ScriptSerializer[AppendStdOutWithSdErr] =
+    pure[AppendStdOutWithSdErr] { _ => "&>>" }
+
+  implicit def stdInSerializer: ScriptSerializer[StdIn] =
+    pure[StdIn] { _ => "<" }
+
+  implicit def negateSerializer: ScriptSerializer[Negate] =
+    pure[Negate] { _ => "!" }
+
+  implicit def amperSerializer: ScriptSerializer[Amper] =
+    pure[Amper] { _ => "&" }
+
+  implicit def semiSerializer: ScriptSerializer[Semi] =
+    pure[Semi] { _ => ";" }
+
+  implicit def newLineSerializer: ScriptSerializer[NewLine] =
+    pure[NewLine] { _ => "\n" }
+
+  implicit def redirectStdOutWithStdErrSerializer
       : ScriptSerializer[RedirectStdOutWithStdErr] =
     pure[RedirectStdOutWithStdErr] { _ => "2>&1" }
-  implicit val closeStdOutSerializer: ScriptSerializer[CloseStdOut] =
-    pure[CloseStdOut] { _ => "<&-" }
-  implicit val closeStdInSerializer: ScriptSerializer[CloseStdIn] =
-    pure[CloseStdIn] { _ => ">&-" }
-  implicit val subCommandStartSerializer: ScriptSerializer[SubCommandStart] =
-    pure[SubCommandStart] { _ => "$(" }
-  implicit val subCommandEndSerializer: ScriptSerializer[SubCommandEnd] =
-    pure[SubCommandEnd] { _ => ")" }
-  implicit val procCommandStartSerializer: ScriptSerializer[ProcCommandStart] =
-    pure[ProcCommandStart] { _ => "<(" }
-  implicit val procCommandEndSerializer: ScriptSerializer[ProcCommandEnd] =
-    pure[ProcCommandEnd] { _ => ")" }
-  implicit val cTrueSerializer: ScriptSerializer[CTrue] =
-    pure[CTrue] { _ => "true" }
-  implicit val cFalseSerializer: ScriptSerializer[CFalse] =
-    pure[CFalse] { _ => "false" }
-  implicit val lInSerializer: ScriptSerializer[LIn] =
-    pure[LIn] { _ => "in" }
-  implicit val lDoneSerializer: ScriptSerializer[LDone] =
-    pure[LDone] { _ => "done" }
-  implicit val cIfSerializer: ScriptSerializer[CIf] =
-    pure[CIf] { _ => "if" }
-  implicit val cUntilSerializer: ScriptSerializer[CUntil] =
-    pure[CUntil] { _ => "until" }
-  implicit val cElifSerializer: ScriptSerializer[CElif] =
-    pure[CElif] { _ => "elif" }
-  implicit val cFiSerializer: ScriptSerializer[CFi] =
-    pure[CFi] { _ => "fi" }
-  implicit val closeSquareBracketSerializer
-      : ScriptSerializer[CloseSquareBracket] =
-    pure[CloseSquareBracket] { _ => "]]" }
 
-  implicit val devFdSerializer: ScriptSerializer[`/dev/fd`] =
-    pure[`/dev/fd`] { df => s"/dev/fd/${df.fileDescriptor}" }
-  implicit val devTcpSerializer: ScriptSerializer[`/dev/tcp`] =
-    pure[`/dev/tcp`] { dt => s"/dev/tcp/${dt.host}/${dt.port}" }
-  implicit val devUdpSerializer: ScriptSerializer[`/dev/udp`] =
-    pure[`/dev/udp`] { dt => s"/dev/udp/${dt.host}/${dt.port}" }
+  implicit def closeStdInSerializer: ScriptSerializer[CloseStdIn] =
+    pure[CloseStdIn] { _ => "<&-" }
 
-  implicit val devStdInSerializer: ScriptSerializer[`/dev/stdin`.type] =
-    pure[`/dev/stdin`.type] { _ => "/dev/stdin" }
-  implicit val devStdOutSerializer: ScriptSerializer[`/dev/stdout`.type] =
-    pure[`/dev/stdout`.type] { _ => "/dev/stdout" }
-  implicit val devStdErrSerializer: ScriptSerializer[`/dev/stderr`.type] =
-    pure[`/dev/stderr`.type] { _ => "/dev/stderr" }
-  implicit val devNullSerializer: ScriptSerializer[`/dev/null`.type] =
-    pure[`/dev/null`.type] { _ => "/dev/null" }
-  implicit val devRandomSerializer: ScriptSerializer[`/dev/random`.type] =
-    pure[`/dev/random`.type] { _ => "/dev/random" }
+  implicit def closeStdOutSerializer: ScriptSerializer[CloseStdOut] =
+    pure[CloseStdOut] { _ => ">&-" }
 
-  implicit def CDo(
-      implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[CDo] = pure[CDo] { f =>
-    s";do\n ${loopArgSerializer(f.op, enc)}"
-  }
+  implicit def closeDoubleSquareBracketSerializer
+      : ScriptSerializer[CloseDoubleSquareBracket] =
+    pure[CloseDoubleSquareBracket] { _ => "]]" }
 
-  implicit def CThen(
-      implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[CThen] = pure[CThen] { f =>
-    s";then\n ${loopArgSerializer(f.op, enc)}"
-  }
+  implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
+    pure[CloseSubShellEnv] { _ => ")" }
 
-  implicit def CElse(
-      implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[CElse] = pure[CElse] { f =>
-    s"else ${loopArgSerializer(f.op, enc)}"
-  }
+  implicit def closeCommandListSerializer: ScriptSerializer[CloseCommandList] =
+    pure[CloseCommandList] { _ => "}" }
 
-  implicit def OpenSquareBracket(
-      implicit enc: ScriptSerializer[CommandOp]
-  ): ScriptSerializer[OpenSquareBracket] = pure[OpenSquareBracket] { f =>
-    s"[[ ${loopArgSerializer(f.op, enc)}"
-  }
+  implicit def scriptLineSerializer: ScriptSerializer[ScriptLine] =
+    pure[ScriptLine] { _ => "\n" }
 
 }
