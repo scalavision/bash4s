@@ -27,6 +27,7 @@ object ScriptSerializer {
   implicit val stringSerializer: ScriptSerializer[String] = pure[String] {
     _.toString()
   }
+  implicit val booleanSerializer: ScriptSerializer[Boolean] = pure[Boolean] {b: Boolean =>  b.toString() }
   implicit val intSerializer: ScriptSerializer[Int] = pure[Int] { _.toString() }
   implicit val charSerializer: ScriptSerializer[Char] = pure[Char] {
     _.toString()

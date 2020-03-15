@@ -49,7 +49,18 @@ object Main {
       du"It workd!"
 
     val testBashCond = 
-      `[[` (du"hello").`]]` && `[[` (du"hello") `]]`
+      `[[` (du"hello").`]]` && `[[` (du"hello").`]]` && echo"yes"
+      
+    val MY_VAR = Var
+
+    val myVar = 
+      MY_VAR `=` txt"Hello" o
+      While `[[` MY_VAR.$ `]]` Do {
+        echo"$MY_VAR"
+      } Done
+      echo"hello world $MY_VAR"
+
+    myVar.print()
 
     script.print()
     testWhile.print()

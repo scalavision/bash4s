@@ -10,6 +10,7 @@ package object bash4s {
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
+  // Helper commands
   object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -31,6 +32,9 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
+  def Var(implicit name: sourcecode.Name) = Variable(name.value)
+
+  // Tools
   def R = clitools.RWrapper()
   def arp = clitools.ArpWrapper()
   def b2sum = clitools.B2sumWrapper()
@@ -147,6 +151,12 @@ package object bash4s {
   def yes = clitools.YesWrapper()
   def zsh = clitools.ZshWrapper()
   implicit class CmdSyntax(s: StringContext) {
+
+    def txt(args: Any*) =
+      TextVariable(CmdArgCtx(args.toVector, s))
+      
+    def array(args: Any*) =
+      ArrayVariable(CmdArgCtx(args.toVector, s))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))

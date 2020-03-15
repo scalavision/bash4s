@@ -41,6 +41,25 @@ object domain {
   final case class PipeWithStdOut() extends PipelineOp
   final case class PipeWithError() extends PipelineOp
 
+  sealed trait BashParameter extends CommandOp
+  sealed trait SpecialParameter extends BashParameter
+
+  sealed trait VariableValue
+  final case class TextVariable(value: CmdArgCtx) extends VariableValue
+  final case class ArrayVariable(value: CmdArgCtx) extends VariableValue
+  final case class UnsetVariable() extends VariableValue
+  final case class Variable(
+    name: String, 
+    value: VariableValue = UnsetVariable(),
+    expanded: Boolean = false
+  ) extends BashParameter { self =>
+    def $ = copy(expanded = true)
+    def `=` (txt: TextVariable) = copy(value = txt)
+    def `=` (array: ArrayVariable) = copy(value = array)
+    def o(op: CommandOp) =
+      ScriptBuilder(Vector(self, ScriptLine(), op))
+  }
+
   final case class Negate() extends PipelineOp
 
   final case class SimpleCommand(
