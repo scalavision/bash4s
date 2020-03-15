@@ -25,13 +25,18 @@ object Main {
         `[[` (du"goodbye").`]]` || du"good"                         o 
       While `[[` du"hello" `]]` Do {
         du"ls"
-      } Done 
+      } Done
       du"no"
 
     val testWhile = 
       While `[[` du"hello" `]]` Do {
         du"ls"
-      } Done 
+      } Done //< (du"from")
+    
+    val testUntil = 
+      Until `[[` du"hello" `]]` Do {
+        du"ls"
+      } Done //< (du"from")
     
     val testIf = 
       If `[[` du"hello" `]]` Then {
@@ -51,6 +56,7 @@ object Main {
     pprint.pprintln(testWhile)
     pprint.pprintln(testBashCond)
     pprint.pprintln(testIf)
+    pprint.pprintln(testUntil)
 
   }
 

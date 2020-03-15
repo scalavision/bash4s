@@ -13,7 +13,6 @@ object dsl {
   }
   final case class EmptyArg() extends CommandArg
   final case class OpenCommandList() extends CommandOp
-  final case class CUntil() extends CommandOp
   final case class CFor() extends CommandOp
   final case class CDone() extends CommandOp
   final case class CFi() extends CommandOp
@@ -181,10 +180,33 @@ object dsl {
     def Done =
       ScriptBuilder(Vector(self, CDone()))
 
+    def Done(op: CommandOp) =
+      ScriptBuilder(Vector(self, CDone(), op))
   }
 
   def Do(op: CommandOp) = CDo(op)
 
+  case class CUntil(
+    testCommands: Vector[CommandOp],
+    conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
+  ) extends CommandOp { self =>
+
+    def `]]`(doCommand: CDo) =
+      copy(conseqCmds =
+        self.conseqCmds :+ CloseDoubleSquareBracket() :+ doCommand
+      )
+
+    def Done =
+      ScriptBuilder(Vector(self, CDone()))
+    
+    def Done(op: CommandOp) =
+      ScriptBuilder(Vector(self, CDone(), op))
+  }
+
+  object Until {
+    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
+  }
+  
   object While {
     def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -219,6 +241,8 @@ object dsl {
     def Else(op: CommandOp) =
       copy(conseqCmds = self.conseqCmds :+ CElse(op))
 
+    // These are used for standalone CIf, or if script is started
+    // with a CIf
     def Fi =
       ScriptBuilder(Vector(self, CFi()))
 
@@ -244,6 +268,7 @@ object dsl {
       }
     }
 
+    // These are used when the Conditional or Loop are used within a script
     def Done(op: CommandOp) =
       self.copy(acc = acc :+ CDone() :+ ScriptLine() :+ op)
 
