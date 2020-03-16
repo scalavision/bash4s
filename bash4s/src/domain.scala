@@ -98,29 +98,30 @@ object domain {
   final case class SimpleCommand(
       name: String,
       arg: CommandArg,
-      cmds: Vector[CommandOp] = Vector.empty[CommandOp]
+      postCommands: Vector[CommandOp] = Vector.empty[CommandOp],
+      preCommands: Vector[CommandOp] = Vector.empty[CommandOp]
   ) extends PipelineOp { self =>
 
-    def >(op: CommandOp) = copy(cmds = (self.cmds :+ StdOut()) :+ op)
-    def `2>`(op: CommandOp) = copy(cmds = (self.cmds :+ StdErr()) :+ op)
-    def >>(op: CommandOp) = copy(cmds = (self.cmds :+ AppendStdOut()) :+ op)
-    def &>(op: CommandOp) = copy(cmds = (self.cmds :+ StdOutWithStdErr()) :+ op)
+    def >(op: CommandOp) = copy(postCommands = (self.postCommands :+ StdOut()) :+ op)
+    def `2>`(op: CommandOp) = copy(postCommands = (self.postCommands :+ StdErr()) :+ op)
+    def >>(op: CommandOp) = copy(postCommands = (self.postCommands :+ AppendStdOut()) :+ op)
+    def &>(op: CommandOp) = copy(postCommands = (self.postCommands :+ StdOutWithStdErr()) :+ op)
     def &>>(op: CommandOp) =
-      copy(cmds = (self.cmds :+ AppendStdOutWithSdErr()) :+ op)
-    def <(op: CommandOp) = copy(cmds = (self.cmds :+ StdIn()) :+ op)
+      copy(postCommands = (self.postCommands :+ AppendStdOutWithSdErr()) :+ op)
+    def <(op: CommandOp) = copy(postCommands = (self.postCommands :+ StdIn()) :+ op)
     def `2>&1`(op: CommandOp) =
-      copy(cmds = (self.cmds :+ RedirectStdOutWithStdErr()) :+ op)
-    def <&-(op: CommandOp) = copy(cmds = (self.cmds :+ CloseStdIn()) :+ op)
-    def >&-(op: CommandOp) = copy(cmds = (self.cmds :+ CloseStdOut()) :+ op)
+      copy(postCommands = (self.postCommands :+ RedirectStdOutWithStdErr()) :+ op)
+    def <&-(op: CommandOp) = copy(postCommands = (self.postCommands :+ CloseStdIn()) :+ op)
+    def >&-(op: CommandOp) = copy(postCommands = (self.postCommands :+ CloseStdOut()) :+ op)
 
-    def & = copy(cmds = self.cmds :+ Amper())
-    def `;` = copy(cmds = self.cmds :+ Semi())
-    def `\n` = copy(cmds = self.cmds :+ NewLine())
+    def & = copy(postCommands = self.postCommands :+ Amper())
+    def `;` = copy(postCommands = self.postCommands :+ Semi())
+    def `\n` = copy(postCommands = self.postCommands :+ NewLine())
 
-    def unary_! = self.copy(cmds = Negate() +: self.cmds)
+    def unary_! = self.copy(preCommands = Negate() +: self.preCommands)
 
     def %(cmdList: CommandListOp) =
-      copy(cmds = cmds :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
+      copy(postCommands = postCommands :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
 
     def &(cmdList: CommandListOp) =
       CommandListBuilder(Vector(self, Amper(), cmdList))
@@ -217,6 +218,11 @@ object domain {
 
     def `]]` = copy(cmds = self.cmds :+ CloseDoubleSquareBracket())
 
+    def `}`(op: CommandOp) = 
+      self.copy(cmds = cmds :+ CloseCommandList() :+ op)
+    
+    def `}` = 
+      self.copy(cmds = cmds :+ CloseCommandList())
   }
 
   final case class CloseDoubleSquareBracket() extends CommandOp
@@ -340,7 +346,7 @@ object domain {
 
     def Fi =
       self.copy(acc = acc :+ CFi() :+ ScriptLine())
-
+ 
     def o(op: CommandOp) =
       self.copy(acc = (acc :+ ScriptLine()) ++ decomposeOnion(op))
   }

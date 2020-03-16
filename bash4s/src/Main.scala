@@ -15,7 +15,11 @@ object Main {
       !(du"ok"  `;` du"pipeline"  & du"next").&                     o
       du"last" || du"last" || du"first" | du"end"                   o
       ! du"hello".&                                                 o
-      du"one" & du"two" && ! du"three"                              o
+      `[[` (! echo"yes").`]]` || `{`( 
+        echo"inside context group"  o
+        echo"goodnight"
+      )`}`
+      (du"one" & du"two" && ! du"three")                            o
       du"goodybe"                                                   o
       du"oki" %( du"sub" | du"hello" )                              o 
       du"now"                                                       o
@@ -70,6 +74,12 @@ object Main {
 
     val subscript = echo %(echo"hello" %(echo"goodbye")) || echo"oki"
 
+    val currentShellContextGroup = `{`( 
+      echo"inside context group"  o
+      echo"goodnight".`;`
+    )`}`
+    echo"next day"
+
     myVar.print()
     script.print()
     testWhile.print()
@@ -78,6 +88,8 @@ object Main {
     testUntil.print()
     forTest.print()
     subscript.printRich()
+
+    currentShellContextGroup.printRich()
 
 /*
     val HelloWorld = echo"hello world is working"

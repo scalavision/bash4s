@@ -57,10 +57,10 @@ object ScriptSerializer {
       case EmptyArg()    => ""
     }
 
-    if(args.isEmpty()) s"${sc.name} ${sc.cmds.map(enc.apply).mkString(" ")}"
+    if(args.isEmpty()) s"${sc.name} ${sc.postCommands.map(enc.apply).mkString(" ")}"
     else {
       val argTxt = if(quoted) s""""${args}"""" else args
-      s"""${sc.name} ${argTxt} ${sc.cmds.map(enc.apply).mkString(" ")}"""
+      s"""${sc.preCommands.map(enc.apply).mkString(" ") + " "}${sc.name} ${argTxt} ${sc.postCommands.map(enc.apply).mkString(" ")}"""
     }
     
   }
@@ -234,7 +234,10 @@ object ScriptSerializer {
     pure[OpenSubShellEnv] { _ => "(" }
 
   implicit def openCommandListSerializer: ScriptSerializer[OpenCommandList] =
-    pure[OpenCommandList] { _ => "{" }
+    pure[OpenCommandList] { _ => "{\n" }
+  
+  implicit def closeCommandListSerializer: ScriptSerializer[CloseCommandList] =
+    pure[CloseCommandList] { _ => "\n}\n" }
 
   implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
     pure[PipeWithStdOut] { _ => "|" }
@@ -296,8 +299,6 @@ object ScriptSerializer {
   implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
     pure[CloseSubShellEnv] { _ => ")" }
 
-  implicit def closeCommandListSerializer: ScriptSerializer[CloseCommandList] =
-    pure[CloseCommandList] { _ => "}" }
 
   implicit def scriptLineSerializer: ScriptSerializer[ScriptLine] =
     pure[ScriptLine] { _ => "\n" }

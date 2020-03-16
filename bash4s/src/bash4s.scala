@@ -25,6 +25,9 @@ package object bash4s {
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
+  def `{`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenCommandList(), op))
+
   def &&(op: CommandOp) = Vector(And(), op)
 
   def Do(op: CommandOp) = CDo(op)
