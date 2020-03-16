@@ -20,6 +20,10 @@ object Main {
         echo"goodnight"
       )`}`
       (du"one" & du"two" && ! du"three")                            o
+      `[[` (! echo"yes").`]]` || `(`( 
+        echo"inside context group"  o
+        echo"goodnight"
+      )`)`
       du"goodybe"                                                   o
       du"oki" %( du"sub" | du"hello" )                              o 
       du"now"                                                       o

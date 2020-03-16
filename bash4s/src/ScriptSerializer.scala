@@ -231,7 +231,10 @@ object ScriptSerializer {
     pure[OpenDoubleSquareBracket] { _ => "[[" }
 
   implicit def openSubShellEnvSerializer: ScriptSerializer[OpenSubShellEnv] =
-    pure[OpenSubShellEnv] { _ => "(" }
+    pure[OpenSubShellEnv] { _ => "(\n" }
+  
+  implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
+    pure[CloseSubShellEnv] { _ => "\n)\n" }
 
   implicit def openCommandListSerializer: ScriptSerializer[OpenGroupInContext] =
     pure[OpenGroupInContext] { _ => "{\n" }
@@ -295,9 +298,6 @@ object ScriptSerializer {
   implicit def closeDoubleSquareBracketSerializer
       : ScriptSerializer[CloseDoubleSquareBracket] =
     pure[CloseDoubleSquareBracket] { _ => "]]" }
-
-  implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
-    pure[CloseSubShellEnv] { _ => ")" }
 
 
   implicit def scriptLineSerializer: ScriptSerializer[ScriptLine] =

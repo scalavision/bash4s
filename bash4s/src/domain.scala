@@ -223,6 +223,13 @@ object domain {
     
     def `}` = 
       self.copy(cmds = cmds :+ CloseGroupInContext())
+    
+    def `)`(op: CommandOp) = 
+      self.copy(cmds = cmds :+ CloseSubShellEnv() :+ op)
+    
+    def `)` = 
+      self.copy(cmds = cmds :+ CloseSubShellEnv())
+
   }
 
   final case class CloseDoubleSquareBracket() extends CommandOp

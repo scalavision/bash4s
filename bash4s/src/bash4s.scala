@@ -28,6 +28,9 @@ package object bash4s {
   def `{`(op: CommandOp) = 
     CommandListBuilder(Vector(OpenGroupInContext(), op))
 
+  def `(`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenSubShellEnv(), op))
+
   def &&(op: CommandOp) = Vector(And(), op)
 
   def Do(op: CommandOp) = CDo(op)
