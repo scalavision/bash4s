@@ -26,7 +26,7 @@ package object bash4s {
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
   def `{`(op: CommandOp) = 
-    CommandListBuilder(Vector(OpenCommandList(), op))
+    CommandListBuilder(Vector(OpenGroupInContext(), op))
 
   def &&(op: CommandOp) = Vector(And(), op)
 

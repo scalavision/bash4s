@@ -50,10 +50,10 @@ object domain {
     def :+(arg: String) = copy(args = self.args :+ arg)
   }
   final case class EmptyArg() extends CommandArg
-  final case class OpenCommandList() extends CommandOp
+  final case class OpenGroupInContext() extends CommandOp
   final case class CDone() extends CommandOp
   final case class CFi() extends CommandOp
-  final case class CloseCommandList() extends CommandOp
+  final case class CloseGroupInContext() extends CommandOp
   final case class Dollar() extends CommandOp
 
   sealed trait CommandRedirection extends CommandOp
@@ -219,10 +219,10 @@ object domain {
     def `]]` = copy(cmds = self.cmds :+ CloseDoubleSquareBracket())
 
     def `}`(op: CommandOp) = 
-      self.copy(cmds = cmds :+ CloseCommandList() :+ op)
+      self.copy(cmds = cmds :+ CloseGroupInContext() :+ op)
     
     def `}` = 
-      self.copy(cmds = cmds :+ CloseCommandList())
+      self.copy(cmds = cmds :+ CloseGroupInContext())
   }
 
   final case class CloseDoubleSquareBracket() extends CommandOp

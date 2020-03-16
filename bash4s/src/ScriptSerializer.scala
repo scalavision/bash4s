@@ -233,11 +233,11 @@ object ScriptSerializer {
   implicit def openSubShellEnvSerializer: ScriptSerializer[OpenSubShellEnv] =
     pure[OpenSubShellEnv] { _ => "(" }
 
-  implicit def openCommandListSerializer: ScriptSerializer[OpenCommandList] =
-    pure[OpenCommandList] { _ => "{\n" }
+  implicit def openCommandListSerializer: ScriptSerializer[OpenGroupInContext] =
+    pure[OpenGroupInContext] { _ => "{\n" }
   
-  implicit def closeCommandListSerializer: ScriptSerializer[CloseCommandList] =
-    pure[CloseCommandList] { _ => "\n}\n" }
+  implicit def closeCommandListSerializer: ScriptSerializer[CloseGroupInContext] =
+    pure[CloseGroupInContext] { _ => "\n}\n" }
 
   implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
     pure[PipeWithStdOut] { _ => "|" }
