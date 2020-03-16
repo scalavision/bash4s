@@ -25,10 +25,10 @@ package object bash4s {
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
-  def `{`(op: CommandOp) = 
+  def `{`(op: CommandOp) =
     CommandListBuilder(Vector(OpenGroupInContext(), op))
 
-  def `(`(op: CommandOp) = 
+  def `(`(op: CommandOp) =
     CommandListBuilder(Vector(OpenSubShellEnv(), op))
 
   def &&(op: CommandOp) = Vector(And(), op)
@@ -38,7 +38,7 @@ package object bash4s {
   def Then(op: CommandOp) = CThen(op)
 
   object For {
-    def apply(indexVariable: CommandOp) = 
+    def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
   }
 
@@ -396,17 +396,20 @@ package object bash4s {
 
   implicit class CmdSyntax(s: StringContext) {
 
-    def $(args: Any*) =
-      LocalizationString(CmdArgCtx(args.toVector, s))
-    
-    def $$(args: Any*) =
-      AnsiCQuoted(CmdArgCtx(args.toVector, s))
-
     def txt(args: Any*) =
       TextVariable(CmdArgCtx(args.toVector, s))
 
     def array(args: Any*) =
       ArrayVariable(CmdArgCtx(args.toVector, s))
+
+    def <<<(args: Any*) =
+      HereStringStart("<<END", CmdArgCtx(args.toVector, s))
+
+    def `<<END`(args: Any*) =
+      HereDocStart("<<END", CmdArgCtx(args.toVector, s))
+
+    def `<<-END`(args: Any*) =
+      HereDocStart("<<-END", CmdArgCtx(args.toVector, s))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))

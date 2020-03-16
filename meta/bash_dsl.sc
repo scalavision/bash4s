@@ -54,14 +54,14 @@ package object bash4s {
   implicit def cmdAliasConverter: 
     BashCommandAdapter => SimpleCommand = _.toCmd
   
-  object Until {
+    object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object While {
     def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
-  
+
   object If {
     def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -69,14 +69,25 @@ package object bash4s {
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
+  def `{`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenGroupInContext(), op))
+
+  def `(`(op: CommandOp) = 
+    CommandListBuilder(Vector(OpenSubShellEnv(), op))
+
   def &&(op: CommandOp) = Vector(And(), op)
-  
+
   def Do(op: CommandOp) = CDo(op)
 
   def Then(op: CommandOp) = CThen(op)
 
+  object For {
+    def apply(indexVariable: CommandOp) = 
+      CFor(Vector(indexVariable))
+  }
+
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
-  
+
   ${toDef(commands.sorted)}
   ${tmpl.cli(commands.sorted)}
   

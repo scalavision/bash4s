@@ -92,6 +92,11 @@ object domain {
   
   final case class LocalizationString(value: CmdArgCtx) extends CommandOp
   final case class AnsiCQuoted(value: CmdArgCtx) extends CommandOp
+  final case class HereStringStart(prefix: String, value: CmdArgCtx) extends CommandOp
+  final case class HereDocStart(prefix: String, value: CmdArgCtx) extends CommandOp {
+    def END = HereDocEnd()
+  }
+  final case class HereDocEnd() extends CommandOp
 
   final case class Negate() extends PipelineOp
 
