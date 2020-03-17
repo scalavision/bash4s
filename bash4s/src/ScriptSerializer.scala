@@ -39,6 +39,8 @@ object ScriptSerializer {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
         case b: BashVariable => "\"" + "$" + b.name.trim() + "\"" 
+        case h: HereString => enc.apply(h)
+        case h: HereDoc => enc.apply(h)
         case c: CommandOp => enc.apply(c)
         case other        => other
       }
@@ -55,6 +57,8 @@ object ScriptSerializer {
       case CmdArgs(args) => args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
       case EmptyArg()    => ""
+      case h: HereString => enc.apply(h)
+      case h: HereDoc => enc.apply(h)
     }
 
     if(args.isEmpty()) s"${sc.name} ${sc.postCommands.map(enc.apply).mkString(" ")}"
@@ -63,6 +67,18 @@ object ScriptSerializer {
       s"""${sc.preCommands.map(enc.apply).mkString(" ") + " "}${sc.name} ${argTxt} ${sc.postCommands.map(enc.apply).mkString(" ")}"""
     }
     
+  }
+  
+  implicit def hereDoc(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[HereDoc] = pure[HereDoc] { hs  =>
+    s"""${hs.prefix}\n${enc.apply(hs.value)}\nEND"""
+  }
+
+  implicit def hereString(
+      implicit enc: ScriptSerializer[CommandOp]
+  ): ScriptSerializer[HereString] = pure[HereString] { hs  =>
+    s"""${hs.prefix}"${enc.apply(hs.value)}""""
   }
 
   implicit def untilLoop(

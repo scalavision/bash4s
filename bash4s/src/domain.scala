@@ -45,6 +45,11 @@ object domain {
 
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
       extends CommandArg
+  
+  final case class HereString(prefix: String, value: CmdArgCtx) extends CommandArg
+  final case class HereDoc(prefix: String, value: CmdArgCtx, end: String = "") extends CommandArg {
+    def END = copy(end = "END")
+  }
 
   final case class CmdArgs(args: Vector[String]) extends CommandArg { self =>
     def :+(arg: String) = copy(args = self.args :+ arg)
@@ -94,10 +99,6 @@ object domain {
   final case class AnsiCQuoted(value: CmdArgCtx) extends CommandOp
   // These probably have to part of the CmdArgCtx !!
   // TODO: rename accordingly
-  final case class HereString(prefix: String, value: CmdArgCtx) extends CommandOp
-  final case class HereDoc(prefix: String, value: CmdArgCtx, ended: Boolean = false) extends CommandOp {
-    def END = copy(ended = true)
-  }
   final case class Negate() extends PipelineOp
 
   final case class SimpleCommand(

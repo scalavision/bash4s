@@ -84,6 +84,19 @@ object Main {
     )`}`
     echo"next day"
 
+    val hereStr1 = cat <<< txt"herestring" > echo"tofile"
+    val hereStr2 = cat `<<END`(
+      txt"""Some additional text"""
+    ) o
+    echo"end"
+   
+    /*
+    val hereStr3 = clitools.CatWrapper().`<<END`(echo"hello" > echo"oki")(
+      txt"""Some additional text"""
+    ) o
+    echo"end"
+    */
+
     myVar.print()
     script.print()
     testWhile.print()
@@ -95,6 +108,10 @@ object Main {
 
     currentShellContextGroup.printRich()
 
+    hereStr1.printRich()
+    hereStr2.printRich()
+    //hereStr3.printRich()
+    
 /*
     val HelloWorld = echo"hello world is working"
     val HelloWorld2 = echo("hello", "world", "simple args")

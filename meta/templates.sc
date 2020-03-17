@@ -71,14 +71,6 @@ def cli(tools: List[String]) =
       |  def array(args: Any*) =
       |    ArrayVariable(CmdArgCtx(args.toVector, s))
       |  
-      |  def <<<(args: Any*) =
-      |    HereStringStart("<<END", CmdArgCtx(args.toVector, s))
-      | 
-      |  def `<<END`(args: Any*) =
-      |    HereDocStart("<<END", CmdArgCtx(args.toVector, s))
-      | 
-      |  def `<<-END`(args: Any*) =
-      |    HereDocStart("<<-END", CmdArgCtx(args.toVector, s))
       |  
       |  ${tools.map(cliTool).mkString("\n  ")}
       |}""".stripMargin

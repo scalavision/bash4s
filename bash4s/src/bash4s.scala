@@ -42,6 +42,9 @@ package object bash4s {
       CFor(Vector(indexVariable))
   }
 
+  def cat(hereStr: HereString) = 
+    SimpleCommand("cat", hereStr)
+
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
   def R(args: String*) = clitools.RWrapper(CmdArgs(args.toVector))
@@ -401,15 +404,6 @@ package object bash4s {
 
     def array(args: Any*) =
       ArrayVariable(CmdArgCtx(args.toVector, s))
-
-    def <<<(args: Any*) =
-      HereStringStart("<<END", CmdArgCtx(args.toVector, s))
-
-    def `<<END`(args: Any*) =
-      HereDocStart("<<END", CmdArgCtx(args.toVector, s))
-
-    def `<<-END`(args: Any*) =
-      HereDocStart("<<-END", CmdArgCtx(args.toVector, s))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))
