@@ -38,7 +38,9 @@ object Main {
     val testWhile = 
       While `[[` du"hello" `]]` Do {
         du"ls"
-      } Done //< (du"from")
+      } Done < (du"from") o
+      echo"continue"
+
     
     val testUntil = 
       Until `[[` du"hello" `]]` Do {
@@ -99,7 +101,6 @@ object Main {
 
     myVar.print()
     script.print()
-    testWhile.print()
     testBashCond.print()
     testIf.print()
     testUntil.print()
@@ -110,6 +111,8 @@ object Main {
 
     hereStr1.printRich()
     hereStr2.printRich()
+    
+    testWhile.printRich()
     //hereStr3.printRich()
     
 /*

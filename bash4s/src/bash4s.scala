@@ -37,6 +37,7 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
+  def < (op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
   object For {
     def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
