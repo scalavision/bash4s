@@ -1,13 +1,21 @@
 package bash4s
 
-import scala.language.postfixOps
+//import scala.language.postfixOps
 import bash4s._
 
 object Main {
 
-
   def main(args: Array[String]): Unit = {
 
+    println("hello  world")
+
+    val script = echo"ok" o
+    o.`{` (echo"hello world")
+//    echo"finished"
+
+    script.print()
+
+    /*
     val script = du"ok" > du"hello"                                 o
       du"in" < du"out" | du"ok"                                     o
       du"ok" | du"pipeline"                                         o
@@ -94,6 +102,7 @@ object Main {
     subscript.printRich()
 
     currentShellContextGroup.printRich()
+    */
 
 /*
     val HelloWorld = echo"hello world is working"

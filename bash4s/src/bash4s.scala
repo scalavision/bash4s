@@ -10,6 +10,7 @@ package object bash4s {
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
+  /*
   object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
@@ -22,20 +23,13 @@ package object bash4s {
     def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
 
-  def `[[`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
-
-  def `{`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenGroupInContext(), op))
-
-  def `(`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenSubShellEnv(), op))
 
   def &&(op: CommandOp) = Vector(And(), op)
 
   def Do(op: CommandOp) = CDo(op)
 
   def Then(op: CommandOp) = CThen(op)
+  */
 
   object For {
     def apply(indexVariable: CommandOp) =
@@ -403,13 +397,13 @@ package object bash4s {
       ArrayVariable(CmdArgCtx(args.toVector, s))
 
     def <<<(args: Any*) =
-      HereStringStart("<<END", CmdArgCtx(args.toVector, s))
+      HereString("<<END", CmdArgCtx(args.toVector, s))
 
     def `<<END`(args: Any*) =
-      HereDocStart("<<END", CmdArgCtx(args.toVector, s))
+      HereDoc("<<END", CmdArgCtx(args.toVector, s))
 
     def `<<-END`(args: Any*) =
-      HereDocStart("<<-END", CmdArgCtx(args.toVector, s))
+      HereDoc("<<-END", CmdArgCtx(args.toVector, s))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))
