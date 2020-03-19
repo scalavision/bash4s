@@ -41,7 +41,6 @@ object Main {
       } Done < (du"from") o
       echo"continue"
 
-    
     val testUntil = 
       Until `[[` du"hello" `]]` Do {
         du"ls"

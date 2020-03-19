@@ -52,6 +52,8 @@ trait common extends ScalaModule {
     ivy"com.lihaoyi::pprint:0.5.8",
     ivy"com.lihaoyi::os-lib:0.6.3",
     ivy"eu.timepit::refined:0.9.12",
+    ivy"dev.zio::zio:1.0.0-RC18-2",
+    ivy"dev.zio::zio-streams:1.0.0-RC18-2",
     ivy"com.propensive::mercator:0.2.1",
     ivy"com.propensive::magnolia:0.12.6",
     ivy"org.scalameta::scalafmt-dynamic:2.4.2",
@@ -70,8 +72,8 @@ trait common extends ScalaModule {
 
   object test extends Tests {
     def ivyDeps = Agg(
-      ivy"dev.zio::zio-test:1.0.0-RC17",
-      ivy"dev.zio::zio-test-sbt:1.0.0-RC17"
+      ivy"dev.zio::zio-test:1.0.0-RC18-2",
+      ivy"dev.zio::zio-test-sbt:1.0.0-RC18-2"
     )
     def testFrameworks = 
       Seq("zio.test.sbt.ZTestFramework")
