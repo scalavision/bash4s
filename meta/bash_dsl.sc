@@ -92,6 +92,86 @@ package object bash4s {
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
+   // True if file exists
+  def a(op: CommandOp) = CIfIsFile(op)
+
+
+  // True if file exists and is a block special file
+  def b(op: CommandOp) = CIsBlock(op)
+
+
+  // True if file exists and is a character special file
+  def c(op: CommandOp) = CIsCharacter(op)
+
+
+  // True if file exists and is a directory
+  def d(op: CommandOp) = CIsDirectory(op)
+
+
+  // True if file exists
+  def e(op: CommandOp) = CIsFile(op)
+
+
+  // True if file exists and is a regular file
+  def f(op: CommandOp) = CGroupIdBitSet(op)
+
+
+  // True if file exists and its set-group-id bit is set
+  def g(op: CommandOp) = CIsSymbolLink(op)
+
+
+  // True if file exists and is a symbolic link
+  def h(op: CommandOp) = CStickyBitSet(op)
+
+
+  // True if file exists and its "sticky" bit is set
+  def k(op: CommandOp) = CIsNamedPipe(op)
+
+
+  // True if file exists and is a named pipe (FIFO)
+  def p(op: CommandOp) = CIsReadAble(op)
+
+
+  // True if file exists and is readable
+  def r(op: CommandOp) = CIsGreaterThanZero(op)
+
+
+  // True if file exists and has a size greater than zero
+  def s(op: CommandOp) = CFileDescriptorIsOpenAndReferTerminal(op)
+
+
+  // True if file descriptor fd is open and refers to a terminal
+  def t(op: CommandOp) = CUserIdBitSet(op)
+
+
+  // True if file exists and its set-user-id bit is set
+  def u(op: CommandOp) = CIsWritable(op)
+
+
+  // True if file exists and is writable
+  def w(op: CommandOp) = CIsExecutable(op)
+
+
+  // True if file exists and is executable
+  def x(op: CommandOp) = CIsOwnedByEffectiveGroupId(op)
+
+
+  // True if file exists and is owned by the effective group id
+  def G(op: CommandOp) = CIsSymbolicLink(op)
+
+
+  // True if file exists and is a symbolic link
+  def L(op: CommandOp) = CIsModifiedSinceLastRead(op)
+
+
+  // True if file exists and has been modified since it was last read
+  def N(op: CommandOp) = CIsOwnedByEffectiveUserId(op)
+
+
+  // True if file exists and is owned by the effective user id
+  def O(op: CommandOp) = CIsSocket(op)
+
+
   ${toDef(commands.sorted)}
   ${tmpl.cli(commands.sorted)}
   

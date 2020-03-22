@@ -94,9 +94,9 @@ object Main {
    val testFile = 
      echo"FielTest" o
      { 
-       If `[[` -a(file"SomeFile").&&( -a(file"OtherFile") ) `]]` Then {
+       If `[[` -a(file"SomeFile").&&( -b(file"OtherFile") ) `]]` Then {
         echo"This is a file"
-       } Elif `[[` ( -a(file"SomeFile").&&( -a(file"OtherFile")) ).`]]` Then {
+       } Elif `[[` ( -a(file"OtherFile1").&&( -g(file"OtherFile2")) ).`]]` Then {
         du"ls in elif" o
         du"this is elif"
        } Else {
@@ -104,19 +104,6 @@ object Main {
       } Fi
      } o
      du"It workd!"
-     
-    /* 
-      Elif `[[` -a(file"SomeFile").&&( -a(file"OtherFile") ).`]]` Then {
-       echo"This is a file"
-     } Fi
-    */
-
-    /*
-    val hereStr3 = clitools.CatWrapper().`<<END`(echo"hello" > echo"oki")(
-      txt"""Some additional text"""
-    ) o
-    echo"end"
-    */
 
     myVar.print()
     script.print()
@@ -134,6 +121,8 @@ object Main {
     testWhile.printRich()
 
     testFile.printRich()
+//    pprint.pprintln(testFile)
+
 //    pprint.pprintln(testFile)
 
     //hereStr3.printRich()

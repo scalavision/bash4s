@@ -61,17 +61,161 @@ object domain {
   final case class CloseGroupInContext() extends CommandOp
   final case class Dollar() extends CommandOp
 
-
   sealed trait ConditionalExpression extends CommandOp
-  final case class CIsFile(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = ConditionalBuilder(Vector(self)) 
+
+  final case class CIfIsFile(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
     def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
     def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
   }
-  final case class CIsBlockSpecialFile(p: FileType) extends ConditionalExpression
+
+
+  final case class CIsBlock(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsCharacter(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsDirectory(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsFile(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CGroupIdBitSet(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsSymbolLink(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CStickyBitSet(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsNamedPipe(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsReadAble(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsGreaterThanZero(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CFileDescriptorIsOpenAndReferTerminal(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CUserIdBitSet(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsWritable(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsExecutable(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsOwnedByEffectiveGroupId(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsSymbolicLink(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsModifiedSinceLastRead(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsOwnedByEffectiveUserId(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+
+
+  final case class CIsSocket(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = self
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
 
   final case class ConditionalBuilder(cmds: Vector[CommandOp]) extends ConditionalExpression { self =>
-    def &&(op: CommandOp) = copy(cmds = self.cmds :+ And() :+ op)
+  
+    def decomposeOnion(op: CommandOp): Vector[CommandOp] = {
+      op match {
+        case ScriptBuilder(scripts) =>
+          scripts.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+            acc ++ decomposeOnion(c)
+          }
+        case _ => Vector(op)
+      }
+    }
+
+    def &&(op: CommandOp) = copy(cmds = (self.cmds :+ And()) ++ decomposeOnion(op))
+    def ||(op: CommandOp) = copy(cmds = (self.cmds :+ Or()) ++ decomposeOnion(op))
     def unary_- = self
   }
 
