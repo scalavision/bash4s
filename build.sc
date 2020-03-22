@@ -46,20 +46,62 @@ trait common extends ScalaModule {
     ivy"com.github.tomasmikula::pascal:0.3.5"
   )
 
+  val Http4sVersion = "0.21.1"
+  val CirceVersion = "0.13.0"
+  val DoobieVersion = "0.8.8"
+  val ZioVersion = "1.0.0-RC18-2"
+  val PureConfigVersion = "0.12.3"
+  val H2Version = "1.4.199"
+  val FlywayVersion = "6.0.0-beta2"
+
   def ivyDeps = Agg(
-    ivy"org.scala-lang.modules::scala-collection-compat:2.1.3",
-    ivy"com.lihaoyi::sourcecode:0.2.0",
+    ivy"org.scala-lang.modules::scala-collection-compat:2.1.4",
+    ivy"com.lihaoyi::sourcecode:0.2.1",
     ivy"com.lihaoyi::pprint:0.5.8",
     ivy"com.lihaoyi::os-lib:0.6.3",
-    ivy"eu.timepit::refined:0.9.12",
-    ivy"dev.zio::zio:1.0.0-RC18-2",
-    ivy"dev.zio::zio-streams:1.0.0-RC18-2",
     ivy"com.propensive::mercator:0.2.1",
-    ivy"com.propensive::magnolia:0.12.6",
+    ivy"com.propensive::magnolia:0.12.8",
     ivy"org.scalameta::scalafmt-dynamic:2.4.2",
     ivy"org.scalameta::scalafmt-core:2.4.2",
+    ivy"eu.timepit::refined:0.9.12",
     ivy"org.scala-lang:scala-reflect:${scalaVersion}",
-    ivy"org.scala-lang:scala-compiler:${scalaVersion}"
+    ivy"org.scala-lang:scala-compiler:${scalaVersion}",
+    
+    // log4j
+    ivy"org.slf4j:slf4j-log4j12:1.7.26",
+
+    //pure config
+    ivy"com.github.pureconfig::pureconfig:${PureConfigVersion}",
+
+    //TODO: Below dependencies, could probably be refactored out of common some day
+    // Http4s
+    ivy"org.http4s::http4s-blaze-server:${Http4sVersion}",
+    ivy"org.http4s::http4s-circe:${Http4sVersion}",
+    ivy"org.http4s::http4s-dsl:${Http4sVersion}",
+
+    ivy"dev.zio::zio-process:0.0.2",
+    ivy"dev.zio::zio-config:1.0.0-RC13",
+    ivy"dev.zio::zio-logging:0.2.4",
+    ivy"dev.zio::zio-interop-cats:2.0.0.0-RC12",
+    ivy"dev.zio::zio:${ZioVersion}",
+
+    ivy"dev.zio::zio-streams:${ZioVersion}",
+    ivy"io.circe::circe-generic:${CirceVersion}",
+    ivy"io.circe::circe-generic-extras:${CirceVersion}",
+
+    // Doobie
+    ivy"org.tpolecat::doobie-core:${DoobieVersion}",
+    ivy"org.tpolecat::doobie-h2:${DoobieVersion}",
+    ivy"org.tpolecat::doobie-hikari:${DoobieVersion}",          // HikariCP transactor.
+    ivy"org.tpolecat::doobie-postgres:${DoobieVersion}",          // Postgres driver 42.2.9 + type mappings.
+    ivy"org.tpolecat::doobie-quill:${DoobieVersion}",          
+    
+    //h2
+    ivy"com.h2database:h2:${H2Version}",
+
+    // log4j
+    ivy"org.slf4j:slf4j-log4j12:1.7.26"
+
   )
 
   def compile = T {

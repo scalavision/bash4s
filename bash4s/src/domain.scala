@@ -61,6 +61,20 @@ object domain {
   final case class CloseGroupInContext() extends CommandOp
   final case class Dollar() extends CommandOp
 
+
+  sealed trait ConditionalExpression extends CommandOp
+  final case class CIsFile(op: CommandOp) extends ConditionalExpression { self =>
+    def unary_- = ConditionalBuilder(Vector(self)) 
+    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+  }
+  final case class CIsBlockSpecialFile(p: FileType) extends ConditionalExpression
+
+  final case class ConditionalBuilder(cmds: Vector[CommandOp]) extends ConditionalExpression { self =>
+    def &&(op: CommandOp) = copy(cmds = self.cmds :+ And() :+ op)
+    def unary_- = self
+  }
+
   sealed trait CommandRedirection extends CommandOp
   final case class StdOut() extends CommandRedirection
   final case class StdErr() extends CommandRedirection
@@ -297,8 +311,8 @@ object domain {
 
   final case class CThen(op: CommandOp) extends CommandOp
   final case class CElse(op: CommandOp) extends CommandOp
-  final case class CElif(op: CommandOp) extends CommandOp
-
+  final case class CElif(op: CommandOp) extends CommandOp 
+  
   final case class CIf(
       testCommands: Vector[CommandOp],
       conseqCmds: Vector[CommandOp] = Vector.empty[CommandOp]
@@ -365,5 +379,33 @@ object domain {
   }
 
   final case class SheBang(s: String) extends CommandOp
+
+  final case class Host(value: String) extends AnyVal
+  final case class Port(value: Int) extends AnyVal
+
+  final case class FileDescriptor(value: Int) extends AnyVal
+  final case class FileExtension(extension: Vector[String])
+  final case class FolderPath(folders: Vector[String])
+  final case class BaseName(value: String) extends AnyVal
+
+
+  sealed trait FileType extends CommandOp
+  final case class FileName(baseName: BaseName, fileExtension: FileExtension)
+      extends FileType
+  final case class FilePath(
+      root: Char,
+      folderPath: FolderPath,
+      fileName: FileName
+  ) extends FileType
+  final case class RelPath(folderPath: FolderPath, fileName: FileName)
+      extends FileType
+  final case object `/dev/stdin` extends FileType
+  final case object `/dev/stdout` extends FileType
+  final case object `/dev/stderr` extends FileType
+  final case class `/dev/fd`(fileDescriptor: FileDescriptor) extends FileType
+  final case class `/dev/tcp`(host: Host, port: Port) extends FileType
+  final case class `/dev/udp`(host: Host, port: Port) extends FileType
+  final case object `/dev/null` extends FileType
+  final case object `/dev/random` extends FileType
 
 }

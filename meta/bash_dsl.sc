@@ -50,11 +50,10 @@ trait BashCommandAdapter {
 }
 
 package object bash4s {
-
-  implicit def cmdAliasConverter: 
-    BashCommandAdapter => SimpleCommand = _.toCmd
   
-    object Until {
+  implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
+
+  object Until {
     def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
 
@@ -69,10 +68,10 @@ package object bash4s {
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
-  def `{`(op: CommandOp) = 
+  def `{`(op: CommandOp) =
     CommandListBuilder(Vector(OpenGroupInContext(), op))
 
-  def `(`(op: CommandOp) = 
+  def `(`(op: CommandOp) =
     CommandListBuilder(Vector(OpenSubShellEnv(), op))
 
   def &&(op: CommandOp) = Vector(And(), op)
@@ -81,10 +80,15 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
+  def < (op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
+  
   object For {
-    def apply(indexVariable: CommandOp) = 
+    def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
   }
+
+  def cat(hereStr: HereString) = 
+    SimpleCommand("cat", hereStr)
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 

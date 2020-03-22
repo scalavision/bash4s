@@ -70,7 +70,15 @@ def cli(tools: List[String]) =
       |    
       |  def array(args: Any*) =
       |    ArrayVariable(CmdArgCtx(args.toVector, s))
-      |  
+      |
+      |  def file(args: Any*): FilePath =
+      |    FileConversions.convertToFilePath(s.s(args: _*))
+      |
+      |  def fileName(args: Any*): FileName =
+      |    FileConversions.convertToFileName(s.s(args: _*))
+      |
+      |  def dirPath(args: Any*): FolderPath =
+      |    FileConversions.convertToFolderPath(s.s(args: _*))
       |  
       |  ${tools.map(cliTool).mkString("\n  ")}
       |}""".stripMargin

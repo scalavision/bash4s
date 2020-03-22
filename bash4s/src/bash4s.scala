@@ -37,13 +37,16 @@ package object bash4s {
 
   def Then(op: CommandOp) = CThen(op)
 
-  def < (op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
+  def <(op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
+
+  def a(op: CommandOp) = CIsFile(op)
+
   object For {
     def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
   }
 
-  def cat(hereStr: HereString) = 
+  def cat(hereStr: HereString) =
     SimpleCommand("cat", hereStr)
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
@@ -405,6 +408,15 @@ package object bash4s {
 
     def array(args: Any*) =
       ArrayVariable(CmdArgCtx(args.toVector, s))
+
+    def file(args: Any*): FilePath =
+      FileConversions.convertToFilePath(s.s(args: _*))
+
+    def fileName(args: Any*): FileName =
+      FileConversions.convertToFileName(s.s(args: _*))
+
+    def dirPath(args: Any*): FolderPath =
+      FileConversions.convertToFolderPath(s.s(args: _*))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))

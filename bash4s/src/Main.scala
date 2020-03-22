@@ -42,7 +42,7 @@ object Main {
       echo"continue"
 
     val testUntil = 
-      Until `[[` du"hello" `]]` Do {
+      Until `[[` (du"hello").&& (du"no") `]]` Do {
         du"ls"
       } Done //< (du"from")
     
@@ -90,7 +90,27 @@ object Main {
       txt"""Some additional text"""
     ) o
     echo"end"
-   
+
+   val testFile = 
+     echo"FielTest" o
+     { 
+       If `[[` -a(file"SomeFile").&&( -a(file"OtherFile") ) `]]` Then {
+        echo"This is a file"
+       } Elif `[[` ( -a(file"SomeFile").&&( -a(file"OtherFile")) ).`]]` Then {
+        du"ls in elif" o
+        du"this is elif"
+       } Else {
+        du"this is else"
+      } Fi
+     } o
+     du"It workd!"
+     
+    /* 
+      Elif `[[` -a(file"SomeFile").&&( -a(file"OtherFile") ).`]]` Then {
+       echo"This is a file"
+     } Fi
+    */
+
     /*
     val hereStr3 = clitools.CatWrapper().`<<END`(echo"hello" > echo"oki")(
       txt"""Some additional text"""
@@ -112,6 +132,10 @@ object Main {
     hereStr2.printRich()
     
     testWhile.printRich()
+
+    testFile.printRich()
+//    pprint.pprintln(testFile)
+
     //hereStr3.printRich()
     
 /*

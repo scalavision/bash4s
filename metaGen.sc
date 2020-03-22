@@ -21,10 +21,10 @@ def generateDomain(dest: os.Path): Unit = {
   serializer.generateSerializer(dest)
 */
 
-// val bashPath = dest / "bash4s.scala"
-// os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
-  
-//val bashcliPath = dest / "clitools"
+  val bashPath = dest / "bash4s.scala"
+  os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
+    
+//  val bashcliPath = dest / "clitools"
 //  createCommandToolClasses(bashcliPath)
 
 }
