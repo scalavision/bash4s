@@ -260,6 +260,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   sealed trait VariableValue
   final case class TextVariable(value: CmdArgCtx) extends VariableValue
   final case class ArrayVariable(value: CmdArgCtx) extends VariableValue
+  final case class SubShellVariable(value: CommandOp) extends VariableValue
   final case class UnsetVariable() extends VariableValue
   final case class BashVariable(
     name: String, 
@@ -269,6 +270,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
     def `=` (array: ArrayVariable) = copy(value = array)
+    def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))
     def o(op: CommandOp) =
       ScriptBuilder(Vector(self, ScriptLine(), op))
   }
@@ -305,7 +307,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def unary_! = self.copy(preCommands = Negate() +: self.preCommands)
 
     def %(cmdList: CommandListOp) =
-      copy(postCommands = postCommands :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellEnv())
+      copy(postCommands = postCommands :+ OpenSubShellExp() :+ cmdList :+ CloseSubShellExp())
 
     def &(cmdList: CommandListOp) =
       CommandListBuilder(Vector(self, Amper(), cmdList))
@@ -371,6 +373,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class OpenSubShellEnv() extends CommandListOp
   final case class CloseSubShellEnv() extends CommandListOp
   final case class OpenSubShellExp() extends CommandListOp
+  final case class CloseSubShellExp() extends CommandListOp
 
   final case class CommandListBuilder(cmds: Vector[CommandOp])
       extends CommandListOp { self =>

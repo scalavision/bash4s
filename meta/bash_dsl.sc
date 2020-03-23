@@ -40,7 +40,25 @@ def readDat(file: String)(transformer: String => String): List[String] =
         case s: String => s
     }.filter(_.nonEmpty) ++ 
       readDat("basic_ops.dat"){ case s => s } ++ 
-      readDat("all.dat"){case s => s}.filter(_.nonEmpty))
+      readDat("builtins.dat"){ 
+        case s if s == "type" => ""
+        case s => s
+      } ++
+      readDat("all.dat"){
+        case s if s.startsWith("7") || 
+        s.startsWith("gimp") ||
+        s.contains("perl5.30.0") ||
+        s.startsWith("alsa") ||
+        s.startsWith("zsh") ||
+        s.contains('.') ||
+        s.contains('+') ||
+        s == "false" ||
+        s == "true"  ||
+        s == "import" ||
+        s == "type"
+        => ""
+        case s => s
+      }.filter(_.nonEmpty))
       .toSet.toList.sorted
 
 def bashDsl = s"""
@@ -258,5 +276,8 @@ def commandToolClass(name: String) =
 def createCommandToolClasses(path: os.Path): Unit =
   commands.map(tmpl.cliAlias).zip(commands).foreach {
     case (src, name)  =>
-      os.write.over(path / s"${name.capFirst}.scala", src)
+      val file = path / s"${name.capFirst}.scala"
+      if(!os.exists(file)) {
+        os.write(path / s"${name.capFirst}.scala", src)
+      }
   }

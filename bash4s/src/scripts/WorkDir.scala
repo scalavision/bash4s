@@ -19,8 +19,9 @@ class WorkDir(
       mkdir"-p $path"
     } Else {
       cd"${parentFolder}"                   o
-        NR_OF_SUBFOLDERS `=` %(ls | wc"-l") o
+        NR_OF_SUBFOLDERS `=$`(ls | wc"-l")  o
         mv"${workFolder} (($NR_OF_SUBFOLDERS + 1))_${workFolder}" &&
         mkdir"-p ${path}"
-    }
+    } Fi 
+    echo"${path} was successfully created!"
 }

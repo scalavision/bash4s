@@ -142,6 +142,7 @@ object ScriptSerializer {
       b.value match {
         case UnsetVariable() => s"unset $$${b.name}"
         case TextVariable(value) => s"""$$${b.name}="${enc.apply(value)}""""
+        case SubShellVariable(value) => s"$$(${enc.apply(value)}"
         case ArrayVariable(value) => 
           val txt = enc.apply(value)
           val splitOnQuote = quote(txt, "", false, Vector.empty[String])
