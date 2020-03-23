@@ -1,6 +1,7 @@
 package bash4s
 
 import scala.language.postfixOps
+import domain._
 import bash4s._
 
 object Main {
@@ -121,6 +122,11 @@ object Main {
     testWhile.printRich()
 
     testFile.printRich()
+
+    val workDir = new scripts.WorkDir(FolderPath(Vector("hello", "goodbye")))
+
+     workDir.src.printRich()
+
 //    pprint.pprintln(testFile)
 
 //    pprint.pprintln(testFile)
