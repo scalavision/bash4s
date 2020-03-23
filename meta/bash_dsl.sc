@@ -34,11 +34,14 @@ def readDat(file: String)(transformer: String => String): List[String] =
   }
   .filter(_.nonEmpty).map {transformer}.filter(_.nonEmpty).toSet.toList
 
- def commands = readDat("coreutils.dat"){
+ def commands = (readDat("coreutils.dat"){
         case "false" => ""
         case "true" => ""
         case s: String => s
-    }.filter(_.nonEmpty) ++ readDat("basic_ops.dat"){ case s => s }
+    }.filter(_.nonEmpty) ++ 
+      readDat("basic_ops.dat"){ case s => s } ++ 
+      readDat("all.dat"){case s => s}.filter(_.nonEmpty))
+      .toSet.toList.sorted
 
 def bashDsl = s"""
 package bash4s

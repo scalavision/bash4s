@@ -36,8 +36,9 @@ def fn(m: MetaCond) = s"""
 """
 
 def domain(name: String) = s"""
-final case class ${name}(op: CommandOp) extends ConditionalExpression { self =>
+final case class ${name}(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
   def unary_- = self
+  def unary_! = copy(isNegated = true)
   def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
   def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
 }
@@ -45,7 +46,8 @@ final case class ${name}(op: CommandOp) extends ConditionalExpression { self =>
 
 def serializer(m: MetaCond) = s"""
   implicit def cond${m.name}(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[${m.name}] = pure[${m.name}] { ce =>
-    s\"\"\"-${m.c} $${enc.apply(ce.op)}\"\"\"
+    val negated = if(ce.isNegated) "! " else ""
+    s\"\"\"$${negated}-${m.c} $${enc.apply(ce.op)}\"\"\"
   }
 """
 
@@ -54,3 +56,4 @@ val bashDsl = data.map(fn).mkString("\n")
 val serial = data.map(serializer).mkString("\n")
 
 println(serial)
+//println(domainDsl)

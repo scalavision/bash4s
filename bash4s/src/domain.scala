@@ -63,144 +63,164 @@ object domain {
 
   sealed trait ConditionalExpression extends CommandOp
 
-  final case class CIfIsFile(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+  final case class CIfIsFile(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsBlock(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsBlock(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsCharacter(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsCharacter(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsDirectory(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsDirectory(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsFile(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsFile(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CGroupIdBitSet(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CGroupIdBitSet(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsSymbolLink(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsSymbolLink(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CStickyBitSet(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CStickyBitSet(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsNamedPipe(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsNamedPipe(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsReadAble(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsReadAble(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsGreaterThanZero(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsGreaterThanZero(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CFileDescriptorIsOpenAndReferTerminal(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CFileDescriptorIsOpenAndReferTerminal(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CUserIdBitSet(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CUserIdBitSet(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsWritable(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsWritable(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsExecutable(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsExecutable(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsOwnedByEffectiveGroupId(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsOwnedByEffectiveGroupId(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsSymbolicLink(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsSymbolicLink(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsModifiedSinceLastRead(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsModifiedSinceLastRead(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsOwnedByEffectiveUserId(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsOwnedByEffectiveUserId(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
 
-  final case class CIsSocket(op: CommandOp) extends ConditionalExpression { self =>
-    def unary_- = self
-    def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
-    def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
-  }
+final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends ConditionalExpression { self =>
+  def unary_- = self
+  def unary_! = copy(isNegated = true)
+  def &&(op: CommandOp) = ConditionalBuilder(Vector(self, And(), op))
+  def ||(op: CommandOp) = ConditionalBuilder(Vector(self, Or(), op))
+}
 
   final case class ConditionalBuilder(cmds: Vector[CommandOp]) extends ConditionalExpression { self =>
   
@@ -527,13 +547,13 @@ object domain {
   final case class Host(value: String) extends AnyVal
   final case class Port(value: Int) extends AnyVal
 
-  final case class FileDescriptor(value: Int) extends AnyVal
-  final case class FileExtension(extension: Vector[String])
-  final case class FolderPath(folders: Vector[String])
-  final case class BaseName(value: String) extends AnyVal
 
 
   sealed trait FileType extends CommandOp
+  final case class FileDescriptor(value: Int) extends CommandOp
+  final case class FileExtension(extension: Vector[String]) extends CommandOp
+  final case class FolderPath(folders: Vector[String]) extends CommandOp
+  final case class BaseName(value: String) extends CommandOp
   final case class FileName(baseName: BaseName, fileExtension: FileExtension)
       extends FileType
   final case class FilePath(
