@@ -34,17 +34,8 @@ def readDat(file: String)(transformer: String => String): List[String] =
   }
   .filter(_.nonEmpty).map {transformer}.filter(_.nonEmpty).toSet.toList
 
- def commands = (readDat("coreutils.dat"){
-        case "false" => ""
-        case "true" => ""
-        case s: String => s
-    }.filter(_.nonEmpty) ++ 
-      readDat("basic_ops.dat"){ case s => s } ++ 
-      readDat("builtins.dat"){ 
-        case s if s == "type" => ""
-        case s => s
-      } ++
-      readDat("all.dat"){
+
+val toMany = readDat("all.dat"){
         case s if s.startsWith("7") || 
         s.startsWith("gimp") ||
         s.contains("perl5.30.0") ||
@@ -58,7 +49,18 @@ def readDat(file: String)(transformer: String => String): List[String] =
         s == "type"
         => ""
         case s => s
-      }.filter(_.nonEmpty))
+      }.filter(_.nonEmpty)
+
+ def commands = (readDat("coreutils.dat"){
+        case "false" => ""
+        case "true" => ""
+        case s: String => s
+    }.filter(_.nonEmpty) ++ 
+      readDat("basic_ops.dat"){ case s => s } ++ 
+      readDat("builtins.dat"){ 
+        case s if s == "type" => ""
+        case s => s
+      })
       .toSet.toList.sorted
 
 def bashDsl = s"""
@@ -278,6 +280,13 @@ def createCommandToolClasses(path: os.Path): Unit =
     case (src, name)  =>
       val file = path / s"${name.capFirst}.scala"
       if(!os.exists(file)) {
-        os.write(path / s"${name.capFirst}.scala", src)
+        os.write(file, src)
       }
   }
+
+  def deleteToMany(path: os.Path): Unit = 
+    toMany.foreach {
+      case name =>
+        val file = path / s"${name.capFirst}.scala"
+        os.remove(file)
+    }
