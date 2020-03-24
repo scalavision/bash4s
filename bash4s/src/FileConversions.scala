@@ -12,6 +12,15 @@ object FileConversions {
     val extensensions = FileExtension(folderAndFile.last.dropWhile(_ != '.').drop(1).split('.').toVector)
     FilePath(root, folders, FileName(baseName, extensensions))
   }
+  
+  def convertToRelFilePath(txt: String): RelPath = {
+    val root = txt.head
+    val folderAndFile = txt.tail.split(root)
+    val folders = SubFolderPath(folderAndFile.dropRight(1).toVector.map(FolderName))
+    val baseName = BaseName(folderAndFile.last.takeWhile(_ != '.'))
+    val extensensions = FileExtension(folderAndFile.last.dropWhile(_ != '.').drop(1).split('.').toVector)
+    RelPath(folders, FileName(baseName, extensensions))
+  }
 
    def convertToFileName(txt: String) : FileName = {
     val fileNameComponents = txt.split("\\.")

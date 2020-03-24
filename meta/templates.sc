@@ -74,6 +74,9 @@ def cli(tools: List[String]) =
       |  def file(args: Any*): FilePath =
       |    FileConversions.convertToFilePath(s.s(args: _*))
       |
+      |  def relFile(args: Any*): FilePath =
+      |    FileConversions.convertToRelFilePath(s.s(args: _*))
+      |
       |  def fileName(args: Any*): FileName =
       |    FileConversions.convertToFileName(s.s(args: _*))
       |

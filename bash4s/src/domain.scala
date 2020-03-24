@@ -561,7 +561,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def parentFolderName = folders.dropRight(1).last
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
-  final case class SubFolderPath(folders: Vector[String]) extends CommandOp
+  final case class SubFolderPath(folders: Vector[FolderName]) extends CommandOp
   final case class BaseName(value: String) extends CommandOp
   final case class FolderName(value: String) extends CommandOp
   final case class FileName(baseName: BaseName, fileExtension: FileExtension)
@@ -571,7 +571,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       folderPath: FolderPath,
       fileName: FileName
   ) extends FileType
-  final case class RelPath(folderPath: FolderPath, fileName: FileName)
+  final case class RelPath(folderPath: SubFolderPath, fileName: FileName)
       extends FileType
   final case object `/dev/stdin` extends FileType
   final case object `/dev/stdout` extends FileType
