@@ -260,29 +260,51 @@ object ScriptSerializer {
 
   implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
 
-  implicit def dollarSerializer: ScriptSerializer[Dollar] = pure[Dollar] { _ =>
-    "$"
+  implicit def conditionalBuilderSerializer(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[ConditionalBuilder] = pure[ConditionalBuilder] { cb =>
+    s"""${cb.cmds.map( b => enc.apply(b)).mkString(" ")}"""
   }
-
-    implicit def condCIfIsFile(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIfIsFile] = pure[CIfIsFile] { ce =>
+ 
+  implicit def condCIfIsFile(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIfIsFile] = pure[CIfIsFile] { ce =>
     val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-a ${enc.apply(ce.op)}"""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
   }
+  
 
-
-  implicit def condCIsBlock(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsBlock] = pure[CIsBlock] { ce =>
+ implicit def condCIsBlock(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsBlock] = pure[CIsBlock] { ce =>
     val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-b ${enc.apply(ce.op)}"""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
   }
+  
 
-
-  implicit def condCIsCharacter(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsCharacter] = pure[CIsCharacter] { ce =>
+ implicit def condCIsCharacter(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsCharacter] = pure[CIsCharacter] { ce =>
     val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-c ${enc.apply(ce.op)}"""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
   }
+  
 
-
-  implicit def condCIsDirectory(implicit 
+ implicit def condCIsDirectory(
+  implicit 
     enc: ScriptSerializer[CommandOp],
     fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsDirectory] = pure[CIsDirectory] { ce =>
     val negated = if(ce.isNegated) "! " else ""
@@ -292,109 +314,219 @@ object ScriptSerializer {
     }
     s"""${negated}-d $inner"""
   }
+  
 
-
-  implicit def condCIsFile(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsFile] = pure[CIsFile] { ce =>
+ implicit def condCIsFile(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsFile] = pure[CIsFile] { ce =>
     val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-e ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCGroupIdBitSet(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CGroupIdBitSet] = pure[CGroupIdBitSet] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-f ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsSymbolLink(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsSymbolLink] = pure[CIsSymbolLink] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-g ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCStickyBitSet(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CStickyBitSet] = pure[CStickyBitSet] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-h ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsNamedPipe(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsNamedPipe] = pure[CIsNamedPipe] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-k ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsReadAble(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsReadAble] = pure[CIsReadAble] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-p ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsGreaterThanZero(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsGreaterThanZero] = pure[CIsGreaterThanZero] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-r ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCFileDescriptorIsOpenAndReferTerminal(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CFileDescriptorIsOpenAndReferTerminal] = pure[CFileDescriptorIsOpenAndReferTerminal] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-s ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCUserIdBitSet(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CUserIdBitSet] = pure[CUserIdBitSet] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-t ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsWritable(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsWritable] = pure[CIsWritable] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-u ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsExecutable(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsExecutable] = pure[CIsExecutable] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-w ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsOwnedByEffectiveGroupId(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsOwnedByEffectiveGroupId] = pure[CIsOwnedByEffectiveGroupId] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-x ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsSymbolicLink(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsSymbolicLink] = pure[CIsSymbolicLink] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-G ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsModifiedSinceLastRead(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsModifiedSinceLastRead] = pure[CIsModifiedSinceLastRead] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-L ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsOwnedByEffectiveUserId(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsOwnedByEffectiveUserId] = pure[CIsOwnedByEffectiveUserId] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-N ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def condCIsSocket(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsSocket] = pure[CIsSocket] { ce =>
-    val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-O ${enc.apply(ce.op)}"""
-  }
-
-
-  implicit def conditionalBuilderSerializer(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[ConditionalBuilder] = pure[ConditionalBuilder] { cb =>
-  pprint.pprintln(cb)
-    s"""${cb.cmds.map( b => enc.apply(b)).mkString(" ")}"""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
   }
   
+
+ implicit def condCGroupIdBitSet(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CGroupIdBitSet] = pure[CGroupIdBitSet] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsSymbolLink(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsSymbolLink] = pure[CIsSymbolLink] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCStickyBitSet(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CStickyBitSet] = pure[CStickyBitSet] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsNamedPipe(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsNamedPipe] = pure[CIsNamedPipe] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsReadAble(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsReadAble] = pure[CIsReadAble] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsGreaterThanZero(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsGreaterThanZero] = pure[CIsGreaterThanZero] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCFileDescriptorIsOpenAndReferTerminal(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CFileDescriptorIsOpenAndReferTerminal] = pure[CFileDescriptorIsOpenAndReferTerminal] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCUserIdBitSet(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CUserIdBitSet] = pure[CUserIdBitSet] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsWritable(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsWritable] = pure[CIsWritable] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsExecutable(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsExecutable] = pure[CIsExecutable] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsOwnedByEffectiveGroupId(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsOwnedByEffectiveGroupId] = pure[CIsOwnedByEffectiveGroupId] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsSymbolicLink(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsSymbolicLink] = pure[CIsSymbolicLink] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsModifiedSinceLastRead(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsModifiedSinceLastRead] = pure[CIsModifiedSinceLastRead] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsOwnedByEffectiveUserId(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsOwnedByEffectiveUserId] = pure[CIsOwnedByEffectiveUserId] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+  
+
+ implicit def condCIsSocket(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsSocket] = pure[CIsSocket] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
+  }
+
+  implicit def dollarSerializer: ScriptSerializer[Dollar] = pure[Dollar] { _ =>
+    "$"
+  }
+
   implicit def subShellExpSerializer: ScriptSerializer[OpenSubShellExp] =
     pure[OpenSubShellExp] { _ => "$(" }
 

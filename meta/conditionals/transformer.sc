@@ -61,7 +61,8 @@ def serializer(m: MetaCond) = s"""
       case f: FileType => fEnc.apply(f)
       case _ => enc.apply(ce.op)
     }
-    s\"\"\"${negated}-d $inner\"\"\"
+    s\"\"\"$${negated}-d $$inner\"\"\"
+  }
   """
 
 val domainDsl = data.map(_.name).map(domain).mkString("\n")
