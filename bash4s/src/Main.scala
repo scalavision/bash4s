@@ -95,9 +95,9 @@ object Main {
    val testFile = 
      echo"FielTest" o
      { 
-       If `[[` -a(file"SomeFile").&&( -b(file"OtherFile") ) `]]` Then {
+       If `[[` -a(file"/path/to/SomeFile").&&( -b(file"/path/to/OtherFile") ) `]]` Then {
         echo"This is a file"
-       } Elif `[[` ( -a(file"OtherFile1").&&( -g(file"OtherFile2")) ).`]]` Then {
+       } Elif `[[` ( -a(file"/path/to/OtherFile1").&&( -g(file"/path/to/OtherFile2")) ).`]]` Then {
         du"ls in elif" o
         du"this is elif"
        } Else {

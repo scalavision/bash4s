@@ -34,10 +34,12 @@ object ScriptSerializer {
   }
 
   implicit def cmdArgCtx(
-      implicit enc: ScriptSerializer[CommandOp]
+      implicit enc: ScriptSerializer[CommandOp],
+      fEnc: ScriptSerializer[FileType]
   ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
+        case f: FileType => fEnc.apply(f)
         case b: BashVariable => b.expansionSafe
         case h: HereString => enc.apply(h)
         case h: HereDoc => enc.apply(h)
@@ -198,6 +200,27 @@ object ScriptSerializer {
       s"if ${iff.testCommands.map(enc.apply).mkString(" ")} ${iff.conseqCmds.map(enc.apply).mkString(" ")}"
     }
 
+  implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
+    case FilePath(fp, fn) => s"""${fp.folders.mkString(fp.root.toString())}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
+    case FolderPath(r, fp) => 
+      s"""${fp.map(_.value).mkString(r.toString())}"""
+    case FolderName(v) => v
+    case SubFolderPath(folders) => s"""${folders.map(_.value).mkString("/")}"""
+    case FileDescriptor(value) => value.toString()
+    case FileExtension(extension) => extension.mkString(".")
+    case BaseName(value) => value
+    case FileName(bn,fe) => s"""${bn.value}.${fe.extension.mkString(".")}"""
+    case RelPath(folders,fn) => s"""${folders.folders.mkString("/")}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
+    case `/dev/null` => "/dev/null"
+    case `/dev/random` => "/dev/random"
+    case `/dev/stderr` => "/dev/stderr"
+    case `/dev/stdin` => "/dev/stdin"
+    case `/dev/stdout` => "/dev/stdout"
+    case `/dev/fd`(fd) => s"/dev/fd/${fd.value}"
+    case `/dev/tcp`(h,p) => s"/dev/tcp/${h}/${p}"
+    case `/dev/udp`(h,p) => s"/dev/udp/${h}/${p}"
+  }
+
   implicit def vectorSerializerAny(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[Vector[Any]] =
@@ -234,19 +257,6 @@ object ScriptSerializer {
     }
   }
 
- implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
-  case FilePath(r, fp, fn) => s"""${r}${fp.folders.mkString("/")}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
-  case FileName(bn,fe) => s"""${bn.value}.${fe.extension.mkString(".")}"""
-  case RelPath(folders,fn) => s"""${folders.folders.mkString("/")}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
-  case `/dev/null` => "/dev/null"
-  case `/dev/random` => "/dev/random"
-  case `/dev/stderr` => "/dev/stderr"
-  case `/dev/stdin` => "/dev/stdin"
-  case `/dev/stdout` => "/dev/stdout"
-  case `/dev/fd`(fd) => s"/dev/fd/${fd.value}"
-  case `/dev/tcp`(h,p) => s"/dev/tcp/${h}/${p}"
-  case `/dev/udp`(h,p) => s"/dev/udp/${h}/${p}"
-}
 
   implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
 
@@ -272,9 +282,15 @@ object ScriptSerializer {
   }
 
 
-  implicit def condCIsDirectory(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[CIsDirectory] = pure[CIsDirectory] { ce =>
+  implicit def condCIsDirectory(implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[CIsDirectory] = pure[CIsDirectory] { ce =>
     val negated = if(ce.isNegated) "! " else ""
-    s"""${negated}-d ${enc.apply(ce.op)}"""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s"""${negated}-d $inner"""
   }
 
 

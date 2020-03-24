@@ -44,12 +44,25 @@ final case class ${name}(op: CommandOp, isNegated: Boolean = false) extends Cond
 }
 """
 
-def serializer(m: MetaCond) = s"""
+def serializer2(m: MetaCond) = s"""
   implicit def cond${m.name}(implicit enc: ScriptSerializer[CommandOp]): ScriptSerializer[${m.name}] = pure[${m.name}] { ce =>
     val negated = if(ce.isNegated) "! " else ""
     s\"\"\"$${negated}-${m.c} $${enc.apply(ce.op)}\"\"\"
   }
 """
+
+def serializer(m: MetaCond) = s"""
+ implicit def cond${m.name}(
+  implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]): ScriptSerializer[${m.name}] = pure[${m.name}] { ce =>
+    val negated = if(ce.isNegated) "! " else ""
+    val inner = ce.op match {
+      case f: FileType => fEnc.apply(f)
+      case _ => enc.apply(ce.op)
+    }
+    s\"\"\"${negated}-d $inner\"\"\"
+  """
 
 val domainDsl = data.map(_.name).map(domain).mkString("\n")
 val bashDsl = data.map(fn).mkString("\n")

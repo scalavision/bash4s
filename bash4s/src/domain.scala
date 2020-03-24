@@ -554,20 +554,19 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
 
 
   sealed trait FileType extends CommandOp
-  final case class FileDescriptor(value: Int) extends CommandOp
-  final case class FileExtension(extension: Vector[String]) extends CommandOp
-  final case class FolderPath(root: Char, folders: Vector[FolderName]) extends CommandOp {
+  final case class FileDescriptor(value: Int) extends FileType
+  final case class FileExtension(extension: Vector[String]) extends FileType
+  final case class FolderPath(root: Char, folders: Vector[FolderName]) extends FileType {
     def lastFolderName = folders.last
     def parentFolderName = folders.dropRight(1).last
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
-  final case class SubFolderPath(folders: Vector[FolderName]) extends CommandOp
-  final case class BaseName(value: String) extends CommandOp
-  final case class FolderName(value: String) extends CommandOp
+  final case class SubFolderPath(folders: Vector[FolderName]) extends FileType
+  final case class BaseName(value: String) extends FileType
+  final case class FolderName(value: String) extends FileType
   final case class FileName(baseName: BaseName, fileExtension: FileExtension)
       extends FileType
   final case class FilePath(
-      root: Char,
       folderPath: FolderPath,
       fileName: FileName
   ) extends FileType
