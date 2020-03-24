@@ -38,7 +38,7 @@ object ScriptSerializer {
   ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
-        case b: BashVariable => "\"" + "$" + b.name.trim() + "\"" 
+        case b: BashVariable => b.expansionSafe
         case h: HereString => enc.apply(h)
         case h: HereDoc => enc.apply(h)
         case c: CommandOp => enc.apply(c)

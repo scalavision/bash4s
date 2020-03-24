@@ -271,6 +271,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def `=` (txt: TextVariable) = copy(value = txt)
     def `=` (array: ArrayVariable) = copy(value = array)
     def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))
+    def expansionSafe: String = "\"" + "$" + "{" + name.trim() + "}" + "\""
     def o(op: CommandOp) =
       ScriptBuilder(Vector(self, ScriptLine(), op))
   }
@@ -555,8 +556,14 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   sealed trait FileType extends CommandOp
   final case class FileDescriptor(value: Int) extends CommandOp
   final case class FileExtension(extension: Vector[String]) extends CommandOp
-  final case class FolderPath(folders: Vector[String]) extends CommandOp
+  final case class FolderPath(root: Char, folders: Vector[FolderName]) extends CommandOp {
+    def lastFolderName = folders.last
+    def parentFolderName = folders.dropRight(1).last
+    def parentFolderPath = copy(folders = folders.dropRight(1))
+  }
+  final case class SubFolderPath(folders: Vector[String]) extends CommandOp
   final case class BaseName(value: String) extends CommandOp
+  final case class FolderName(value: String) extends CommandOp
   final case class FileName(baseName: BaseName, fileExtension: FileExtension)
       extends FileType
   final case class FilePath(

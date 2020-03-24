@@ -9,8 +9,8 @@ class WorkDir(
 
   assert(path.folders.nonEmpty, "Invalid pathPath, must be a subpath")
 
-  val parentFolder = path.folders.dropRight(1)
-  val workFolder = path.folders.last
+  val parentFolder = path.parentFolderPath
+  val workFolder = path.lastFolderName
 
   val NR_OF_SUBFOLDERS = Var
 
