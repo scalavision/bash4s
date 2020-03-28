@@ -43,22 +43,6 @@ object ScriptLinter {
 
     }
 
-    /*
-    def reproducibleString(s: String) = {
-
-      def wordLoop(rest: String, ctx: ParserContext, accum: String, result: String): String = {
-
-      }
-
-      def newLineLoop(rest: List[String], ctx: ParserContext, accum: String, result: String): String = rest match {
-        case Nil => result + accum 
-        case x::xs => newLineLoop(rest.tail, ctx, accum + wordLoop(rest.head))
-        
-      }
-
-      newLineLoop(s.split("\n"), LineContext, "", "")
-    }*/
-
     def startWord: String => (String, String) = s => {
      val x = s.split(" ").filter(_.nonEmpty)
      (x.head, x.tail.mkString(" "))
@@ -72,28 +56,13 @@ object ScriptLinter {
     def lint(txt: String): String = {
       val cleanedForMultiSpace: String = txt.replaceAll(" +", " ")
       val cleanedForMultiNewLines: String = cleanedForMultiSpace.replaceAll("\n+", "\n")
-      /*
-      cleanedForMultiNewLines.split("\n").toList.map { l =>
-
-        val w: (String,String) = startWord(l)
-
-        w match {
-          case ("else", w) => "else" + w
-          case ("fi", w) => "fi" + w
-          case _ => l.dropWhile(_ == ' ')
-        }
-
-      }.mkString("\n")
-      
-      */
-      // use folding to keep track of state 
       cleanedForMultiNewLines.split("\n").toList.foldLeft(Indenter("", 0)) { (acc, l) =>
 
         val w: (String,String) = startWord(l)
 
         w match {
           case("if", w) => acc.copy(
-            txt = acc.txt + "if" + w + "\n",
+            txt = acc.txt + "if " + w + "\n",
             indent = acc.indent + 2
           )
           case ("else", w) => acc.copy(
