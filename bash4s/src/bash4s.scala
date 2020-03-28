@@ -40,7 +40,8 @@ package object bash4s {
   def <(op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
 
   object exit {
-    def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
+    def apply(code: Int) =
+      SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
 
   object For {
@@ -140,6 +141,9 @@ package object bash4s {
   def bash(args: String*) = clitools.BashWrapper(CmdArgs(args.toVector))
   def bash = clitools.BashWrapper()
 
+  def bg(args: String*) = clitools.BgWrapper(CmdArgs(args.toVector))
+  def bg = clitools.BgWrapper()
+
   def bind(args: String*) = clitools.BindWrapper(CmdArgs(args.toVector))
   def bind = clitools.BindWrapper()
 
@@ -172,6 +176,10 @@ package object bash4s {
 
   def cksum(args: String*) = clitools.CksumWrapper(CmdArgs(args.toVector))
   def cksum = clitools.CksumWrapper()
+
+  //Compare two files.
+  def cmp(args: String*) = clitools.CmpWrapper(CmdArgs(args.toVector))
+  def cmp = clitools.CmpWrapper()
 
   def comm(args: String*) = clitools.CommWrapper(CmdArgs(args.toVector))
   def comm = clitools.CommWrapper()
@@ -231,17 +239,33 @@ package object bash4s {
   def factor(args: String*) = clitools.FactorWrapper(CmdArgs(args.toVector))
   def factor = clitools.FactorWrapper()
 
+  def fc(args: String*) = clitools.FcWrapper(CmdArgs(args.toVector))
+  def fc = clitools.FcWrapper()
+
+  def fg(args: String*) = clitools.FgWrapper(CmdArgs(args.toVector))
+  def fg = clitools.FgWrapper()
+
+  //Find files.
+  def find(args: String*) = clitools.FindWrapper(CmdArgs(args.toVector))
+  def find = clitools.FindWrapper()
+
   def fmt(args: String*) = clitools.FmtWrapper(CmdArgs(args.toVector))
   def fmt = clitools.FmtWrapper()
 
   def fold(args: String*) = clitools.FoldWrapper(CmdArgs(args.toVector))
   def fold = clitools.FoldWrapper()
 
+  def getopts(args: String*) = clitools.GetoptsWrapper(CmdArgs(args.toVector))
+  def getopts = clitools.GetoptsWrapper()
+
   def grep(args: String*) = clitools.GrepWrapper(CmdArgs(args.toVector))
   def grep = clitools.GrepWrapper()
 
   def groups(args: String*) = clitools.GroupsWrapper(CmdArgs(args.toVector))
   def groups = clitools.GroupsWrapper()
+
+  def hash(args: String*) = clitools.HashWrapper(CmdArgs(args.toVector))
+  def hash = clitools.HashWrapper()
 
   def head(args: String*) = clitools.HeadWrapper(CmdArgs(args.toVector))
   def head = clitools.HeadWrapper()
@@ -260,6 +284,9 @@ package object bash4s {
 
   def install(args: String*) = clitools.InstallWrapper(CmdArgs(args.toVector))
   def install = clitools.InstallWrapper()
+
+  def jobs(args: String*) = clitools.JobsWrapper(CmdArgs(args.toVector))
+  def jobs = clitools.JobsWrapper()
 
   def join(args: String*) = clitools.JoinWrapper(CmdArgs(args.toVector))
   def join = clitools.JoinWrapper()
@@ -308,6 +335,9 @@ package object bash4s {
 
   def mv(args: String*) = clitools.MvWrapper(CmdArgs(args.toVector))
   def mv = clitools.MvWrapper()
+
+  def newgrp(args: String*) = clitools.NewgrpWrapper(CmdArgs(args.toVector))
+  def newgrp = clitools.NewgrpWrapper()
 
   def nice(args: String*) = clitools.NiceWrapper(CmdArgs(args.toVector))
   def nice = clitools.NiceWrapper()
@@ -479,6 +509,9 @@ package object bash4s {
   def ulimit(args: String*) = clitools.UlimitWrapper(CmdArgs(args.toVector))
   def ulimit = clitools.UlimitWrapper()
 
+  def umask(args: String*) = clitools.UmaskWrapper(CmdArgs(args.toVector))
+  def umask = clitools.UmaskWrapper()
+
   def unalias(args: String*) = clitools.UnaliasWrapper(CmdArgs(args.toVector))
   def unalias = clitools.UnaliasWrapper()
 
@@ -502,6 +535,9 @@ package object bash4s {
 
   def vdir(args: String*) = clitools.VdirWrapper(CmdArgs(args.toVector))
   def vdir = clitools.VdirWrapper()
+
+  def wait(args: String*) = clitools.WaitWrapper(CmdArgs(args.toVector))
+  def wait = clitools.WaitWrapper()
 
   def wc(args: String*) = clitools.WcWrapper(CmdArgs(args.toVector))
   def wc = clitools.WcWrapper()
@@ -528,6 +564,9 @@ package object bash4s {
 
     def file(args: Any*): FilePath =
       FileConversions.convertToFilePath(s.s(args: _*))
+
+    def relFile(args: Any*): FilePath =
+      FileConversions.convertToRelFilePath(s.s(args: _*))
 
     def fileName(args: Any*): FileName =
       FileConversions.convertToFileName(s.s(args: _*))
@@ -562,6 +601,9 @@ package object bash4s {
     def bash(args: Any*) =
       SimpleCommand("bash", CmdArgCtx(args.toVector, s))
 
+    def bg(args: Any*) =
+      SimpleCommand("bg", CmdArgCtx(args.toVector, s))
+
     def bind(args: Any*) =
       SimpleCommand("bind", CmdArgCtx(args.toVector, s))
 
@@ -594,6 +636,9 @@ package object bash4s {
 
     def cksum(args: Any*) =
       SimpleCommand("cksum", CmdArgCtx(args.toVector, s))
+    //Compare two files.
+    def cmp(args: Any*) =
+      SimpleCommand("cmp", CmdArgCtx(args.toVector, s))
 
     def comm(args: Any*) =
       SimpleCommand("comm", CmdArgCtx(args.toVector, s))
@@ -652,17 +697,32 @@ package object bash4s {
     def factor(args: Any*) =
       SimpleCommand("factor", CmdArgCtx(args.toVector, s))
 
+    def fc(args: Any*) =
+      SimpleCommand("fc", CmdArgCtx(args.toVector, s))
+
+    def fg(args: Any*) =
+      SimpleCommand("fg", CmdArgCtx(args.toVector, s))
+    //Find files.
+    def find(args: Any*) =
+      SimpleCommand("find", CmdArgCtx(args.toVector, s))
+
     def fmt(args: Any*) =
       SimpleCommand("fmt", CmdArgCtx(args.toVector, s))
 
     def fold(args: Any*) =
       SimpleCommand("fold", CmdArgCtx(args.toVector, s))
 
+    def getopts(args: Any*) =
+      SimpleCommand("getopts", CmdArgCtx(args.toVector, s))
+
     def grep(args: Any*) =
       SimpleCommand("grep", CmdArgCtx(args.toVector, s))
 
     def groups(args: Any*) =
       SimpleCommand("groups", CmdArgCtx(args.toVector, s))
+
+    def hash(args: Any*) =
+      SimpleCommand("hash", CmdArgCtx(args.toVector, s))
 
     def head(args: Any*) =
       SimpleCommand("head", CmdArgCtx(args.toVector, s))
@@ -681,6 +741,9 @@ package object bash4s {
 
     def install(args: Any*) =
       SimpleCommand("install", CmdArgCtx(args.toVector, s))
+
+    def jobs(args: Any*) =
+      SimpleCommand("jobs", CmdArgCtx(args.toVector, s))
 
     def join(args: Any*) =
       SimpleCommand("join", CmdArgCtx(args.toVector, s))
@@ -729,6 +792,9 @@ package object bash4s {
 
     def mv(args: Any*) =
       SimpleCommand("mv", CmdArgCtx(args.toVector, s))
+
+    def newgrp(args: Any*) =
+      SimpleCommand("newgrp", CmdArgCtx(args.toVector, s))
 
     def nice(args: Any*) =
       SimpleCommand("nice", CmdArgCtx(args.toVector, s))
@@ -895,6 +961,9 @@ package object bash4s {
     def ulimit(args: Any*) =
       SimpleCommand("ulimit", CmdArgCtx(args.toVector, s))
 
+    def umask(args: Any*) =
+      SimpleCommand("umask", CmdArgCtx(args.toVector, s))
+
     def unalias(args: Any*) =
       SimpleCommand("unalias", CmdArgCtx(args.toVector, s))
 
@@ -918,6 +987,9 @@ package object bash4s {
 
     def vdir(args: Any*) =
       SimpleCommand("vdir", CmdArgCtx(args.toVector, s))
+
+    def wait(args: Any*) =
+      SimpleCommand("wait", CmdArgCtx(args.toVector, s))
 
     def wc(args: Any*) =
       SimpleCommand("wc", CmdArgCtx(args.toVector, s))

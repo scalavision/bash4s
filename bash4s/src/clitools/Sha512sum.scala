@@ -4,6 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
+    
     case class Sha512sumWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

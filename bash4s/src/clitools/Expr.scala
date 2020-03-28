@@ -4,6 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
+    
     case class ExprWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

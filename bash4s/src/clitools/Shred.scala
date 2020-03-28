@@ -4,6 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
+    
     case class ShredWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

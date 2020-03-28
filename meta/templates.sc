@@ -61,7 +61,7 @@ def emptyDefBuilder(fnMeta: (String, String)) =
 def cliTool(tool: Command) =
   s"""|${if(tool.description.nonEmpty) s"//${tool.description}" else ""}
       |def ${tool.name}(args: Any*) =
-      |  SimpleCommand("$tool", CmdArgCtx(args.toVector, s))""".stripMargin
+      |  SimpleCommand("${tool.name}", CmdArgCtx(args.toVector, s))""".stripMargin
   
 def cli(tools: List[Command]) = 
   s"""|implicit class CmdSyntax(s: StringContext) {
