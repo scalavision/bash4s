@@ -1,5 +1,7 @@
 package bash4s
 
+import scala.util.Try
+
 object domain {
 
   sealed abstract class CommandOp() {
@@ -29,7 +31,7 @@ object domain {
       if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
 
       val fileName = if(name.isEmpty()) implicitName.value else name
-      val wd = os.pwd
+      val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
       val result = runScript(txt, wd / s"$fileName", wd)
       println(result.exitCode)
       
@@ -418,6 +420,8 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def `)` = 
       self.copy(cmds = cmds :+ CloseSubShellEnv())
 
+    def o(op: CommandOp) =
+      ScriptBuilder(Vector(self, ScriptLine(), op))
   }
 
   final case class CloseDoubleSquareBracket() extends CommandOp

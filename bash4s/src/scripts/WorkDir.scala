@@ -7,21 +7,30 @@ class WorkDir(
   path: FolderPath
 ) extends Script {
 
-  assert(path.folders.nonEmpty, "Invalid pathPath, must be a subpath")
+  assert(
+    path.folders.size >= 2, 
+    s"Invalid path for workdir: $path, must have at least two levels, like /parent/child"
+  )
 
   val parentFolder = path.parentFolderPath
   val workFolder = path.lastFolderName
 
   val NR_OF_SUBFOLDERS = Var
+  val NEXT_FOLDER_NAME = Var
 
-  def src: CommandOp = 
+  def script: CommandOp = 
     If `[[` ! (-d(path)) `]]` Then {
       mkdir"-p $path"
     } Else {
-      cd"${parentFolder}"                   o
-        NR_OF_SUBFOLDERS `=$`(ls | wc"-l")  o
+      cd"${parentFolder}" || exit(1)              o
+        NR_OF_SUBFOLDERS `=$`(find"." | wc"-l")   o
+        //NEXT_FOLDER_NAME  `=$`()
         mv"${workFolder} (($NR_OF_SUBFOLDERS + 1))_${workFolder}" &&
-        mkdir"-p ${path}"
+          mkdir"-p ${path}"
     } Fi 
     echo"${path} was successfully created!"
+}
+
+object WorkDir {
+  def apply(path: FolderPath): Script = new WorkDir(path)
 }

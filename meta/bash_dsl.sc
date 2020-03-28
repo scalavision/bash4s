@@ -34,6 +34,13 @@ def readDat(file: String)(transformer: String => String): List[String] =
   }
   .filter(_.nonEmpty).map {transformer}.filter(_.nonEmpty).toSet.toList
 
+case class Command(name: String, description: String)
+
+val fileUtils =  os.read(os.pwd / "meta" / "commands" / "file_utils.dat")
+  .lines.toList.filterNot(_.isEmpty)
+  .sliding(size=2, step=2).toList.map{ l =>
+    Command(l.head, l.last)
+  
 
 val toMany = readDat("all.dat"){
         case s if s.startsWith("7") || 
@@ -51,7 +58,7 @@ val toMany = readDat("all.dat"){
         case s => s
       }.filter(_.nonEmpty)
 
- def commands = (readDat("coreutils.dat"){
+ def commands = ((readDat("coreutils.dat"){
         case "false" => ""
         case "true" => ""
         case s: String => s
@@ -60,7 +67,10 @@ val toMany = readDat("all.dat"){
       readDat("builtins.dat"){ 
         case s if s == "type" => ""
         case s => s
-      })
+      }).map( s =>
+        Command(s, "")
+      ) ++ fileUtils)
+      .filter(_.name != "cat")
       .toSet.toList.sorted
 
 def bashDsl = s"""
@@ -104,6 +114,10 @@ package object bash4s {
   def Then(op: CommandOp) = CThen(op)
 
   def < (op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
+  
+  object exit {
+    def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
+  }
   
   object For {
     def apply(indexVariable: CommandOp) =

@@ -39,6 +39,10 @@ package object bash4s {
 
   def <(op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
 
+  object exit {
+    def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
+  }
+
   object For {
     def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
