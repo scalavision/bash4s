@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-
 if [[ ! -d /tmp/workspace/job1 ]] ;then
   mkdir -p /tmp/workspace/job1 
 else
-  cd /tmp/workspace || exit 1
-  NR_OF_SUBFOLDERS=$(find . |  wc -l ) 
-  NEW_SUBFOLDER=$(( "${NR_OF_SUBFOLDERS}" - 1))
-  mv job1 "${NEW_SUBFOLDER}"_job1  &&  mkdir -p /tmp/workspace/job1 
-fi 
-
+  cd /tmp/workspace || exit 1 
+  NR_OF_SUBFOLDERS=$(find . -maxdepth 1 -type d | wc -l ) 
+  BACKUP_FOLDER_NAME=$(("${NR_OF_SUBFOLDERS}" - 1)) 
+  CREATION_DATE=$(date "+%Y__%m_%d__%H_%M" ) 
+  mv job1 "${BACKUP_FOLDER_NAME}"__"${CREATION_DATE}"_job1 && mkdir -p /tmp/workspace/job1 
+fi
 echo "/tmp/workspace/job1 was successfully created!" 
