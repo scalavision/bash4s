@@ -117,6 +117,9 @@ package object bash4s {
   def R(args: String*) = clitools.RWrapper(CmdArgs(args.toVector))
   def R = clitools.RWrapper()
 
+  def Wait(args: String*) = clitools.WaitWrapper(CmdArgs(args.toVector))
+  def Wait = clitools.WaitWrapper()
+
   def alias(args: String*) = clitools.AliasWrapper(CmdArgs(args.toVector))
   def alias = clitools.AliasWrapper()
 
@@ -536,9 +539,6 @@ package object bash4s {
   def vdir(args: String*) = clitools.VdirWrapper(CmdArgs(args.toVector))
   def vdir = clitools.VdirWrapper()
 
-  def wait(args: String*) = clitools.WaitWrapper(CmdArgs(args.toVector))
-  def wait = clitools.WaitWrapper()
-
   def wc(args: String*) = clitools.WcWrapper(CmdArgs(args.toVector))
   def wc = clitools.WcWrapper()
 
@@ -562,10 +562,13 @@ package object bash4s {
     def array(args: Any*) =
       ArrayVariable(CmdArgCtx(args.toVector, s))
 
+    def m(args: Any*) =
+      ArithmeticExpression(CmdArgCtx(args.toVector, s))
+
     def file(args: Any*): FilePath =
       FileConversions.convertToFilePath(s.s(args: _*))
 
-    def relFile(args: Any*): FilePath =
+    def relFile(args: Any*): RelPath =
       FileConversions.convertToRelFilePath(s.s(args: _*))
 
     def fileName(args: Any*): FileName =
@@ -576,6 +579,9 @@ package object bash4s {
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))
+
+    def Wait(args: Any*) =
+      SimpleCommand("Wait", CmdArgCtx(args.toVector, s))
 
     def alias(args: Any*) =
       SimpleCommand("alias", CmdArgCtx(args.toVector, s))
@@ -987,9 +993,6 @@ package object bash4s {
 
     def vdir(args: Any*) =
       SimpleCommand("vdir", CmdArgCtx(args.toVector, s))
-
-    def wait(args: Any*) =
-      SimpleCommand("wait", CmdArgCtx(args.toVector, s))
 
     def wc(args: Any*) =
       SimpleCommand("wc", CmdArgCtx(args.toVector, s))

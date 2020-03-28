@@ -72,10 +72,13 @@ def cli(tools: List[Command]) =
       |  def array(args: Any*) =
       |    ArrayVariable(CmdArgCtx(args.toVector, s))
       |
+      |  def m(args: Any*) =
+      |    ArithmeticExpression(CmdArgCtx(args.toVector, s))
+      |
       |  def file(args: Any*): FilePath =
       |    FileConversions.convertToFilePath(s.s(args: _*))
       |
-      |  def relFile(args: Any*): FilePath =
+      |  def relFile(args: Any*): RelPath =
       |    FileConversions.convertToRelFilePath(s.s(args: _*))
       |
       |  def fileName(args: Any*): FileName =

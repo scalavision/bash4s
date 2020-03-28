@@ -8,10 +8,12 @@ object domain {
 
     val serializer = ScriptSerializer.gen[CommandOp]
 
-    def txt = s"""#!/usr/bin/env bash
-    |
-    |${serializer.apply(this)}
-    |""".stripMargin
+    def txt = ScriptLinter.lint(
+      s"""#!/usr/bin/env bash
+      |
+      |${serializer.apply(this)}
+      |""".stripMargin
+    )
 
     def print() = println(txt)
     def printRich() = pprint.pprintln(txt)
@@ -62,6 +64,8 @@ object domain {
   final case class CFi() extends CommandOp
   final case class CloseGroupInContext() extends CommandOp
   final case class Dollar() extends CommandOp
+
+  final case class ArithmeticExpression(value: CmdArgCtx) extends CommandOp
 
   sealed trait ConditionalExpression extends CommandOp
 

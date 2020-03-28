@@ -103,11 +103,12 @@ val toMany = readDat("all.dat"){
     }.filter(_.nonEmpty) ++ 
         readDat("basic_ops.dat"){ case s => s } ++ 
         readDat("builtins.dat"){ 
-        case s if s == "false" ||
-          s == "true"  ||
-          s == "import" ||
-          s == "type" => ""
-        case s => s
+          case "wait" => "Wait"
+          case s if s == "false" ||
+            s == "true"  ||
+            s == "import" ||
+            s == "type" => ""
+          case s => s
         }).map { s =>
           CmdMeta(s, "")
         } ++ fileUtils

@@ -56,7 +56,7 @@ object ScriptSerializer {
     val quoted = if(sc.name == "echo") true else false
     
     val args = sc.arg match {
-      case CmdArgs(args) => args.mkString(" ")
+      case CmdArgs(args) => if(args.isEmpty) "" else args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
       case EmptyArg()    => ""
       case h: HereString => enc.apply(h)
@@ -66,7 +66,9 @@ object ScriptSerializer {
     if(args.isEmpty()) s"${sc.name} ${sc.postCommands.map(enc.apply).mkString(" ")}"
     else {
       val argTxt = if(quoted) s""""${args}"""" else args
-      s"""${sc.preCommands.map(enc.apply).mkString(" ") + " "}${sc.name} ${argTxt} ${sc.postCommands.map(enc.apply).mkString(" ")}"""
+      val preCommands = if(sc.preCommands.nonEmpty) sc.preCommands.map(enc.apply).mkString(" ") + " " else ""
+      val postCommands = if(sc.postCommands.nonEmpty) sc.postCommands.map(enc.apply).mkString(" ") else ""
+      s"""${preCommands}${sc.name} ${argTxt} ${postCommands}"""
     }
     
   }
@@ -144,7 +146,12 @@ object ScriptSerializer {
       b.value match {
         case UnsetVariable() => s"unset $$${b.name}"
         case TextVariable(value) => s"""$$${b.name}="${enc.apply(value)}""""
-        case SubShellVariable(value) => s"$$(${enc.apply(value)})"
+        case SubShellVariable(value) => value match {
+          case ArithmeticExpression(value) => 
+            s"${b.name}=$$((${enc.apply(value)}))"
+          case _ => 
+            s"${b.name}=$$(${enc.apply(value)})"
+        }
         case ArrayVariable(value) => 
           val txt = enc.apply(value)
           val splitOnQuote = quote(txt, "", false, Vector.empty[String])
@@ -153,6 +160,12 @@ object ScriptSerializer {
       }
     }
 
+  }
+
+  implicit def arithmeticExprSerializer(
+    implicit enc: ScriptSerializer[CmdArgCtx]
+  ): ScriptSerializer[ArithmeticExpression] = pure[ArithmeticExpression] { a =>
+    s"""((${enc.apply(a.value)}))"""
   }
 
   implicit def localizationSerializer(

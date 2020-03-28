@@ -18,9 +18,10 @@ object ScriptSpec extends DefaultRunnableSpec {
       val workDir = WorkDir(testDir) 
 
       workDir.script.printRich()
+      workDir.script.save(os.Path("/tmp/wd"))
       pprint.pprintln(workDir.name)
-      val result = workDir.run()
-      pprint.pprintln(result)
+//      val result = workDir.run()
+ //     pprint.pprintln(result)
       assert(1)(equalTo(1))
     },
 

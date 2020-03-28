@@ -3,7 +3,7 @@ package bash4s.scripts
 import bash4s.domain._
 import bash4s.bash4s._
 
-class WorkDir(
+class WorkDir (
   path: FolderPath
 ) extends Script {
 
@@ -16,16 +16,18 @@ class WorkDir(
   val workFolder = path.lastFolderName
 
   val NR_OF_SUBFOLDERS = Var
-  val NEXT_FOLDER_NAME = Var
+  val BACKUP_FOLDER_NAME = Var
+  val CREATION_DATE = Var
 
   def script: CommandOp = 
     If `[[` ! (-d(path)) `]]` Then {
       mkdir"-p $path"
     } Else {
       cd"${parentFolder}" || exit(1)              o
-        NR_OF_SUBFOLDERS `=$`(find"." | wc"-l")   o
-        //NEXT_FOLDER_NAME  `=$`()
-        mv"${workFolder} (($NR_OF_SUBFOLDERS + 1))_${workFolder}" &&
+        NR_OF_SUBFOLDERS `=$`(find". -maxdepth 1 -type d" | wc"-l")   o
+        BACKUP_FOLDER_NAME `=$`(m"${NR_OF_SUBFOLDERS} - 1")           o
+        CREATION_DATE `=$`(date""""+%Y__%m_%d__%H_%M"""") o
+        mv"${workFolder} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${workFolder}" &&
           mkdir"-p ${path}"
     } Fi 
     echo"${path} was successfully created!"
