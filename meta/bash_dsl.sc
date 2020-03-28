@@ -2,16 +2,25 @@ import $file.syntax, syntax._
 import SyntaxEnhancer._
 import $file.command_op
 import $file.templates
+import scala.util.Sorting
 
 val cmd = command_op
 val tmpl = templates
 
-def toDef(helpers: List[String]): String = {
+final case class CmdMeta(name: String, description: String) 
+object CmdMetaOrdering extends Ordering[CmdMeta] {
+    override def compare(x: CmdMeta, y: CmdMeta): Int = {
+      x.name.toString.compareTo(y.name.toString)
+  }
+}
 
-  def t(name: String) = 
+def toDef(helpers: List[CmdMeta]): String = {
+
+  def t(cmd: CmdMeta) = 
     s"""
-    def ${name.head + name.tail.map(_.toLower)}(args: String *) = clitools.${name.capFirst}Wrapper(CmdArgs(args.toVector))
-    def ${name.head + name.tail.map(_.toLower)} = clitools.${name.capFirst}Wrapper()
+    ${if(cmd.description.nonEmpty) s"//${cmd.description}" else ""}
+    def ${cmd.name.head + cmd.name.tail.map(_.toLower)}(args: String *) = clitools.${cmd.name.capFirst}Wrapper(CmdArgs(args.toVector))
+    def ${cmd.name.head + cmd.name.tail.map(_.toLower)} = clitools.${cmd.name.capFirst}Wrapper()
     """
 
   helpers.map(t).mkString("\n")
@@ -20,7 +29,7 @@ def toDef(helpers: List[String]): String = {
 
 def toLoop(prefix: Char)(loop: List[String]): String = {
   def t(name: String) =
-    s"""def ${name}(op: CommandOp) = ${prefix}${name}(op)"""
+    s"""def ${name}(op: CmdMetaOp) = ${prefix}${name}(op)"""
   loop.map(t).mkString("\n")
 }
 
@@ -34,13 +43,11 @@ def readDat(file: String)(transformer: String => String): List[String] =
   }
   .filter(_.nonEmpty).map {transformer}.filter(_.nonEmpty).toSet.toList
 
-case class Command(name: String, description: String)
-
 val fileUtils =  os.read(os.pwd / "meta" / "commands" / "file_utils.dat")
   .lines.toList.filterNot(_.isEmpty)
   .sliding(size=2, step=2).toList.map{ l =>
-    Command(l.head, l.last)
-  
+    CmdMeta(l.head, l.last)
+  }
 
 val toMany = readDat("all.dat"){
         case s if s.startsWith("7") || 
@@ -58,7 +65,7 @@ val toMany = readDat("all.dat"){
         case s => s
       }.filter(_.nonEmpty)
 
- def commands = ((readDat("coreutils.dat"){
+ def commandsUnsorted = ((readDat("coreutils.dat"){
         case "false" => ""
         case "true" => ""
         case s: String => s
@@ -67,150 +74,156 @@ val toMany = readDat("all.dat"){
       readDat("builtins.dat"){ 
         case s if s == "type" => ""
         case s => s
-      }).map( s =>
-        Command(s, "")
-      ) ++ fileUtils)
+      }).map{ s =>
+        CmdMeta(s, "")
+      } ++ fileUtils)
       .filter(_.name != "cat")
-      .toSet.toList.sorted
+      .toSet.toList
+
+def commands: List[CmdMeta] =  {
+  var sorted = commandsUnsorted.toArray
+  Sorting.quickSort[CmdMeta](sorted)(CmdMetaOrdering)
+  sorted.toList
+}
 
 def bashDsl = s"""
 package bash4s
 
 import domain._
 
-trait BashCommandAdapter {
-  def toCmd: SimpleCommand
+trait BashCmdMetaAdapter {
+  def toCmd: SimpleCmdMeta
 }
 
 package object bash4s {
   
-  implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
+  implicit def cmdAliasConverter: BashCmdMetaAdapter => SimpleCmdMeta = _.toCmd
 
   object Until {
-    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: CmdMetaOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object While {
-    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: CmdMetaOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object If {
-    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: CmdMetaOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
 
-  def `[[`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
+  def `[[`(op: CmdMetaOp) =
+    CmdMetaListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
-  def `{`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenGroupInContext(), op))
+  def `{`(op: CmdMetaOp) =
+    CmdMetaListBuilder(Vector(OpenGroupInContext(), op))
 
-  def `(`(op: CommandOp) =
-    CommandListBuilder(Vector(OpenSubShellEnv(), op))
+  def `(`(op: CmdMetaOp) =
+    CmdMetaListBuilder(Vector(OpenSubShellEnv(), op))
 
-  def &&(op: CommandOp) = Vector(And(), op)
+  def &&(op: CmdMetaOp) = Vector(And(), op)
 
-  def Do(op: CommandOp) = CDo(op)
+  def Do(op: CmdMetaOp) = CDo(op)
 
-  def Then(op: CommandOp) = CThen(op)
+  def Then(op: CmdMetaOp) = CThen(op)
 
-  def < (op: CommandOp) = ScriptBuilder(Vector(StdIn(), op))
+  def < (op: CmdMetaOp) = ScriptBuilder(Vector(StdIn(), op))
   
   object exit {
-    def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
+    def apply(code: Int) = SimpleCmdMeta("exit", CmdArgs(Vector(code.toString())))
   }
   
   object For {
-    def apply(indexVariable: CommandOp) =
+    def apply(indexVariable: CmdMetaOp) =
       CFor(Vector(indexVariable))
   }
 
   def cat(hereStr: HereString) = 
-    SimpleCommand("cat", hereStr)
+    SimpleCmdMeta("cat", hereStr)
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
    // True if file exists
-  def a(op: CommandOp) = CIfIsFile(op)
+  def a(op: CmdMetaOp) = CIfIsFile(op)
 
 
   // True if file exists and is a block special file
-  def b(op: CommandOp) = CIsBlock(op)
+  def b(op: CmdMetaOp) = CIsBlock(op)
 
 
   // True if file exists and is a character special file
-  def c(op: CommandOp) = CIsCharacter(op)
+  def c(op: CmdMetaOp) = CIsCharacter(op)
 
 
   // True if file exists and is a directory
-  def d(op: CommandOp) = CIsDirectory(op)
+  def d(op: CmdMetaOp) = CIsDirectory(op)
 
 
   // True if file exists
-  def e(op: CommandOp) = CIsFile(op)
+  def e(op: CmdMetaOp) = CIsFile(op)
 
 
   // True if file exists and is a regular file
-  def f(op: CommandOp) = CGroupIdBitSet(op)
+  def f(op: CmdMetaOp) = CGroupIdBitSet(op)
 
 
   // True if file exists and its set-group-id bit is set
-  def g(op: CommandOp) = CIsSymbolLink(op)
+  def g(op: CmdMetaOp) = CIsSymbolLink(op)
 
 
   // True if file exists and is a symbolic link
-  def h(op: CommandOp) = CStickyBitSet(op)
+  def h(op: CmdMetaOp) = CStickyBitSet(op)
 
 
   // True if file exists and its "sticky" bit is set
-  def k(op: CommandOp) = CIsNamedPipe(op)
+  def k(op: CmdMetaOp) = CIsNamedPipe(op)
 
 
   // True if file exists and is a named pipe (FIFO)
-  def p(op: CommandOp) = CIsReadAble(op)
+  def p(op: CmdMetaOp) = CIsReadAble(op)
 
 
   // True if file exists and is readable
-  def r(op: CommandOp) = CIsGreaterThanZero(op)
+  def r(op: CmdMetaOp) = CIsGreaterThanZero(op)
 
 
   // True if file exists and has a size greater than zero
-  def s(op: CommandOp) = CFileDescriptorIsOpenAndReferTerminal(op)
+  def s(op: CmdMetaOp) = CFileDescriptorIsOpenAndReferTerminal(op)
 
 
   // True if file descriptor fd is open and refers to a terminal
-  def t(op: CommandOp) = CUserIdBitSet(op)
+  def t(op: CmdMetaOp) = CUserIdBitSet(op)
 
 
   // True if file exists and its set-user-id bit is set
-  def u(op: CommandOp) = CIsWritable(op)
+  def u(op: CmdMetaOp) = CIsWritable(op)
 
 
   // True if file exists and is writable
-  def w(op: CommandOp) = CIsExecutable(op)
+  def w(op: CmdMetaOp) = CIsExecutable(op)
 
 
   // True if file exists and is executable
-  def x(op: CommandOp) = CIsOwnedByEffectiveGroupId(op)
+  def x(op: CmdMetaOp) = CIsOwnedByEffectiveGroupId(op)
 
 
   // True if file exists and is owned by the effective group id
-  def G(op: CommandOp) = CIsSymbolicLink(op)
+  def G(op: CmdMetaOp) = CIsSymbolicLink(op)
 
 
   // True if file exists and is a symbolic link
-  def L(op: CommandOp) = CIsModifiedSinceLastRead(op)
+  def L(op: CmdMetaOp) = CIsModifiedSinceLastRead(op)
 
 
   // True if file exists and has been modified since it was last read
-  def N(op: CommandOp) = CIsOwnedByEffectiveUserId(op)
+  def N(op: CmdMetaOp) = CIsOwnedByEffectiveUserId(op)
 
 
   // True if file exists and is owned by the effective user id
-  def O(op: CommandOp) = CIsSocket(op)
+  def O(op: CmdMetaOp) = CIsSocket(op)
 
 
-  ${toDef(commands.sorted)}
-  ${tmpl.cli(commands.sorted)}
+  ${toDef(commands)}
+  ${tmpl.cli(commands.map(c => tmpl.Command(c.name, c.description)))}
   
 }
 """
@@ -219,12 +232,12 @@ package object bash4s {
 def bashDslOld = s"""package bash
 import domain._
 
-trait BashCommandAdapter {
-  def toCmd: SimpleCommand
+trait BashCmdMetaAdapter {
+  def toCmd: SimpleCmdMeta
 }
 
 object dsl {
-  implicit def bashCommandAdapterToSimpleCommand: BashCommandAdapter => ScriptBuilder = 
+  implicit def bashCmdMetaAdapterToSimpleCmdMeta: BashCmdMetaAdapter => ScriptBuilder = 
     cmd => ScriptBuilder(Vector(cmd.toCmd))
 }
 
@@ -249,7 +262,7 @@ package object bash {
 
   ${toLoop('L')(cmd.loopFns.map(_._1))}
   ${toLoop('C')(cmd.conditionalExprSymbols.filter(_ != """`[[`"""))}
-  def `[[`(op: CommandOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
+  def `[[`(op: CmdMetaOp) = ScriptBuilder(Vector(OpenSquareBracket(op)))
   def If = ScriptBuilder(Vector(CIf()))
   def Until = ScriptBuilder(Vector(CUntil()))
   def Elif = ScriptBuilder(Vector(CElif()))
@@ -258,15 +271,15 @@ package object bash {
   def False = CFalse()
 
   case object - {
-    def a(op: CommandOp) = ConditionalExpression("a", op)
+    def a(op: CmdMetaOp) = ConditionalExpression("a", op)
   }
 
-  def $$(op: CommandOp) = 
-    ScriptBuilder(Vector(SubCommandStart(), op, SubCommandEnd()))
+  def $$(op: CmdMetaOp) = 
+    ScriptBuilder(Vector(SubCmdMetaStart(), op, SubCmdMetaEnd()))
 
   def * = RegexFileSearchApi()
 
-  def time(op: CommandOp) = 
+  def time(op: CmdMetaOp) = 
     ScriptBuilder(Vector(TimedPipeline(), op))
 
   ${commandTemplate}
@@ -278,21 +291,21 @@ def commandToolClass(name: String) =
     package bash.clitools
 
     import bash.domain._
-    import bash.BashCommandAdapter
+    import bash.BashCmdMetaAdapter
 
     case class ${name.capFirst}Wrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
-    ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("$name", args)
+    ) extends BashCmdMetaAdapter { self =>
+      def toCmd = SimpleCmdMeta("$name", args)
       def help = copy(args = self.args :+ "--help")
     }
     """
 */
 
 def createCommandToolClasses(path: os.Path): Unit =
-  commands.map(tmpl.cliAlias).zip(commands).foreach {
-    case (src, name)  =>
-      val file = path / s"${name.capFirst}.scala"
+  commands.map(c => tmpl.cliAlias(tmpl.Command(c.name, c.description))).zip(commands).foreach {
+    case (src, cmd)  =>
+      val file = path / s"${cmd.name.capFirst}.scala"
       if(!os.exists(file)) {
         os.write(file, src)
       }
