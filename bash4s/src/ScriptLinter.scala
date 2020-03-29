@@ -45,6 +45,7 @@ object ScriptLinter {
 
     def startWord: String => (String, String) = s => {
      val x = s.split(" ").filter(_.nonEmpty)
+     if(x.isEmpty) ("","") else
      (x.head, x.tail.mkString(" "))
     }
 
