@@ -1,5 +1,8 @@
 package bash4s.scripts
 
+
+// Some day, maybe implement something like this
+// https://github.com/matejak/argbash
 object ArgTemplate {
 
   case class ArgOpt(short: String, long: String)
