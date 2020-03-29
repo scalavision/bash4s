@@ -27,8 +27,8 @@ case class WorkDir (
   val CREATION_DATE = Var
 
   def cmdOp: CommandOp = 
-    FOLDER_PATH `=` txt"$path"                                      o
-    {
+    FOLDER_PATH `=` txt"$path"                                        o
+    (
       If `[[` ! (-d(FOLDER_PATH.$)) `]]` Then {
         mkdir"-p $FOLDER_PATH"
       } Else {
@@ -41,7 +41,7 @@ case class WorkDir (
         mv"${WORKFOLDER} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${WORKFOLDER}" &&
           mkdir"-p ${FOLDER_PATH}"
       } Fi 
-    } o
+    ) o
     echo"${path} was successfully created!"
 
   def gen = ScriptGenerator.gen[WorkDir](this.asInstanceOf[WorkDir])
