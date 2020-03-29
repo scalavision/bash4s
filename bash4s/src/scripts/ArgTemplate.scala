@@ -1,10 +1,12 @@
 package bash4s.scripts
 
+case class ScriptMeta(name: String, argOpt: List[ArgOpt])
+case class ArgOpt(long: String, description: String, short: String = "")
+
 // Some day, maybe implement something like this
 // https://github.com/matejak/argbash
 object ArgTemplate {
 
-  case class ArgOpt(long: String, description: String, short: String)
 
   def argHandler(argOpt: ArgOpt) = s"""
     |-${argOpt.short}|--${argOpt.long})  # Takes an option argument; ensure it has been specified.
@@ -18,7 +20,7 @@ object ArgTemplate {
     |--${argOpt.long}=?*)
     |    ${argOpt.long}=$${1#*=} # Delete everything up to "=" and assign the remainder.
     |    ;;
-    |--${argOpt.long}e=)    # Handle the case of an empty --${argOpt.long}=
+    |--${argOpt.long}=)    # Handle the case of an empty --${argOpt.long}=
     |    die 'ERROR: "--${argOpt.long}" requires a non-empty option argument.'
     |    ;;
     """.stripMargin
@@ -29,7 +31,6 @@ object ArgTemplate {
     args: List[ArgOpt]
   ) = 
     s"""#!/usr/bin/env bash
-    |# POSIX Compatible as standalone, but will be used in bash scripts
     |die() {
     |  printf '%s\\n' "$$1" >&2
     |  exit 1

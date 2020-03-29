@@ -556,6 +556,9 @@ package object bash4s {
 
   implicit class CmdSyntax(s: StringContext) {
 
+    def $(args: Any*) =
+      ParameterExpander(CmdArgCtx(args.toVector, s))
+
     def txt(args: Any*) =
       TextVariable(CmdArgCtx(args.toVector, s))
 

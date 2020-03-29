@@ -138,14 +138,21 @@ object ScriptSerializer {
   }
 
   implicit def bashVariableSerializer(
-    implicit enc: ScriptSerializer[CommandOp]
+    implicit 
+    enc: ScriptSerializer[CommandOp],
   ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
 
     if(b.isExpanded) s"$$${b.name}"
     else {
       b.value match {
-        case UnsetVariable() => s"unset $$${b.name}"
-        case TextVariable(value) => s"""$$${b.name}="${enc.apply(value)}""""
+        case UnsetVariable() => s"unset ${b.name}"
+        case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
+        case ParameterExpanderVariable(value) => 
+          val args = value.value.args.collect {
+            case b: BashVariable => 
+              b.name
+          }.head
+          s"""${b.name}=$$${value.value.strCtx.s(args)}"""
         case SubShellVariable(value) => value match {
           case ArithmeticExpression(value) => 
             s"${b.name}=$$((${enc.apply(value)}))"
@@ -168,6 +175,17 @@ object ScriptSerializer {
     s"""((${enc.apply(a.value)}))"""
   }
 
+  implicit def parameterExpanderSerializer(
+  ): ScriptSerializer[ParameterExpander] = pure[ParameterExpander] { a =>
+    pprint.pprintln("HELLO2")
+    val args = a.value.args.map {
+      case b: BashVariable => 
+        b.name
+      case b => b
+    }
+    s"""$$${a.value.strCtx.s(args)}"""
+  }
+  
   implicit def localizationSerializer(
     implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[LocalizationString] = pure[LocalizationString] { l =>
@@ -216,7 +234,7 @@ object ScriptSerializer {
   implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
     case FilePath(root, fp, fn) => s"""${root.toString}${fp.mkString(root.toString())}${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case FolderPath(r, fp) => 
-      s"""${r.toString()}${fp.mkString(r.toString())}"""
+      s"""${fp.mkString(r.toString())}"""
     case FileDescriptor(value) => value.toString()
     case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
     case RelPath(folders,fn) => s"""${folders.mkString("/")}${fn.baseName.value}.${fn.extension.mkString(".")}"""

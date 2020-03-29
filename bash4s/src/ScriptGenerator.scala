@@ -4,6 +4,8 @@ import magnolia._
 
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
+import scripts._
+import scripts.Annotations.doc
 
 @implicitNotFound(
   """Cannot find an BiologyGenerator for type ${T}.
@@ -12,58 +14,44 @@ import scala.annotation.implicitNotFound
   """
 )
 trait ScriptGenerator[T] {
-  def apply(t: T): String
+  def apply(t: T): ScriptMeta
 }
 object ScriptGenerator {
   
   type Typeclass[T] = ScriptGenerator[T]
 
-  def pure[A](func: A => String): ScriptGenerator[A] =
+  def pure[A](func: A => ScriptMeta): ScriptGenerator[A] =
     new ScriptGenerator[A] {
-      def apply(value: A): String = func(value)
+      def apply(value: A): ScriptMeta = func(value)
     }
 
   // We only want to extract the parameter names and annotations / documentation
   // Therefor we stop here ..
-  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ""}
+  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ScriptMeta("", List.empty[ArgOpt])}
 
   def combine[T](
       caseClass: CaseClass[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
-      pprint.pprintln(caseClass)
-      println("annotations:")
-      pprint.pprintln(caseClass.annotations)
-      println("isObject")
-      pprint.pprintln(caseClass.isObject)
-      println("typeName")
-      pprint.pprintln(caseClass.typeName)
-      println("rawConstruct")
-      pprint.pprintln(caseClass.formatted(""))
 
       val paramString = caseClass.parameters.map { p =>
-        p.label + p.annotations
-      }
-      paramString.mkString(" ")
+        ArgOpt(p.label, p.annotations.collect {
+          case d: doc => d.description
+        }.head, 
+        p.annotations.collect {
+          case d: doc => d.short 
+        }.head)
+      }.toList
+
+      ScriptMeta(caseClass.typeName.short, paramString)
     }
-    /*
-      val paramString = caseClass.parameters.map { p =>
-        p.typeclass.apply(p.dereference(t))
-      }
-      paramString.mkString("")
-    }}
-    */
   }
 
   def dispatch[T](
       sealedTrait: SealedTrait[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
-      sealedTrait.typeName.full
-      /*
-      sealedTrait.dispatch(t) { subtype =>
-        subtype.typeclass.apply(subtype.cast(t))
-      }*/
+      ScriptMeta(sealedTrait.typeName.short, List.empty[ArgOpt])
     }
   }
 

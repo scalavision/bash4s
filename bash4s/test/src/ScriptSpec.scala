@@ -23,7 +23,7 @@ object ScriptSpec extends DefaultRunnableSpec {
   val suite1 = suite("Bash Dsl in Scala")(
 
     test("workDir example") {
-      assert(workDir.cmdOp.txt)(equalTo(TargetScript("WorkDir")))
+      assert(workDir.txt)(equalTo(TargetScript("WorkDir")))
     },
 
     test("test if else for bash script") {
@@ -34,14 +34,11 @@ object ScriptSpec extends DefaultRunnableSpec {
   val suite2 = suite("Bash script generator")(
 
     test("generate script with support for arguments") {
-      val result = ScriptGenerator.gen[WorkDir].apply(workDir.asInstanceOf[WorkDir])
-      println("result" + result)
-      pprint.pprintln(result)
+      pprint.pprintln(workDir.script)
       assert(1)(equalTo(1))
     }
 
   )
-
 
   def spec = suite("TestSuite for BashDsl")(suite2)
 

@@ -66,6 +66,7 @@ object domain {
   final case class Dollar() extends CommandOp
 
   final case class ArithmeticExpression(value: CmdArgCtx) extends CommandOp
+  final case class ParameterExpander(value: CmdArgCtx) extends CommandOp
 
   sealed trait ConditionalExpression extends CommandOp
 
@@ -266,6 +267,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   sealed trait VariableValue
   final case class TextVariable(value: CmdArgCtx) extends VariableValue
   final case class ArrayVariable(value: CmdArgCtx) extends VariableValue
+  final case class ParameterExpanderVariable(value: ParameterExpander) extends VariableValue
   final case class SubShellVariable(value: CommandOp) extends VariableValue
   final case class UnsetVariable() extends VariableValue
   final case class BashVariable(
@@ -276,6 +278,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
     def `=` (array: ArrayVariable) = copy(value = array)
+    def `=` (parameterExpander: ParameterExpander) = copy(value = ParameterExpanderVariable(parameterExpander))
     def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))
     def expansionSafe: String = "\"" + "$" + "{" + name.trim() + "}" + "\""
     def o(op: CommandOp) =
