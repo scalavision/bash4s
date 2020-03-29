@@ -125,7 +125,7 @@ object Main {
 
     val workDir = new scripts.WorkDir(dirPath"/hello/goodbye")
 
-     workDir.script.printRich()
+     workDir.cmdOp.printRich()
 
 //    pprint.pprintln(testFile)
 

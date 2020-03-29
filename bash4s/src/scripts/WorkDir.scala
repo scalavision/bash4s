@@ -2,9 +2,10 @@ package bash4s.scripts
 
 import bash4s.domain._
 import bash4s.bash4s._
-
+import bash4s.scripts.Annotations.doc
 case class WorkDir (
-  path: FolderPath
+  @doc("path to the folder", "p")
+  path: FolderPath 
 ) extends Script {
 
   assert(
@@ -19,7 +20,7 @@ case class WorkDir (
   val BACKUP_FOLDER_NAME = Var
   val CREATION_DATE = Var
 
-  def script: CommandOp = 
+  def cmdOp: CommandOp = 
     If `[[` ! (-d(path)) `]]` Then {
       mkdir"-p $path"
     } Else {
@@ -35,4 +36,5 @@ case class WorkDir (
 
 object WorkDir {
   def apply(path: FolderPath): Script = new WorkDir(path)
+
 }

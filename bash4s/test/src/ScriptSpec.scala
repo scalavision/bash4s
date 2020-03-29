@@ -23,7 +23,7 @@ object ScriptSpec extends DefaultRunnableSpec {
   val suite1 = suite("Bash Dsl in Scala")(
 
     test("workDir example") {
-      assert(workDir.script.txt)(equalTo(TargetScript("WorkDir")))
+      assert(workDir.cmdOp.txt)(equalTo(TargetScript("WorkDir")))
     },
 
     test("test if else for bash script") {
