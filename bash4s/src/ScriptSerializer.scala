@@ -177,12 +177,10 @@ object ScriptSerializer {
 
   implicit def parameterExpanderSerializer(
   ): ScriptSerializer[ParameterExpander] = pure[ParameterExpander] { a =>
-    pprint.pprintln("HELLO2")
-    val args = a.value.args.map {
+    val args = a.value.args.collect {
       case b: BashVariable => 
         b.name
-      case b => b
-    }
+    }.head
     s"""$$${a.value.strCtx.s(args)}"""
   }
   
