@@ -3,7 +3,7 @@ package bash4s.scripts
 import bash4s.domain._
 import bash4s.bash4s._
 
-class WorkDir (
+case class WorkDir (
   path: FolderPath
 ) extends Script {
 
