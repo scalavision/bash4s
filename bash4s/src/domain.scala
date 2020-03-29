@@ -559,27 +559,30 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class Host(value: String) extends AnyVal
   final case class Port(value: Int) extends AnyVal
 
-
+  final case class BaseName(value: String)
 
   sealed trait FileType extends CommandOp
   final case class FileDescriptor(value: Int) extends FileType
-  final case class FileExtension(extension: Vector[String]) extends FileType
-  final case class FolderPath(root: Char, folders: Vector[FolderName]) extends FileType {
+
+  final case class FileName(baseName: BaseName, extension: Vector[String])
+      extends FileType
+
+  final case class FolderPath(root: Char, folders: Vector[String]) extends FileType {
     def lastFolderName = folders.last
     def parentFolderName = folders.dropRight(1).last
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
-  final case class SubFolderPath(folders: Vector[FolderName]) extends FileType
-  final case class BaseName(value: String) extends FileType
-  final case class FolderName(value: String) extends FileType
-  final case class FileName(baseName: BaseName, fileExtension: FileExtension)
-      extends FileType
+
+
   final case class FilePath(
-      folderPath: FolderPath,
+      root: Char,
+      folderPath: Vector[String],
       fileName: FileName
   ) extends FileType
-  final case class RelPath(folderPath: SubFolderPath, fileName: FileName)
+
+  final case class RelPath(folderPath: Vector[String], fileName: FileName)
       extends FileType
+
   final case object `/dev/stdin` extends FileType
   final case object `/dev/stdout` extends FileType
   final case object `/dev/stderr` extends FileType

@@ -2,6 +2,7 @@ package bash4s
 
 import magnolia._
 import domain._
+import scripts._
 
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
@@ -52,67 +53,49 @@ object ScriptGenerator {
       }.mkString(" ")
     }
   
-  implicit val folderPathGenerator: ScriptGenerator[FolderPath] = pure[FolderPath] { _.toString() }
-  implicit val relFolderPathGenerator: ScriptGenerator[RelPath] = pure[RelPath] { _.toString() }
-  implicit val subSubFolderPathGenerator: ScriptGenerator[SubFolderPath] = pure[SubFolderPath] { _.toString() }
-  
-  implicit def fileTypeGenerator: ScriptGenerator[FileType] = pure[FileType] {
-    case FilePath(fp, fn) => s"""${fp.folders.mkString(fp.root.toString())}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
-    case FolderPath(r, fp) => 
-      s"""${fp.map(_.value).mkString(r.toString())}"""
-    case FolderName(v) => v
-    case SubFolderPath(folders) => s"""${folders.map(_.value).mkString("/")}"""
-    case FileDescriptor(value) => value.toString()
-    case FileExtension(extension) => extension.mkString(".")
-    case BaseName(value) => value
-    case FileName(bn,fe) => s"""${bn.value}.${fe.extension.mkString(".")}"""
-    case RelPath(folders,fn) => s"""${folders.folders.mkString("/")}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
-    case `/dev/null` => "/dev/null"
-    case `/dev/random` => "/dev/random"
-    case `/dev/stderr` => "/dev/stderr"
-    case `/dev/stdin` => "/dev/stdin"
-    case `/dev/stdout` => "/dev/stdout"
-    case `/dev/fd`(fd) => s"/dev/fd/${fd.value}"
-    case `/dev/tcp`(h,p) => s"/dev/tcp/${h}/${p}"
-    case `/dev/udp`(h,p) => s"/dev/udp/${h}/${p}"
-  }
-
+ // implicit val folderPathGenerator: ScriptGenerator[FolderPath] = pure[FolderPath] { _.toString() }
+//  implicit val relFolderPathGenerator: ScriptGenerator[RelPath] = pure[RelPath] { _.toString() }
 
   implicit def commandOpGen: ScriptGenerator[CommandOp] = pure[CommandOp] {
     _.txt
+  }
+  
+  implicit def scriptGen: ScriptGenerator[Script] = pure[Script] { _ =>
+    "hello"
   }
 
   def combine[T](
       caseClass: CaseClass[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
-      val paramString = caseClass.parameters.map { p =>
-        p.typeclass.apply(p.dereference(t))
-      }
-      paramString.mkString("")
-    }}
-    /*
+      pprint.pprintln(caseClass)
       val paramString = caseClass.parameters.map { p =>
         p.label
       }
       paramString.mkString(" ")
     }
-  }*/
+    /*
+      val paramString = caseClass.parameters.map { p =>
+        p.typeclass.apply(p.dereference(t))
+      }
+      paramString.mkString("")
+    }}
+    */
+  }
 
   def dispatch[T](
-      sealedTrait: SealedTrait[ScriptSerializer, T]
-  ): ScriptSerializer[T] = new ScriptSerializer[T] {
+      sealedTrait: SealedTrait[ScriptGenerator, T]
+  ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
-      sealedTrait.typeName.full
-      /*
+//      sealedTrait.typeName.full
       sealedTrait.dispatch(t) { subtype =>
         subtype.typeclass.apply(subtype.cast(t))
-      }*/
+      }
     }
   }
 
 
-  implicit def gen[T]: ScriptSerializer[T] = macro Magnolia.gen[T]
+  implicit def gen[T]: ScriptGenerator[T] = macro Magnolia.gen[T]
   
   
 }

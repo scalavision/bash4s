@@ -214,16 +214,12 @@ object ScriptSerializer {
     }
 
   implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
-    case FilePath(fp, fn) => s"""${fp.folders.mkString(fp.root.toString())}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
+    case FilePath(root, fp, fn) => s"""${root.toString}${fp.mkString(root.toString())}${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case FolderPath(r, fp) => 
-      s"""${fp.map(_.value).mkString(r.toString())}"""
-    case FolderName(v) => v
-    case SubFolderPath(folders) => s"""${folders.map(_.value).mkString("/")}"""
+      s"""${r.toString()}${fp.mkString(r.toString())}"""
     case FileDescriptor(value) => value.toString()
-    case FileExtension(extension) => extension.mkString(".")
-    case BaseName(value) => value
-    case FileName(bn,fe) => s"""${bn.value}.${fe.extension.mkString(".")}"""
-    case RelPath(folders,fn) => s"""${folders.folders.mkString("/")}${fn.baseName.value}.${fn.fileExtension.extension.mkString(".")}"""
+    case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
+    case RelPath(folders,fn) => s"""${folders.mkString("/")}${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case `/dev/null` => "/dev/null"
     case `/dev/random` => "/dev/random"
     case `/dev/stderr` => "/dev/stderr"

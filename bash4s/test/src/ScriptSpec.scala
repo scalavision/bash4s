@@ -4,7 +4,7 @@ import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
-import domain._
+//import domain._
 import bash4s._
 import scripts._
 
@@ -34,7 +34,8 @@ object ScriptSpec extends DefaultRunnableSpec {
   val suite2 = suite("Bash script generator")(
 
     test("generate script with support for arguments") {
-      val result = ScriptGenerator.gen[CommandOp].apply(workDir)
+      val result = ScriptGenerator.gen[WorkDir].apply(workDir.asInstanceOf[WorkDir])
+      println("result" + result)
       pprint.pprintln(result)
       assert(1)(equalTo(1))
     }
