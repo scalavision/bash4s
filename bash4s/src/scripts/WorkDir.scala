@@ -16,9 +16,6 @@ case class WorkDir (
     s"Invalid path for workdir: $path, must have at least two levels, like /parent/child"
   )
 
-  val parentFolder = path.parentFolderPath
-  val workFolder = path.lastFolderName
-
   val WORKFOLDER = Var
   val FOLDER_PATH = Var
   val PARENT_FOLDER_PATH = Var
@@ -28,7 +25,7 @@ case class WorkDir (
 
   def cmdOp: CommandOp = 
     FOLDER_PATH `=` txt"$path"                                        o
-    (
+    {
       If `[[` ! (-d(FOLDER_PATH.$)) `]]` Then {
         mkdir"-p $FOLDER_PATH"
       } Else {
@@ -41,8 +38,8 @@ case class WorkDir (
         mv"${WORKFOLDER} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${WORKFOLDER}" &&
           mkdir"-p ${FOLDER_PATH}"
       } Fi 
-    ) o
-    echo"${path} was successfully created!"
+    } o
+    echo"${FOLDER_PATH} was successfully created!"
 
   def gen = ScriptGenerator.gen[WorkDir](this.asInstanceOf[WorkDir])
 

@@ -47,6 +47,8 @@ object domain {
   final case class ScriptLine() extends CommandOp
   sealed trait CommandArg extends CommandOp
 
+  final case class DebugValue(value: String) extends CommandOp
+
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
       extends CommandArg
   
