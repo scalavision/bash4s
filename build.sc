@@ -114,13 +114,8 @@ trait common extends ScalaModule {
 
   object test extends Tests {
     def ivyDeps = Agg(
-<<<<<<< HEAD
       ivy"dev.zio::zio-test:1.0.0-RC18-2",
       ivy"dev.zio::zio-test-sbt:1.0.0-RC18-2"
-=======
-      ivy"dev.zio::zio-test:1.0.0-RC18",
-      ivy"dev.zio::zio-test-sbt:1.0.0-RC18"
->>>>>>> snapshot before pull
     )
     def testFrameworks = 
       Seq("zio.test.sbt.ZTestFramework")
