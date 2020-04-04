@@ -5,8 +5,30 @@ import domain._
 
 package object bio {
 
-  implicit class BioFileSyntax(p: FilePath) {
-    def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
+//  type Fasta = domain.Fasta
+  
+  type Fasta = BiologyFileType[FastaFile]
+
+  implicit def liftBioToBash4s[Fasta]: BiologyFileType[Fasta] => CommandOp = {
+    case bp: BiologyFilePath[Fasta] => 
+      FilePath(bp.folderPath.root, bp.folderPath.folders, bp.fileName)
+    case _ => throw new Exception("UNSUPPORTED!!!!")
   }
 
+  implicit class BioFileSyntax(p: FilePath) {
+    def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
+    def fasta = BiologyFilePath[Fasta](FolderPath(p.root, p.folderPath), p.fileName)
+    
+  }
+
+  implicit class CmdSyntax(s: StringContext) {
+    def bwa(args: Any*) = 
+      SimpleCommand("bwa", CmdArgCtx(args.toVector, s))
+   
+    def file(args: Any*) = {
+      val fileArgs = s.s(args:_*).split("/").toVector
+      BiologyFilePath(FolderPath('/', fileArgs.dropRight(1) ), FileName(BaseName(fileArgs.last), Vector.empty[String]))
+    }
+    
+  }
 }

@@ -9,14 +9,14 @@ object domain {
   type BamSortedIndexedMarkDup =
     BiologyFileType[Bam with Sorted with Indexed with Markdup]
   type FastqGz = BiologyFileType[Fastq with Gz]
-  type FastaBwaIndexed = BiologyFileType[Fasta with BwaIndexed]
+//  type FastaBwaIndexed = BiologyFileType[Fasta with BwaIndexed]
   type MarkdupMetrics = BiologyFileType[Markdup with Metrics]
 
   sealed trait Bam extends Product with Serializable
   sealed trait Vcf extends Product with Serializable
   sealed trait G extends Product with Serializable
   sealed trait Bed extends Product with Serializable
-  sealed trait Fasta extends Product with Serializable
+  sealed trait FastaFile extends Product with Serializable
   sealed trait Fastq extends Product with Serializable
   sealed trait BwaIndexed extends Product with Serializable
   sealed trait Tar extends Product with Serializable
@@ -34,7 +34,7 @@ object domain {
     def vcf = e[T with Vcf]("vcf")
     def g = e[T with G]("g")
     def bed = e[T with Bed]("bed")
-    def fasta = e[T with Fasta]("fasta")
+    def fasta = e[T with bio.Fasta]("fasta")
     def fastq = e[T with Fastq]("fastq")
     def bwaIndexed = e[T with BwaIndexed]("bwaIndexed")
     def tar = e[T with Tar]("tar")
