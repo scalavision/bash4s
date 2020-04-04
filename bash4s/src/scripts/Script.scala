@@ -7,9 +7,12 @@ abstract class Script(implicit n: sourcecode.Name) {
   def cmdOp: CommandOp
   def txt = cmdOp.txt
   def run() = cmdOp.run(name)
-  def gen: ScriptMeta
-  def script = ArgTemplate.optionParser(gen.argOpt) + "\n" + cmdOp.txt
+  def param: ScriptMeta
+  def script = cmdOp.txt
+  // BashCliArgVariable(gen.$1, path)
+  // ArgTemplate.optionParser(param.argOpt) + "\n" + 
+  /*
   def scriptify = cmdOp match {
     case BashVariable(name, value, isExpanded) => ???
-  }
+  }*/
 }

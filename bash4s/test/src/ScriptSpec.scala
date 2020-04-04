@@ -3,7 +3,7 @@ package bash4s
 import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
-import zio.test.TestAspect._
+//import zio.test.TestAspect._
 
 //import domain._
 import bash4s._

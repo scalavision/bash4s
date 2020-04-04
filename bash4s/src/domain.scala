@@ -4,7 +4,7 @@ import scala.util.Try
 
 object domain {
 
-  sealed abstract class CommandOp() {
+  sealed abstract class CommandOp() { self =>
 
     val serializer = ScriptSerializer.gen[CommandOp]
 
@@ -272,6 +272,11 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class ParameterExpanderVariable(value: ParameterExpander) extends VariableValue
   final case class SubShellVariable(value: CommandOp) extends VariableValue
   final case class UnsetVariable() extends VariableValue
+  final case class BashCliArgVariable(
+    name: String,
+    value: CommandOp
+  ) extends VariableValue
+
   final case class BashVariable(
     name: String, 
     value: VariableValue = UnsetVariable(),
@@ -279,6 +284,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   ) extends BashParameter { self =>
     def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
+    def `=` (cliArg: BashCliArgVariable) = copy(value = cliArg)
     def `=` (array: ArrayVariable) = copy(value = array)
     def `=` (parameterExpander: ParameterExpander) = copy(value = ParameterExpanderVariable(parameterExpander))
     def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))

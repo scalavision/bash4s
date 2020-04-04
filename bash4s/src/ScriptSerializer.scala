@@ -140,12 +140,19 @@ object ScriptSerializer {
   implicit def bashVariableSerializer(
     implicit 
     enc: ScriptSerializer[CommandOp],
+    fileEnc: ScriptSerializer[FileType]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
 
     if(b.isExpanded) s"$$${b.name}"
     else {
       b.value match {
         case UnsetVariable() => s"unset ${b.name}"
+        case BashCliArgVariable(name, value) => 
+          val valueDec = value match {
+            case fileType: FileType => fileEnc.apply(fileType)
+            case _ => enc.apply(value)
+          }
+          s"""${b.name}={$name:-${valueDec}}"""
         case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
         case ParameterExpanderVariable(value) => 
           val args = value.value.args.collect {

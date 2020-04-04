@@ -4,16 +4,17 @@ package bash
 import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
-import zio.test.TestAspect._
+//import zio.test.TestAspect._
 
-import bash._
+//import bash._
 //import dsl._
-import domain._
+//import domain._
 
 object ConditionalSpec extends DefaultRunnableSpec {
   def spec = suite("Bash Dsl for Conditionals")(
     test("Test a simpel script") {
- 
+      
+      /*
       val myF = 
         FilePath('/', 
         FolderPath(Vector("folder","path")), 
@@ -21,8 +22,8 @@ object ConditionalSpec extends DefaultRunnableSpec {
 
       val result = -a(myF) && -a(myF)
       pprint.pprintln(result) 
-
+      */
       assert(1)(equalTo(1))
     }
-  ) @@ignore
+  ) //@@ignore
 } 

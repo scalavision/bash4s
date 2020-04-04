@@ -1,6 +1,21 @@
 package bash4s.scripts
 
-case class ScriptMeta(name: String, argOpt: List[ArgOpt])
+import bash4s.domain._
+
+case class ScriptMeta(name: String, argOpt: List[ArgOpt]) {
+  //def $1(op: CommandOp) = BashCliArgVariable(argOpt.head.long, op) 
+  def $1(op: CommandOp) = BashCliArgVariable("1", op) 
+  def $2(op: CommandOp) = BashCliArgVariable("2", op) 
+  def $3(op: CommandOp) = BashCliArgVariable("3", op) 
+  def $4(op: CommandOp) = BashCliArgVariable("4", op) 
+  def $5(op: CommandOp) = BashCliArgVariable("5", op) 
+  def $6(op: CommandOp) = BashCliArgVariable("6", op) 
+  def $7(op: CommandOp) = BashCliArgVariable("7", op) 
+  def $8(op: CommandOp) = BashCliArgVariable("8", op) 
+  def $9(op: CommandOp) = BashCliArgVariable("9", op) 
+  def $10(op: CommandOp) = BashCliArgVariable("10", op) 
+}
+
 case class ArgOpt(long: String, description: String, short: String = "")
 
 // Some day, maybe implement something like this
