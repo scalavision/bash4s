@@ -2,6 +2,8 @@ package bio
 
 import bash4s.domain._
 
+case class Cores(nrOfCores: Int)
+
 object domain {
 
   type BamSorted = BiologyFileType[Bam with Sorted]
@@ -12,7 +14,6 @@ object domain {
 //  type FastaBwaIndexed = BiologyFileType[Fasta with BwaIndexed]
   type MarkdupMetrics = BiologyFileType[Markdup with Metrics]
 
-  case class Cores(nrOfCores: Int)
 
   sealed trait Bam extends Product with Serializable
   sealed trait Vcf extends Product with Serializable

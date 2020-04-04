@@ -47,7 +47,7 @@ object domain {
   sealed trait CommandArg extends CommandOp
 
   final case class DebugValue(value: String) extends CommandOp
-
+  
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
       extends CommandArg
   
@@ -265,8 +265,9 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   sealed trait BashParameter extends CommandOp
   sealed trait SpecialParameter extends BashParameter
 
-  sealed trait VariableValue
+  sealed trait VariableValue extends CommandOp
   final case class TextVariable(value: CmdArgCtx) extends VariableValue
+  final case class IntVariable(value: Int) extends VariableValue
   final case class ArrayVariable(value: CmdArgCtx) extends VariableValue
   final case class ParameterExpanderVariable(value: ParameterExpander) extends VariableValue
   final case class SubShellVariable(value: CommandOp) extends VariableValue

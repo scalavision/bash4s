@@ -147,6 +147,7 @@ object ScriptSerializer {
     else {
       b.value match {
         case UnsetVariable() => s"unset ${b.name}"
+        case IntVariable(value) => s"${value.toString()}"
         case BashCliArgVariable(name, value) => 
           val valueDec = value match {
             case fileType: FileType => fileEnc.apply(fileType)

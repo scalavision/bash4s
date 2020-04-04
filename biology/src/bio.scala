@@ -18,12 +18,18 @@ package object bio {
     case _ => throw new Exception("UNSUPPORTED!!!!")
   }
 
+  implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)
+
   implicit class BioFileSyntax(p: FilePath) {
     def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
     def fasta = BiologyFilePath[Fasta](FolderPath(p.root, p.folderPath), p.fileName)
     
   }
 
+  implicit class BioSyntaxInt(i: Int) {
+    def cores = Cores(i)
+  }
+  
   implicit class BioSyntax(s: StringContext) {
 
     def bwa(args: Any*) = 

@@ -1,6 +1,7 @@
 package bio
 
 import bash4s._
+import domain._
 import scripts.Script
 import bio._
 import scripts.Annotations.doc
@@ -34,8 +35,8 @@ object Bwa {
     r1: Read1,
     r2: Read2,
     bwaIndex: BwaIndex,
-    nrOfCores: Int,
-    readGroupInfo: String
+    nrOfCores: Cores,
+    readGroupInfo: TextVariable
   ) extends Script {
 
     def param = ScriptGenerator.gen[MapAndAlign](this.asInstanceOf[MapAndAlign])
@@ -46,7 +47,7 @@ object Bwa {
     val NR_OF_CORES = bash4s.Var
     val READ_GROUP_INFO = bash4s.Var
 
-    def op 
+    def op =
       READ1 `=` param.$1(r1)              o
       READ2 `=` param.$2(r2)              o
       NR_OF_CORES `=` param.$3(nrOfCores) o

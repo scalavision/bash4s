@@ -19,6 +19,19 @@ object BioSpec extends DefaultRunnableSpec {
       pprint.pprintln(Bwa.BuildIndex(path).script)
 
       assert(1)(equalTo(1))
+    },
+    test("map and align fastq files") {
+      val r1 = file"/path/to/fastq".fastq.gz
+      val r2 = file"/path/to/fastq".fastq.gz
+      val bwaIndexed = file"/path/to/bwa.index"
+
+      MapAndAlign(
+        r1,
+        r2,
+
+      )
+
+      assert(1)(equalTo(1))
     }
   )
 
