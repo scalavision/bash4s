@@ -9,8 +9,7 @@ object domain {
     val serializer = ScriptSerializer.gen[CommandOp]
 
     def txt = ScriptLinter.lint(
-      s"""#!/usr/bin/env bash
-      |
+      s"""
       |${serializer.apply(this)}
       |""".stripMargin
     )

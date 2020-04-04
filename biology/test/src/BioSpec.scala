@@ -6,6 +6,7 @@ import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
 import bio._
+//import bash4s._
 
 object BioSpec extends DefaultRunnableSpec {
 
@@ -15,7 +16,7 @@ object BioSpec extends DefaultRunnableSpec {
       val path = file"/test/hello".fasta
       println(path)
 
-      pprint.pprintln(Bwa.BuildIndexWgs(path).txt)
+      pprint.pprintln(Bwa.BuildIndex(path).script)
 
       assert(1)(equalTo(1))
     }

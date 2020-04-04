@@ -2,7 +2,7 @@ package bash4s.scripts
 
 import bash4s.domain._
 
-case class ScriptMeta(name: String, argOpt: List[ArgOpt]) {
+case class ScriptMeta(name: String, description: String, argOpt: List[ArgOpt]) {
   //def $1(op: CommandOp) = BashCliArgVariable(argOpt.head.long, op) 
   def $1(op: CommandOp) = BashCliArgVariable("1", op) 
   def $2(op: CommandOp) = BashCliArgVariable("2", op) 
@@ -21,7 +21,6 @@ case class ArgOpt(long: String, description: String, short: String = "")
 // Some day, maybe implement something like this
 // https://github.com/matejak/argbash
 object ArgTemplate {
-
 
   def argHandler(argOpt: ArgOpt) = s"""
     |-${argOpt.short}|--${argOpt.long})  # Takes an option argument; ensure it has been specified.

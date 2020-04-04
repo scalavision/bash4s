@@ -5,6 +5,7 @@ import magnolia._
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
 import scripts._
+import scripts.Annotations.arg
 import scripts.Annotations.doc
 
 @implicitNotFound(
@@ -27,23 +28,26 @@ object ScriptGenerator {
 
   // We only want to extract the parameter names and annotations / documentation
   // Therefor we stop here ..
-  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ScriptMeta("", List.empty[ArgOpt])}
+  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ScriptMeta("", "", List.empty[ArgOpt])}
 
   def combine[T](
       caseClass: CaseClass[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
 
+      val description = caseClass.annotations.collect { 
+        case d: doc => d.description 
+      }       
       val paramString = caseClass.parameters.map { p =>
         ArgOpt(p.label, p.annotations.collect {
-          case d: doc => d.description
+          case d: arg => d.description
         }.head, 
         p.annotations.collect {
-          case d: doc => d.short 
+          case d: arg => d.short 
         }.head)
       }.toList
 
-      ScriptMeta(caseClass.typeName.short, paramString)
+      ScriptMeta(caseClass.typeName.short, description.head, paramString)
     }
   }
 
@@ -51,7 +55,7 @@ object ScriptGenerator {
       sealedTrait: SealedTrait[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
     def apply(t: T) = {
-      ScriptMeta(sealedTrait.typeName.short, List.empty[ArgOpt])
+      ScriptMeta(sealedTrait.typeName.short, "", List.empty[ArgOpt])
     }
   }
 
