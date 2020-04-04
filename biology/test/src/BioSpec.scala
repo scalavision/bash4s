@@ -15,7 +15,7 @@ object BioSpec extends DefaultRunnableSpec {
       val path = file"/test/hello".fasta
       println(path)
 
-      pprint.pprintln(Bwa.BuildIndex(path).txt)
+      pprint.pprintln(Bwa.BuildIndexWgs(path).txt)
 
       assert(1)(equalTo(1))
     }
