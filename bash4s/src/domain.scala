@@ -584,7 +584,6 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
 
-
   final case class FilePath(
       root: Char,
       folderPath: Vector[String],
