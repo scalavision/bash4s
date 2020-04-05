@@ -58,7 +58,7 @@ object Bwa {
   |- https://gatkforums.broadinstitute.org/gatk/discussion/2798/howto-prepare-a-reference-for-use-with-bwa-and-gatk
   """.stripMargin)
   case class BuildIndex(
-    @arg("""path to fasta file""")
+    @arg("path to fasta file")
     fasta: Fasta
   ) extends Script {
 
