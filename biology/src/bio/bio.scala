@@ -1,7 +1,7 @@
 package bio
 
 import bash4s.domain._
-import domain._
+import biomodel._
 
 package object bio {
 
@@ -30,7 +30,7 @@ package object bio {
     def cores = Cores(i)
   }
   
-  implicit class BioSyntax(s: StringContext) {
+  implicit class BioSyntax(private val s: StringContext) extends AnyVal {
 
     def bwa(args: Any*) = 
       SimpleCommand("bwa", CmdArgCtx(args.toVector, s))

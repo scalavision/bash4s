@@ -64,7 +64,7 @@ def cliTool(tool: Command) =
       |  SimpleCommand("${tool.name}", CmdArgCtx(args.toVector, s))""".stripMargin
   
 def cli(tools: List[Command]) = 
-  s"""|implicit class CmdSyntax(s: StringContext) {
+  s"""|implicit class CmdSyntax(private val s: StringContext) extends AnyVal {
       | 
       |  def $$(args: Any*) =
       |    ParameterExpander(CmdArgCtx(args.toVector, s))   

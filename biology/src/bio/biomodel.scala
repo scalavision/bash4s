@@ -4,7 +4,7 @@ import bash4s.domain._
 
 case class Cores(nrOfCores: Int)
 
-object domain {
+object biomodel {
 
   type BamSorted = BiologyFileType[Bam with Sorted]
   type BamSortedIndexed = BiologyFileType[Bam with Sorted with Indexed]
