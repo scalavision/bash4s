@@ -9,6 +9,8 @@ abstract class Script(implicit n: sourcecode.Name) {
   def txt = op.txt
   def run() = op.run(name)
   def param: ScriptMeta
+  def init(op: CommandOp) = Some(op)
+  def setup: Option[CommandOp] = Option.empty[CommandOp]
   def script = {
    
     val comments = param.description.foldLeft(""){(acc,c) =>
@@ -18,19 +20,18 @@ abstract class Script(implicit n: sourcecode.Name) {
       }
     }.reverse.dropWhile(_ != '#').drop(1).reverse + "\n"
 
-  ScriptLinter.lint(
-    s"""#!/usr/bin/env bash
-    |
-    |${comments}
-    |${op.txt}
-    """.stripMargin
-  )
+    val argComments = param.argOpt.zipWithIndex.foldLeft(""){ (acc, ia) =>
+      val (a, index) = ia
+      acc + s"\n # $$${index + 1} (${a.long}): ${a.description}" 
+    }
 
+    ScriptLinter.lint(
+      s"""#!/usr/bin/env bash
+      |${comments}
+      |${argComments}
+      |${setup.fold(""){_.txt}}
+      |${op.txt}
+      """.stripMargin
+    )
   }
-  // BashCliArgVariable(gen.$1, path)
-  // ArgTemplate.optionParser(param.argOpt) + "\n" + 
-  /*
-  def scriptify = cmdOp match {
-    case BashVariable(name, value, isExpanded) => ???
-  }*/
 }
