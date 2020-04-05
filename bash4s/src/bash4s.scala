@@ -554,7 +554,7 @@ package object bash4s {
   def zsh(args: String*) = clitools.ZshWrapper(CmdArgs(args.toVector))
   def zsh = clitools.ZshWrapper()
 
-  implicit class CmdSyntax(s: StringContext) {
+  implicit class CmdSyntax(private val s: StringContext) extends AnyVal {
 
     def $(args: Any*) =
       ParameterExpander(CmdArgCtx(args.toVector, s))

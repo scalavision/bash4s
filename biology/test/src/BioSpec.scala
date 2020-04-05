@@ -6,7 +6,7 @@ import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
 import bio._
-//import bash4s._
+import bash4s._
 
 object BioSpec extends DefaultRunnableSpec {
 
@@ -21,15 +21,22 @@ object BioSpec extends DefaultRunnableSpec {
       assert(1)(equalTo(1))
     },
     test("map and align fastq files") {
+
       val r1 = file"/path/to/fastq".fastq.gz
       val r2 = file"/path/to/fastq".fastq.gz
-      val bwaIndexed = file"/path/to/bwa.index"
+      val ref = file"/path/to/ref".fasta
+      val cores = 12.cores
+      val readGroupInfo = txt"@RG:Test"
 
-      MapAndAlign(
+      val mapAndAlign = Bwa.MapAndAlign(
         r1,
         r2,
-
+        ref,
+        cores,
+        readGroupInfo
       )
+
+      pprint.pprintln(mapAndAlign)
 
       assert(1)(equalTo(1))
     }
