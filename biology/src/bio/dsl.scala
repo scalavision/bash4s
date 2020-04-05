@@ -5,11 +5,11 @@ import biomodel._
 
 object dsl {
 
-//  type Fasta = domain.Fasta
-  
   type Fasta = BiologyFileType[FastaFile]
-  type Read1 = BiologyFileType[FastqGz]
-  type Read2 = BiologyFileType[FastqGz]
+  
+//  type Fasta = BiologyFileType[FastaFile]
+  type Read1 = BiologyFileType[Fastq with Gz]
+  type Read2 = BiologyFileType[Fastq with Gz]
   type BwaIndex = BiologyFileType[BwaIndexed]
 
   implicit def liftBioToBash4s[Fasta]: BiologyFileType[Fasta] => CommandOp = {
@@ -22,7 +22,7 @@ object dsl {
 
   implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
     def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
-    def fasta = BiologyFilePath[Fasta](FolderPath(p.root, p.folderPath), p.fileName)
+    def fasta = BiologyFilePath[FastaFile](FolderPath(p.root, p.folderPath), p.fileName)
     def fastq = BiologyFilePath[Fastq](FolderPath(p.root, p.folderPath), p.fileName)
     def gz = BiologyFilePath[Gz](FolderPath(p.root, p.folderPath), p.fileName)
     
