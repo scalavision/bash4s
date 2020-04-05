@@ -2,7 +2,7 @@ package bash4s
 
 import scala.language.postfixOps
 //import domain._
-import bash4s._
+import bash4s.dsl._
 
 object Main {
 

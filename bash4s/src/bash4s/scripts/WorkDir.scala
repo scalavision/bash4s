@@ -2,7 +2,7 @@ package bash4s.scripts
 
 import scala.language.postfixOps
 import bash4s.domain._
-import bash4s.bash4s._
+import bash4s.dsl._
 import bash4s.scripts.Annotations.arg
 import bash4s.scripts.Annotations.doc
 import bash4s.ScriptGenerator

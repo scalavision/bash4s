@@ -6,7 +6,7 @@ trait BashCommandAdapter {
   def toCmd: SimpleCommand
 }
 
-package object bash4s {
+object dsl {
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 

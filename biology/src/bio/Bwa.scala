@@ -1,11 +1,11 @@
 package bio
 
+import bash4s.dsl._
+import bash4s.domain._
 import bash4s._
-import domain._
-import scripts.Script
-import bio._
-import scripts.Annotations.doc
-import scripts.Annotations.arg
+import bash4s.scripts._
+import bio.dsl._
+import bash4s.scripts.Annotations._
 
 object Bwa {
 
@@ -23,7 +23,7 @@ object Bwa {
 
     def param = ScriptGenerator.gen[BuildIndex](this.asInstanceOf[BuildIndex])
 
-    val FASTA_FILE = bash4s.Var
+    val FASTA_FILE = Var
 
     def op = 
       FASTA_FILE `=` param.$1(fasta) o
@@ -49,11 +49,11 @@ object Bwa {
 
     def param = ScriptGenerator.gen[MapAndAlign](this.asInstanceOf[MapAndAlign])
 
-    val READ1 = bash4s.Var
-    val READ2 = bash4s.Var
-    val BWA_INDEX = bash4s.Var
-    val NR_OF_CORES = bash4s.Var
-    val READ_GROUP_INFO = bash4s.Var
+    val READ1 = Var
+    val READ2 = Var
+    val BWA_INDEX = Var
+    val NR_OF_CORES = Var
+    val READ_GROUP_INFO = Var
 
     /**
       * bwa mem -K 100000000 -t 6 -M /work/bio/ref/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna /stash/data/hg00x/HG002C2c-000200PM-Mendel-KIT-wgs_S8_L008_R1_001.fastq.gz /stash/data/hg00x/HG002C2c-000200PM-Mendel-KIT-wgs_S8_L008_R2_001.fastq.gz

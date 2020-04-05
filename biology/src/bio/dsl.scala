@@ -3,7 +3,7 @@ package bio
 import bash4s.domain._
 import biomodel._
 
-package object bio {
+object dsl {
 
 //  type Fasta = domain.Fasta
   
@@ -20,9 +20,11 @@ package object bio {
 
   implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)
 
-  implicit class BioFileSyntax(p: FilePath) {
+  implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
     def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
     def fasta = BiologyFilePath[Fasta](FolderPath(p.root, p.folderPath), p.fileName)
+    def fastq = BiologyFilePath[Fastq](FolderPath(p.root, p.folderPath), p.fileName)
+    def gz = BiologyFilePath[Gz](FolderPath(p.root, p.folderPath), p.fileName)
     
   }
 
@@ -34,11 +36,12 @@ package object bio {
 
     def bwa(args: Any*) = 
       SimpleCommand("bwa", CmdArgCtx(args.toVector, s))
-  
+
+    /*
     def file(args: Any*) = {
       val fileArgs = s.s(args:_*).split("/").toVector
       BiologyFilePath(FolderPath('/', fileArgs.dropRight(1) ), FileName(BaseName(fileArgs.last), Vector.empty[String]))
-    }
+    }*/
     
   }
 }

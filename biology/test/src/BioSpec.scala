@@ -5,8 +5,8 @@ import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
-import bio._
-import bash4s._
+import bio.dsl._
+import bash4s.dsl._
 
 object BioSpec extends DefaultRunnableSpec {
 

@@ -37,7 +37,7 @@ object biomodel {
     def vcf = e[T with Vcf]("vcf")
     def g = e[T with G]("g")
     def bed = e[T with Bed]("bed")
-    def fasta = e[T with bio.Fasta]("fasta")
+    def fasta = e[T with bio.dsl.Fasta]("fasta")
     def fastq = e[T with Fastq]("fastq")
     def bwaIndexed = e[T with BwaIndexed]("bwaIndexed")
     def tar = e[T with Tar]("tar")
