@@ -65,7 +65,7 @@ object Bwa {
       READ2 `=` param.$2(r2)              o
       NR_OF_CORES `=` param.$3(nrOfCores) o
       READ_GROUP_INFO `=` param.$4(readGroupInfo) o
-        bwa"mem -K 100000000 -R ${READ_GROUP_INFO} -t ${NR_OF_CORES} -M ${BWA_INDEX} $READ1 $READ2"
+        bwa"mem -K 100000000 -Y -R ${READ_GROUP_INFO} -t ${NR_OF_CORES} ${BWA_INDEX} $READ1 $READ2"
 
   }
 

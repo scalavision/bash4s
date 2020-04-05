@@ -36,12 +36,6 @@ object dsl {
 
     def bwa(args: Any*) = 
       SimpleCommand("bwa", CmdArgCtx(args.toVector, s))
-
-    /*
-    def file(args: Any*) = {
-      val fileArgs = s.s(args:_*).split("/").toVector
-      BiologyFilePath(FolderPath('/', fileArgs.dropRight(1) ), FileName(BaseName(fileArgs.last), Vector.empty[String]))
-    }*/
     
   }
 }
