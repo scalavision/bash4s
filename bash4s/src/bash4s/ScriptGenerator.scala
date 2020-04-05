@@ -41,13 +41,13 @@ object ScriptGenerator {
       val paramString = caseClass.parameters.map { p =>
         ArgOpt(p.label, p.annotations.collect {
           case d: arg => d.description
-        }.head, 
+        }.headOption.fold(""){s => s}, 
         p.annotations.collect {
           case d: arg => d.short 
-        }.head)
+        }.headOption.fold(""){s => s})
       }.toList
 
-      ScriptMeta(caseClass.typeName.short, description.head, paramString)
+      ScriptMeta(caseClass.typeName.short, description.headOption.fold(""){s => s}, paramString)
     }
   }
 

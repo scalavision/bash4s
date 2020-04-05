@@ -36,7 +36,7 @@ object BioSpec extends DefaultRunnableSpec {
         readGroupInfo
       )
 
-      pprint.pprintln(mapAndAlign)
+      pprint.pprintln(mapAndAlign.script)
 
       assert(1)(equalTo(1))
     }
