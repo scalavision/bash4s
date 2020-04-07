@@ -575,8 +575,6 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   sealed trait FileType extends CommandOp
   final case class FileDescriptor(value: Int) extends FileType
 
-  final case class FileName(baseName: BaseName, extension: Vector[String])
-      extends FileType
 
   final case class FolderPath(root: Char, folders: Vector[String]) extends FileType {
     def lastFolderName = folders.last
@@ -584,14 +582,19 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
 
+  sealed trait FileHandle extends FileType
+
   final case class FilePath(
       root: Char,
       folderPath: Vector[String],
       fileName: FileName
-  ) extends FileType
+  ) extends FileHandle
+  
+  final case class FileName(baseName: BaseName, extension: Vector[String])
+      extends FileHandle
 
   final case class RelPath(folderPath: Vector[String], fileName: FileName)
-      extends FileType
+      extends FileHandle
 
   final case object `/dev/stdin` extends FileType
   final case object `/dev/stdout` extends FileType

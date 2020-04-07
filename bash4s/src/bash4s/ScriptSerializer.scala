@@ -153,7 +153,7 @@ object ScriptSerializer {
             case fileType: FileType => fileEnc.apply(fileType)
             case _ => enc.apply(value)
           }
-          s"""${b.name}={$name:-"${valueDec}"}"""
+          s"""${b.name}=$${$name:-"${valueDec}"}"""
         case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
         case ParameterExpanderVariable(value) => 
           val args = value.value.args.collect {

@@ -52,7 +52,7 @@ object biomodel {
   }
 
   final case class BiologyFilePath[T](
-    fileType: FileType
+    fileType: FileHandle
   ) extends BiologyFileType[T] { self =>
 
     def e[T2]: String => BiologyFilePath[T2] =

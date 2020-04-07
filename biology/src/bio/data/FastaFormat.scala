@@ -2,11 +2,12 @@ package bio.data
 
 import bio.dsl._
 import bash4s.dsl._
+import bash4s.domain._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
 
 sealed trait FastaFormat {
-    def param = ScriptGenerator.gen[FastaFormat](this.asInstanceOf[FastaFormat])
+    val param = ScriptGenerator.gen[FastaFormat](this.asInstanceOf[FastaFormat])
     val FASTA_FILE = Var
     def defineFasta(fastaFile: Fasta, meta: ScriptMeta) =
       FASTA_FILE `=` meta.$1(fastaFile)
@@ -39,6 +40,39 @@ object FastaFormat {
     def op = 
       samtools"faidx ${FASTA_FILE}"
   }
+ 
+  case class SplitByChromosome(
+    fastaFile: Fasta,
+    workDir: FolderPath,
+    resultDir: FolderPath
+  ) extends Script {
+
+    val param = 
+      ScriptGenerator.gen[SplitByChromosome](this.asInstanceOf[SplitByChromosome])
+
+    val WORKDIR = Var
+    val FASTA_FILE = Var
+    val RESULTDIR = Var
+
+    val CHR_FILE = Var 
+    val INDEX = Var
+
+    override def setup = init(
+      FASTA_FILE `=` param.$1(fastaFile) o
+      WORKDIR `=` param.$2(workDir) o
+      RESULTDIR `=` param.$3(resultDir) 
+    )
+
+    def op = mkdir"-p ${WORKDIR}" && 
+      cd"${WORKDIR}" && 
+      csplit"-s -z ${FASTA_FILE} '/>/' '{*}'" o
+      For(CHR_FILE.$).In(txt"xx{00..23}").Do {
+        INDEX `=$`(sed"""'s/>// ; s/ .*// ; 1q' "${CHR_FILE}"""")      o
+        mv"${CHR_FILE} ${INDEX}.fa"
+      } Done 
+      echo"finished"
+    
+  }
 
   case class CreateBwaIndex(
     fastaFile: Fasta
@@ -53,9 +87,9 @@ object FastaFormat {
     dictFile: Dict
   ) extends Script with FastaFormat {
 
-    val createIndex = CreateIndex(fastaFile)
-    val createBwaIndex = CreateBwaIndex(fastaFile)
-    val createDictionary = CreateDictionary(fastaFile, dictFile)
+    lazy val createIndex = CreateIndex(fastaFile)
+    lazy val createBwaIndex = CreateBwaIndex(fastaFile)
+    lazy val createDictionary = CreateDictionary(fastaFile, dictFile)
 
     override def setup = 
       createDictionary.setup
@@ -71,9 +105,9 @@ object FastaFormat {
     dictFile: Dict
   ) extends Script with FastaFormat {
 
-    val createIndex = CreateIndex(fastaFile)
-    val createBwaIndex = CreateBwaIndex(fastaFile)
-    val createDictionary = CreateDictionary(fastaFile, dictFile)
+    lazy val createIndex = CreateIndex(fastaFile)
+    lazy val createBwaIndex = CreateBwaIndex(fastaFile)
+    lazy val createDictionary = CreateDictionary(fastaFile, dictFile)
     
     override def setup = createDictionary.setup
     

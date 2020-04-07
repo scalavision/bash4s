@@ -90,11 +90,16 @@ object BioSpec extends DefaultRunnableSpec {
         fastaFile, dictFile
       )
 
+      val workDir = dirPath"/tmp/splitChr"
+      val resultFolder = dirPath"/bio/ref"
+      val splitByChromosome = FastaFormat.SplitByChromosome(fastaFile, workDir, resultFolder)
+
       pprint.pprintln(createDictionary.script)
       pprint.pprintln(createBwaIndex.script)
       pprint.pprintln(createFastaIndex.script)
       pprint.pprintln(createFastaAllIndexes.script)
       pprint.pprintln(createFastaAllIndexesInParallel.script)
+      pprint.pprintln(splitByChromosome.script)
 
       assert(1)(equalTo(1))
     }
