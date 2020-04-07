@@ -62,4 +62,22 @@ object FastaFormat {
           createDictionary.op
   }
 
+  case class CreateAllIndexesInParallel(
+    fastaFile: Fasta,
+    dictFile: Dict
+  ) extends Script with FastaFormat {
+
+    val createIndex = CreateIndex(fastaFile)
+    val createBwaIndex = CreateBwaIndex(fastaFile)
+    val createDictionary = CreateDictionary(fastaFile, dictFile)
+    
+    override def setup = createDictionary.setup
+    
+    def op = 
+      createIndex.op.&          o
+        createBwaIndex.op.&     o
+          createDictionary.op.&
+
+  }
+
 }

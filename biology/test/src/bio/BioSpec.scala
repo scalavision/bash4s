@@ -82,15 +82,19 @@ object BioSpec extends DefaultRunnableSpec {
 
       val createFastaIndex = FastaFormat.CreateIndex(fastaFile)
 
-      val createFastaAll = FastaFormat.CreateAllIndexes(
+      val createFastaAllIndexes = FastaFormat.CreateAllIndexes(
+        fastaFile, dictFile
+      )
+      
+      val createFastaAllIndexesInParallel = FastaFormat.CreateAllIndexesInParallel(
         fastaFile, dictFile
       )
 
       pprint.pprintln(createDictionary.script)
       pprint.pprintln(createBwaIndex.script)
       pprint.pprintln(createFastaIndex.script)
-
-      pprint.pprintln(createFastaAll.script)
+      pprint.pprintln(createFastaAllIndexes.script)
+      pprint.pprintln(createFastaAllIndexesInParallel.script)
 
       assert(1)(equalTo(1))
     }
