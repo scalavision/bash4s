@@ -51,27 +51,18 @@ object biomodel {
     def metrics = e[T with Metrics]("metrics")
   }
 
-   final case class BiologyFile[T](name: BaseName, extension: Vector[String])
-      extends BiologyFileType[T] { self =>
-    def e[T2]: String => BiologyFile[T2] =
-      s =>
-        copy(extension =
-          self.extension :+ s
-        )
-  }
-
   final case class BiologyFilePath[T](
-      folderPath: FolderPath,
-      fileName: FileName
+    fileType: FileType
   ) extends BiologyFileType[T] { self =>
 
-    // Scala really needs lenses
     def e[T2]: String => BiologyFilePath[T2] =
       s =>
-        copy(
-          fileName = 
-            self.fileName.copy(extension = self.fileName.extension :+ s)
-          )
+        self.fileType match {
+          case f: FileName => copy( fileType = f.copy(extension = f.extension :+ s))
+          case f: RelPath => copy( fileType = f.copy(fileName = f.fileName.copy(extension = f.fileName.extension :+ s)))
+          case f: FilePath => copy(fileType = f.copy(fileName = f.fileName.copy(extension = f.fileName.extension :+ s)))
+          case _ => copy(fileType = fileType)
+        }
 
   }
 

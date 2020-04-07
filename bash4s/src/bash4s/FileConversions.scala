@@ -8,6 +8,7 @@ object FileConversions {
     val root = txt.head
     val folderAndFile = txt.tail.split(root)
     val folders = folderAndFile.dropRight(1).toVector
+    pprint.pprintln(folders)
     val baseName = BaseName(folderAndFile.last.takeWhile(_ != '.'))
     val extensensions = folderAndFile.last.dropWhile(_ != '.').drop(1).split('.').toVector
     FilePath(root, folders, FileName(baseName, extensensions))

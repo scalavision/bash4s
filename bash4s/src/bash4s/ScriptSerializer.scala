@@ -153,7 +153,7 @@ object ScriptSerializer {
             case fileType: FileType => fileEnc.apply(fileType)
             case _ => enc.apply(value)
           }
-          s"""${b.name}={$name:-${valueDec}}"""
+          s"""${b.name}={$name:-"${valueDec}"}"""
         case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
         case ParameterExpanderVariable(value) => 
           val args = value.value.args.collect {
@@ -238,12 +238,12 @@ object ScriptSerializer {
     }
 
   implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
-    case FilePath(root, fp, fn) => s"""${root.toString}${fp.mkString(root.toString())}${fn.baseName.value}.${fn.extension.mkString(".")}"""
+    case FilePath(root, fp, fn) => s"""${root.toString}${fp.mkString(root.toString())}/${fn.baseName.value}${fn.extension.mkString(".")}"""
     case FolderPath(r, fp) => 
       s"""${fp.mkString(r.toString())}"""
     case FileDescriptor(value) => value.toString()
     case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
-    case RelPath(folders,fn) => s"""${folders.mkString("/")}${fn.baseName.value}.${fn.extension.mkString(".")}"""
+    case RelPath(folders,fn) => s"""${folders.mkString("/")}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case `/dev/null` => "/dev/null"
     case `/dev/random` => "/dev/random"
     case `/dev/stderr` => "/dev/stderr"

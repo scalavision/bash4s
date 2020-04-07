@@ -15,18 +15,18 @@ object dsl {
 
   implicit def liftBioToBash4s[Fasta]: BiologyFileType[Fasta] => CommandOp = {
     case bp: BiologyFilePath[Fasta] => 
-      FilePath(bp.folderPath.root, bp.folderPath.folders, bp.fileName)
+      bp.fileType
     case _ => throw new Exception("UNSUPPORTED!!!!")
   }
 
   implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)
 
   implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
-    def bam = BiologyFilePath[Bam](FolderPath(p.root, p.folderPath), p.fileName)
-    def fasta = BiologyFilePath[FastaFile](FolderPath(p.root, p.folderPath), p.fileName)
-    def fastq = BiologyFilePath[Fastq](FolderPath(p.root, p.folderPath), p.fileName)
-    def gz = BiologyFilePath[Gz](FolderPath(p.root, p.folderPath), p.fileName)
-    def dict = BiologyFilePath[DictFile](FolderPath(p.root, p.folderPath), p.fileName)
+    def bam = BiologyFilePath[Bam](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "bam")))
+    def fasta = BiologyFilePath[FastaFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fasta")))
+    def fastq = BiologyFilePath[Fastq](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fastq")))
+    def gz = BiologyFilePath[Gz](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "gz")))
+    def dict = BiologyFilePath[DictFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "dict")))
   }
 
   implicit class BioSyntaxInt(i: Int) {

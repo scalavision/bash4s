@@ -11,7 +11,11 @@ sealed trait FastaFormat {
     def defineFasta(fastaFile: Fasta, meta: ScriptMeta) =
       FASTA_FILE `=` meta.$1(fastaFile)
 }
-  
+
+/**
+  * Resources:
+  * - https://gatkforums.broadinstitute.org/gatk/discussion/1601/how-can-i-prepare-a-fasta-file-to-use-as-reference
+  */
 object FastaFormat {
 
   case class CreateDictionary(
