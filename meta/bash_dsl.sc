@@ -163,9 +163,7 @@ object dsl {
     def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
  
-  object `await` {
-    def apply() = SimpleCommand("wait", CmdArgs(Vector.empty[String]))
-  }
+  def await = bash4s.clitools.AwaitWrapper()
 
   object For {
     def apply(indexVariable: CommandOp) =

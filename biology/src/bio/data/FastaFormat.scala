@@ -77,7 +77,7 @@ object FastaFormat {
       createIndex.op.&          o
         createBwaIndex.op.&     o
           createDictionary.op.& o
-          await()
+          await
 
   }
 
