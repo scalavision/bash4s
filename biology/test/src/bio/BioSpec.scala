@@ -1,6 +1,5 @@
 package bio
 
-
 import zio.test.{assert, suite, test, DefaultRunnableSpec}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
@@ -9,7 +8,7 @@ import bio.dsl._
 import bio.tools._
 import bio.data._
 import bash4s.dsl._
-
+import TestCases._
 object TestCases {
 
   val fastaFile = file"/test/hello".fasta
