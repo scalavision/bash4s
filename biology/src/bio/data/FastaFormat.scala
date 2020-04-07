@@ -76,7 +76,8 @@ object FastaFormat {
     def op = 
       createIndex.op.&          o
         createBwaIndex.op.&     o
-          createDictionary.op.&
+          createDictionary.op.& o
+          await()
 
   }
 

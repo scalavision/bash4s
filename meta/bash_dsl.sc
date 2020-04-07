@@ -126,7 +126,7 @@ trait BashCommandAdapter {
   def toCmd: SimpleCommand
 }
 
-package object bash4s {
+object dsl {
   
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
@@ -162,7 +162,11 @@ package object bash4s {
   object exit {
     def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
-  
+ 
+  object `await` {
+    def apply() = SimpleCommand("wait", CmdArgs(Vector.empty[String]))
+  }
+
   object For {
     def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))

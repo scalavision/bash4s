@@ -44,6 +44,10 @@ object dsl {
       SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
 
+  object `await` {
+    def apply() = SimpleCommand("wait", CmdArgs(Vector.empty[String]))
+  }
+
   object For {
     def apply(indexVariable: CommandOp) =
       CFor(Vector(indexVariable))
