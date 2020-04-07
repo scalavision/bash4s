@@ -54,9 +54,16 @@ object ScriptGenerator {
   def dispatch[T](
       sealedTrait: SealedTrait[ScriptGenerator, T]
   ): ScriptGenerator[T] = new ScriptGenerator[T] {
+
+    def apply(t: T) = {
+      sealedTrait.dispatch(t) { subtype =>
+        subtype.typeclass.apply(subtype.cast(t))
+      }
+    }
+    /*
     def apply(t: T) = {
       ScriptMeta(sealedTrait.typeName.short, "", List.empty[ArgOpt])
-    }
+    }*/
   }
 
 

@@ -2,7 +2,7 @@ package bio
 
 import bash4s.domain._
 
-case class Cores(nrOfCores: Int)
+final case class Cores(nrOfCores: Int)
 
 object biomodel {
 
@@ -22,6 +22,7 @@ object biomodel {
   sealed trait FastaFile extends Product with Serializable
   sealed trait Fastq extends Product with Serializable
   sealed trait BwaIndexed extends Product with Serializable
+  sealed trait DictFile extends Product with Serializable
   sealed trait Tar extends Product with Serializable
   sealed trait Txt extends Product with Serializable
   sealed trait Indexed extends Product with Serializable

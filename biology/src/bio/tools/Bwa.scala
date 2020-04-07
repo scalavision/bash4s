@@ -1,10 +1,11 @@
-package bio
+package bio.tools
 
 import bash4s.dsl._
 import bash4s.domain._
 import bash4s._
 import bash4s.scripts._
 import bio.dsl._
+import bio.Cores
 import bash4s.scripts.Annotations._
 
 object Bwa {
@@ -38,15 +39,16 @@ object Bwa {
     override def setup = init(
       READ1 `=` param.$1(r1)                      o
       READ2 `=` param.$2(r2)                      o
-      NR_OF_CORES `=` param.$3(nrOfCores)         o
-      READ_GROUP_INFO `=` param.$4(readGroupInfo)
+      BWA_INDEX `=` param.$3(bwaIndexedFasta)     o
+      NR_OF_CORES `=` param.$4(nrOfCores)         o
+      READ_GROUP_INFO `=` param.$5(readGroupInfo)
     ) 
     
     /**
       * bwa mem -K 100000000 -t 6 -M /work/bio/ref/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna /stash/data/hg00x/HG002C2c-000200PM-Mendel-KIT-wgs_S8_L008_R1_001.fastq.gz /stash/data/hg00x/HG002C2c-000200PM-Mendel-KIT-wgs_S8_L008_R2_001.fastq.gz
       */
     def op =
-        bwa"mem -K 100000000 -Y -R ${READ_GROUP_INFO} -t ${NR_OF_CORES} ${BWA_INDEX} $READ1 $READ2"
+        bwa"mem -K 100000000 -M -R ${READ_GROUP_INFO} -t ${NR_OF_CORES} ${BWA_INDEX} $READ1 $READ2"
 
   }
 
