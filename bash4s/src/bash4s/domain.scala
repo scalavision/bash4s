@@ -609,10 +609,17 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       extends FileHandle
 
   final case class RelPath(folderPath: Vector[String], fileName: FileName)
-      extends FileHandle
+      extends FileHandle {
+        
+      }
   
- final case class RelFolderPath(folderPath: Vector[String])
-      extends FileHandle
+ final case class RelFolderPath(folders: Vector[String])
+      extends FileHandle{
+        def / (fileName: FileName) = RelPath(folders, fileName)
+        def lastFolderName = folders.last
+        def parentFolderName = folders.dropRight(1).last
+        def parentFolderPath = copy(folders = folders.dropRight(1))
+      }
 
   final case object `/dev/stdin` extends FileType
   final case object `/dev/stdout` extends FileType
