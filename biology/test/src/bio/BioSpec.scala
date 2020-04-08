@@ -6,7 +6,7 @@ import zio.test.Assertion._
 
 import bio.dsl._
 import bio.tools._
-import bio.data._
+//import bio.data._
 import bash4s.dsl._
 import TestCases._
 object TestCases {
@@ -29,6 +29,8 @@ object TestCases {
     cores,
     readGroupInfo
   )
+
+  val bamAligned = file"/path/to/sample1".markdup.sorted.indexed.bam
 
 }
 
@@ -74,6 +76,7 @@ object BioSpec extends DefaultRunnableSpec {
 
     test("fastaFormat operations") {
 
+      /*
       val createDictionary = FastaFormat.CreateDictionary(
         fastaFile, dictFile        
       )
@@ -100,7 +103,19 @@ object BioSpec extends DefaultRunnableSpec {
       pprint.pprintln(createFastaAllIndexes.script)
       pprint.pprintln(createFastaAllIndexesInParallel.script)
       pprint.pprintln(splitByChromosome.script)
+      */
 
+      assert(1)(equalTo(1))
+    },
+    test("gatk operations") {
+
+      val vcfOutput = file"/path/to/output".vcf
+//      val bamOutput =file"/path/bam/haplotyped".bam
+
+      //val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput, Some(bamOutput))
+      val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput)
+      pprint.pprintln(haplotypeCaller.script)
+      
       assert(1)(equalTo(1))
     }
   )

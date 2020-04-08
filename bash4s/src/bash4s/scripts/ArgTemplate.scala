@@ -14,6 +14,17 @@ case class ScriptMeta(name: String, description: String, argOpt: List[ArgOpt]) {
   def $8(op: CommandOp) = BashCliArgVariable("8", op) 
   def $9(op: CommandOp) = BashCliArgVariable("9", op) 
   def $10(op: CommandOp) = BashCliArgVariable("10", op) 
+  
+  def $1(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("1", op, paramName) 
+  def $2(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("2", op, paramName) 
+  def $3(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("3", op, paramName) 
+  def $4(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("4", op, paramName) 
+  def $5(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("5", op, paramName) 
+  def $6(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("6", op, paramName) 
+  def $7(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("7", op, paramName) 
+  def $8(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("8", op, paramName) 
+  def $9(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("9", op, paramName) 
+  def $10(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("10", op, paramName) 
 }
 
 case class ArgOpt(long: String, description: String, short: String = "")

@@ -40,7 +40,15 @@ object ScriptSerializer {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
         case f: FileType => fEnc.apply(f)
-        case b: BashVariable => b.expansionSafe
+        case b: BashVariable => 
+          pprint.pprintln(b)
+          b.value match {
+            case BashCliOptArgVariable(name,_,_) =>
+              "\"" + "$" + "{" + name.trim() + "[@]}" + "\""
+            case UnsetArrayVariable() =>
+              "\"" + "$" + "{" + b.name.trim() + "[@]}" + "\""
+            case _ => b.expansionSafe
+          }
         case h: HereString => enc.apply(h)
         case h: HereDoc => enc.apply(h)
         case c: CommandOp => enc.apply(c)
@@ -137,6 +145,24 @@ object ScriptSerializer {
     }
   }
 
+  def optionalArgTemplate(
+    paramName: String, variableName: String, op: String, argName: String
+  ) = {
+    if(op.nonEmpty) 
+      s"""|TMP${paramName}=$${${paramName}:-"${op}"}
+      |${variableName}=( "${argName}" "$$TMP${paramName}" )
+      |""".stripMargin
+      else s"""|
+      |set +u
+      |${variableName}=( "$argName" "$$${paramName}" )
+      |if [[ -z $$${paramName} ]]; then
+      |  unset $$$variableName
+      |fi
+      |set -u
+      |""".stripMargin
+
+  }
+
   implicit def bashVariableSerializer(
     implicit 
     enc: ScriptSerializer[CommandOp],
@@ -154,6 +180,22 @@ object ScriptSerializer {
             case _ => enc.apply(value)
           }
           s"""${b.name}=$${$name:-"${valueDec}"}"""
+        case BashCliOptArgVariable(name, valueOpt, paramName) => 
+          val valueDec = valueOpt.fold(""){ value => value match {
+            case fileType: FileType => fileEnc.apply(fileType)
+            case _ => enc.apply(value)
+          }}
+          if(paramName.isEmpty) {
+            if(valueDec.isEmpty()) {
+             s"""${b.name}=$${$name:+"${name}"}""" 
+            } else {
+              s"""${b.name}=$${$name:-"${valueDec}"}"""
+            }
+          } else {
+            optionalArgTemplate(name, b.name, valueDec, paramName)
+          }
+        case UnsetArrayVariable() => 
+          s"""${b.name}[@]"""
         case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
         case ParameterExpanderVariable(value) => 
           val args = value.value.args.collect {

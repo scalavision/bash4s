@@ -278,9 +278,16 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class ParameterExpanderVariable(value: ParameterExpander) extends VariableValue
   final case class SubShellVariable(value: CommandOp) extends VariableValue
   final case class UnsetVariable() extends VariableValue
+  final case class UnsetArrayVariable() extends VariableValue
   final case class BashCliArgVariable(
     name: String,
     value: CommandOp
+  ) extends VariableValue
+
+  final case class BashCliOptArgVariable(
+    name: String,
+    value: Option[CommandOp],
+    param: String
   ) extends VariableValue
 
   final case class BashVariable(
@@ -291,6 +298,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
     def `=` (cliArg: BashCliArgVariable) = copy(value = cliArg)
+    def `=` (cliArg: BashCliOptArgVariable) = copy(value = cliArg)
     def `=` (array: ArrayVariable) = copy(value = array)
     def `=` (parameterExpander: ParameterExpander) = copy(value = ParameterExpanderVariable(parameterExpander))
     def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))

@@ -64,6 +64,7 @@ object dsl {
     SimpleCommand("cat", hereStr)
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
+  def Array(implicit name: sourcecode.Name) = BashVariable(name.value, UnsetArrayVariable())
 
   // True if file exists
   def a(op: CommandOp) = CIfIsFile(op)

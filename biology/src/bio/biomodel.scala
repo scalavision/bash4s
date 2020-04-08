@@ -6,36 +6,35 @@ final case class Cores(nrOfCores: Int)
 
 object biomodel {
 
-  type BamSorted = BiologyFileType[Bam with Sorted]
-  type BamSortedIndexed = BiologyFileType[Bam with Sorted with Indexed]
-  type BamSortedIndexedMarkDup =
-    BiologyFileType[Bam with Sorted with Indexed with Markdup]
+  type BamSorted = BiologyFileType[BamFile with Sorted]
+  type BamSortedIndexed = BiologyFileType[BamFile with Sorted with Indexed]
   type FastqGz = BiologyFileType[Fastq with Gz]
 //  type FastaBwaIndexed = BiologyFileType[Fasta with BwaIndexed]
   type MarkdupMetrics = BiologyFileType[Markdup with Metrics]
 
 
-  sealed trait Bam extends Product with Serializable
-  sealed trait Vcf extends Product with Serializable
-  sealed trait G extends Product with Serializable
-  sealed trait Bed extends Product with Serializable
-  sealed trait FastaFile extends Product with Serializable
-  sealed trait Fastq extends Product with Serializable
-  sealed trait BwaIndexed extends Product with Serializable
-  sealed trait DictFile extends Product with Serializable
-  sealed trait Tar extends Product with Serializable
-  sealed trait Txt extends Product with Serializable
-  sealed trait Indexed extends Product with Serializable
-  sealed trait Sorted extends Product with Serializable
-  sealed trait Markdup extends Product with Serializable
-  sealed trait Tbi extends Product with Serializable
-  sealed trait Gz extends Product with Serializable
-  sealed trait Metrics extends Product with Serializable
+  sealed trait BiologyFileTypeMark extends Product with Serializable
+  sealed trait BamFile extends BiologyFileTypeMark
+  sealed trait VcfFile extends BiologyFileTypeMark
+  sealed trait G extends BiologyFileTypeMark
+  sealed trait Bed extends BiologyFileTypeMark
+  sealed trait FastaFile extends BiologyFileTypeMark
+  sealed trait Fastq extends BiologyFileTypeMark
+  sealed trait BwaIndexed extends BiologyFileTypeMark
+  sealed trait DictFile extends BiologyFileTypeMark
+  sealed trait Tar extends BiologyFileTypeMark
+  sealed trait Txt extends BiologyFileTypeMark
+  sealed trait Indexed extends BiologyFileTypeMark
+  sealed trait Sorted extends BiologyFileTypeMark
+  sealed trait Markdup extends BiologyFileTypeMark
+  sealed trait Tbi extends BiologyFileTypeMark
+  sealed trait Gz extends BiologyFileTypeMark
+  sealed trait Metrics extends BiologyFileTypeMark
 
   sealed trait BiologyFileType[+T] {
     def e[T2]: String => BiologyFileType[T2]
-    def bam = e[T with Bam]("bam")
-    def vcf = e[T with Vcf]("vcf")
+    def bam = e[T with BamFile]("bam")
+    def vcf = e[T with VcfFile]("vcf")
     def g = e[T with G]("g")
     def bed = e[T with Bed]("bed")
     def fasta = e[T with bio.dsl.Fasta]("fasta")
