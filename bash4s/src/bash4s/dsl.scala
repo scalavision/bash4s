@@ -64,7 +64,9 @@ object dsl {
     SimpleCommand("cat", hereStr)
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
-  def Array(implicit name: sourcecode.Name) = BashVariable(name.value, UnsetArrayVariable())
+
+  def Array(implicit name: sourcecode.Name) =
+    BashVariable(name.value, UnsetArrayVariable())
 
   // True if file exists
   def a(op: CommandOp) = CIfIsFile(op)
@@ -610,15 +612,6 @@ object dsl {
     def file(args: Any*): FilePath =
       FileConversions.convertToFilePath(s.s(args: _*))
 
-    def /(args: Any*): FolderPath =
-      FileConversions.convertToFolderPath("/" + s.s(args: _*))
-    
-    def `./`(args: Any*): RelFolderPath =
-      FileConversions.convertToRelFolderPath(s.s("./" + args: _*))
-    
-    def `../`(args: Any*): RelFolderPath =
-      FileConversions.convertToRelFolderPath(s.s("../" + args: _*))
-      
     def relFile(args: Any*): RelPath =
       FileConversions.convertToRelFilePath(s.s(args: _*))
 
@@ -627,6 +620,15 @@ object dsl {
 
     def dirPath(args: Any*): FolderPath =
       FileConversions.convertToFolderPath(s.s(args: _*))
+
+    def /(args: Any*): FolderPath =
+      FileConversions.convertToFolderPath("/" + s.s(args: _*))
+
+    def `./`(args: Any*): RelFolderPath =
+      FileConversions.convertToRelFolderPath(s.s("./" + args: _*))
+
+    def `../`(args: Any*): RelFolderPath =
+      FileConversions.convertToRelFolderPath(s.s("../" + args: _*))
 
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))
