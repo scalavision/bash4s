@@ -4,6 +4,8 @@ import bio.dsl._
 import bash4s.dsl._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
+import bash4s.domain.IntVariable
+import bash4s.domain.TextVariable
 
 sealed trait Gatk extends Script {
 
@@ -59,5 +61,74 @@ object Gatk extends ToolMetaInfo {
       gatk"$HaplotypeCaller -R ${REF} -I ${BAM} -O ${OUT_VCF}"
 
   }
+
+  case class GenotypeGVCFs(
+    reference: Fasta,
+    variants: GVcf,
+    finalVariantsOutput: Vcf
+  ) extends Gatk {
+
+    val VARIANTS = Var
+
+    override def setup = init(
+      REF `=` param.$1(reference) o
+      VARIANTS `=` param.$2(variants) o
+      OUT_VCF `=` param.$3(finalVariantsOutput)
+    )
+
+    def op = 
+      gatk"${name} -R ${REF} -V ${VARIANTS} -O ${OUT_VCF}"
+
+  }
+ 
+  case class CNNScoreVariants1D(
+    vcfToAnnotate: Vcf,
+    reference: Fasta,
+    annotatedOut: Vcf
+  ) extends Gatk {
+
+    val VCF_TO_ANNOTATE = Var
+    val ANNOTATED_VCF_OUT = Var
+
+    val initVariables = 
+      VCF_TO_ANNOTATE `=` param.$1(vcfToAnnotate) o
+      REF `=` param.$2(reference) o
+      ANNOTATED_VCF_OUT `=` param.$3(annotatedOut)
+
+    override def setup = init(initVariables)
+
+    def op = gatk"${name.dropRight(2)} -V ${VCF_TO_ANNOTATE} -R ${REF} -O ${ANNOTATED_VCF_OUT}"
+
+  }
   
+  case class CNNScoreVariants2D(
+    vcfToAnnotate: Vcf,
+    reference: Fasta,
+    annotatedOut: Vcf,
+    inferenceBatchSize: IntVariable,
+    transferBatchSize: IntVariable,
+    tensorType: TextVariable
+  ) extends Gatk {
+
+    val cnnScore1D = CNNScoreVariants1D(vcfToAnnotate, reference, annotatedOut)
+
+    val INFERENCE_BATCH_SIZE = Var
+    val TRANSFER_BATCH_SIZE = Var
+    val TENSORTYPE = Var
+
+    override def setup = init { 
+      cnnScore1D.initVariables o 
+      INFERENCE_BATCH_SIZE `=` param.$4(inferenceBatchSize) o
+      TRANSFER_BATCH_SIZE `=` param.$5(transferBatchSize) o
+      TENSORTYPE `=` param.$6(tensorType) 
+    }
+
+    def op = gatk"""${name.dropRight(2)} \\
+      -V ${cnnScore1D.VCF_TO_ANNOTATE} \\
+      -R ${REF} \\
+      -O ${cnnScore1D.ANNOTATED_VCF_OUT} \\
+      -inference-batch-size ${INFERENCE_BATCH_SIZE} \\
+      -transfer-batch-size ${TRANSFER_BATCH_SIZE} \\
+      -tensor-type ${TENSORTYPE}""" 
+    } 
 }

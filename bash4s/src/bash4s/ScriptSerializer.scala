@@ -41,7 +41,6 @@ object ScriptSerializer {
       val serializedArgs = args.map {
         case f: FileType => fEnc.apply(f)
         case b: BashVariable => 
-          pprint.pprintln(b)
           b.value match {
             case BashCliOptArgVariable(name,_,_) =>
               "\"" + "$" + "{" + name.trim() + "[@]}" + "\""

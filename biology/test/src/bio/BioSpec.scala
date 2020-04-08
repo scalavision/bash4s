@@ -9,6 +9,7 @@ import bio.tools._
 //import bio.data._
 import bash4s.dsl._
 import TestCases._
+import bash4s.domain.IntVariable
 object TestCases {
 
   val fastaFile = file"/test/hello".fasta
@@ -115,7 +116,17 @@ object BioSpec extends DefaultRunnableSpec {
       //val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput, Some(bamOutput))
       val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput)
       pprint.pprintln(haplotypeCaller.script)
-      
+     
+      val vcfToAnnotate = file"/path/to/vcf_to_annotate".vcf
+      val annotatedVcf = file"/path/to/annotated".vcf
+
+      val cnnAnno = Gatk.CNNScoreVariants1D(vcfToAnnotate, ref, annotatedVcf)
+
+      pprint.pprintln(cnnAnno.script)
+
+      val cnnAnno2D = Gatk.CNNScoreVariants2D(vcfToAnnotate, ref, annotatedVcf, IntVariable(2), IntVariable(2), txt"read-sensor")      
+      pprint.pprintln(cnnAnno2D.script)
+
       assert(1)(equalTo(1))
     }
   )
