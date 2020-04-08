@@ -285,6 +285,7 @@ object ScriptSerializer {
     case FileDescriptor(value) => value.toString()
     case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
     case RelPath(folders,fn) => s"""${folders.mkString("/")}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
+    case RelFolderPath(folders) => s"""${folders.mkString("/")}"""
     case `/dev/null` => "/dev/null"
     case `/dev/random` => "/dev/random"
     case `/dev/stderr` => "/dev/stderr"

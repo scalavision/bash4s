@@ -25,11 +25,18 @@ object FileConversions {
    def convertToFileName(txt: String) : FileName = {
     val fileNameComponents = txt.split("\\.")
     FileName(BaseName(fileNameComponents.head), fileNameComponents.tail.toVector)
-  }
+   }
 
    def convertToFolderPath(txt: String) : FolderPath = {
     val folders = txt.split(Constants.rootChar.toString())
     FolderPath(Constants.rootChar, folders.toVector)
-  }
+   }   
+
+   def convertToRelFolderPath(txt: String) : RelFolderPath = {
+    val folders = txt.split(Constants.rootChar.toString())
+    RelFolderPath(folders.toVector)
+   }
+
+  
 
 }

@@ -610,6 +610,15 @@ object dsl {
     def file(args: Any*): FilePath =
       FileConversions.convertToFilePath(s.s(args: _*))
 
+    def /(args: Any*): FolderPath =
+      FileConversions.convertToFolderPath("/" + s.s(args: _*))
+    
+    def `./`(args: Any*): RelFolderPath =
+      FileConversions.convertToRelFolderPath(s.s("./" + args: _*))
+    
+    def `../`(args: Any*): RelFolderPath =
+      FileConversions.convertToRelFolderPath(s.s("../" + args: _*))
+      
     def relFile(args: Any*): RelPath =
       FileConversions.convertToRelFilePath(s.s(args: _*))
 

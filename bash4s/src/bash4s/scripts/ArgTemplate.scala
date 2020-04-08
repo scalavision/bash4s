@@ -24,7 +24,7 @@ case class ScriptMeta(name: String, description: String, argOpt: List[ArgOpt]) {
   def $7(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("7", op, paramName) 
   def $8(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("8", op, paramName) 
   def $9(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("9", op, paramName) 
-  def $10(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("10", op, paramName) ?
+  def $10(op: Option[CommandOp], paramName: String="") = BashCliOptArgVariable("10", op, paramName)
 
   //TODO: Add support for VarArgszz
 }
