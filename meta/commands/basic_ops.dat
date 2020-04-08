@@ -10,3 +10,10 @@ py
 scala
 R
 grep
+egrep
+awk
+sed
+zcat
+zgrep
+netstat
+lsof

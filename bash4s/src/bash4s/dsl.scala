@@ -555,6 +555,7 @@ object dsl {
 
   def zsh(args: String*) = clitools.ZshWrapper(CmdArgs(args.toVector))
   def zsh = clitools.ZshWrapper()
+  
 
   implicit class CmdSyntax(private val s: StringContext) extends AnyVal {
 
