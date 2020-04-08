@@ -143,7 +143,7 @@ object dsl {
   }
   
   object #! {
-    def apply(path: String) = SheBang(s"#!$${shebang}")
+    def apply(shebang: String) = SheBang(s"#!$${shebang}")
     def `/usr/bin/env`(shebang: String)= SheBang(s"#!/usr/bin/env $$shebang")
     def `/bin/bash` = SheBang("#!/bin/bash")
     def `/bin/sh` = SheBang("#!/bin/sh")

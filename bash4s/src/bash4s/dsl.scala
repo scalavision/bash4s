@@ -22,6 +22,15 @@ object dsl {
     def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
 
+  object #! {
+    def apply(shebang: String) = SheBang(s"#!${shebang}")
+    def `/usr/bin/env`(shebang: String) = SheBang(s"#!/usr/bin/env $shebang")
+    def `/bin/bash` = SheBang("#!/bin/bash")
+    def `/bin/sh` = SheBang("#!/bin/sh")
+    def bash = SheBang("#!/usr/bin/env bash")
+    def sh = SheBang("#!/usr/bin/env sh")
+  }
+
   def `[[`(op: CommandOp) =
     CommandListBuilder(Vector(OpenDoubleSquareBracket(), op))
 
@@ -128,6 +137,9 @@ object dsl {
   def arp(args: String*) = clitools.ArpWrapper(CmdArgs(args.toVector))
   def arp = clitools.ArpWrapper()
 
+  def awk(args: String*) = clitools.AwkWrapper(CmdArgs(args.toVector))
+  def awk = clitools.AwkWrapper()
+
   def b2sum(args: String*) = clitools.B2sumWrapper(CmdArgs(args.toVector))
   def b2sum = clitools.B2sumWrapper()
 
@@ -229,6 +241,9 @@ object dsl {
   def echo(args: String*) = clitools.EchoWrapper(CmdArgs(args.toVector))
   def echo = clitools.EchoWrapper()
 
+  def egrep(args: String*) = clitools.EgrepWrapper(CmdArgs(args.toVector))
+  def egrep = clitools.EgrepWrapper()
+
   def enable(args: String*) = clitools.EnableWrapper(CmdArgs(args.toVector))
   def enable = clitools.EnableWrapper()
 
@@ -320,6 +335,9 @@ object dsl {
   def ls(args: String*) = clitools.LsWrapper(CmdArgs(args.toVector))
   def ls = clitools.LsWrapper()
 
+  def lsof(args: String*) = clitools.LsofWrapper(CmdArgs(args.toVector))
+  def lsof = clitools.LsofWrapper()
+
   def mapfile(args: String*) = clitools.MapfileWrapper(CmdArgs(args.toVector))
   def mapfile = clitools.MapfileWrapper()
 
@@ -340,6 +358,9 @@ object dsl {
 
   def mv(args: String*) = clitools.MvWrapper(CmdArgs(args.toVector))
   def mv = clitools.MvWrapper()
+
+  def netstat(args: String*) = clitools.NetstatWrapper(CmdArgs(args.toVector))
+  def netstat = clitools.NetstatWrapper()
 
   def newgrp(args: String*) = clitools.NewgrpWrapper(CmdArgs(args.toVector))
   def newgrp = clitools.NewgrpWrapper()
@@ -419,6 +440,9 @@ object dsl {
 
   def scala(args: String*) = clitools.ScalaWrapper(CmdArgs(args.toVector))
   def scala = clitools.ScalaWrapper()
+
+  def sed(args: String*) = clitools.SedWrapper(CmdArgs(args.toVector))
+  def sed = clitools.SedWrapper()
 
   def seq(args: String*) = clitools.SeqWrapper(CmdArgs(args.toVector))
   def seq = clitools.SeqWrapper()
@@ -553,14 +577,25 @@ object dsl {
   def yes(args: String*) = clitools.YesWrapper(CmdArgs(args.toVector))
   def yes = clitools.YesWrapper()
 
+  def zcat(args: String*) = clitools.ZcatWrapper(CmdArgs(args.toVector))
+  def zcat = clitools.ZcatWrapper()
+
+  def zgrep(args: String*) = clitools.ZgrepWrapper(CmdArgs(args.toVector))
+  def zgrep = clitools.ZgrepWrapper()
+
   def zsh(args: String*) = clitools.ZshWrapper(CmdArgs(args.toVector))
   def zsh = clitools.ZshWrapper()
-  
 
   implicit class CmdSyntax(private val s: StringContext) extends AnyVal {
 
     def $(args: Any*) =
       ParameterExpander(CmdArgCtx(args.toVector, s))
+
+    def ##(args: Any*) =
+      CommentLine("##", CmdArgCtx(args.toVector, s))
+
+    def `#`(args: Any*) =
+      CommentLine("#", CmdArgCtx(args.toVector, s))
 
     def txt(args: Any*) =
       TextVariable(CmdArgCtx(args.toVector, s))
@@ -594,6 +629,9 @@ object dsl {
 
     def arp(args: Any*) =
       SimpleCommand("arp", CmdArgCtx(args.toVector, s))
+
+    def awk(args: Any*) =
+      SimpleCommand("awk", CmdArgCtx(args.toVector, s))
 
     def b2sum(args: Any*) =
       SimpleCommand("b2sum", CmdArgCtx(args.toVector, s))
@@ -694,6 +732,9 @@ object dsl {
     def echo(args: Any*) =
       SimpleCommand("echo", CmdArgCtx(args.toVector, s))
 
+    def egrep(args: Any*) =
+      SimpleCommand("egrep", CmdArgCtx(args.toVector, s))
+
     def enable(args: Any*) =
       SimpleCommand("enable", CmdArgCtx(args.toVector, s))
 
@@ -784,6 +825,9 @@ object dsl {
     def ls(args: Any*) =
       SimpleCommand("ls", CmdArgCtx(args.toVector, s))
 
+    def lsof(args: Any*) =
+      SimpleCommand("lsof", CmdArgCtx(args.toVector, s))
+
     def mapfile(args: Any*) =
       SimpleCommand("mapfile", CmdArgCtx(args.toVector, s))
 
@@ -804,6 +848,9 @@ object dsl {
 
     def mv(args: Any*) =
       SimpleCommand("mv", CmdArgCtx(args.toVector, s))
+
+    def netstat(args: Any*) =
+      SimpleCommand("netstat", CmdArgCtx(args.toVector, s))
 
     def newgrp(args: Any*) =
       SimpleCommand("newgrp", CmdArgCtx(args.toVector, s))
@@ -882,6 +929,9 @@ object dsl {
 
     def scala(args: Any*) =
       SimpleCommand("scala", CmdArgCtx(args.toVector, s))
+
+    def sed(args: Any*) =
+      SimpleCommand("sed", CmdArgCtx(args.toVector, s))
 
     def seq(args: Any*) =
       SimpleCommand("seq", CmdArgCtx(args.toVector, s))
@@ -1011,6 +1061,12 @@ object dsl {
 
     def yes(args: Any*) =
       SimpleCommand("yes", CmdArgCtx(args.toVector, s))
+
+    def zcat(args: Any*) =
+      SimpleCommand("zcat", CmdArgCtx(args.toVector, s))
+
+    def zgrep(args: Any*) =
+      SimpleCommand("zgrep", CmdArgCtx(args.toVector, s))
 
     def zsh(args: Any*) =
       SimpleCommand("zsh", CmdArgCtx(args.toVector, s))
