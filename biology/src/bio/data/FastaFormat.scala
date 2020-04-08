@@ -55,7 +55,7 @@ object FastaFormat {
     val RESULTDIR = Var
 
     val CHR_FILE = Var 
-    val INDEX = Var
+    val CHR_NAME = Var
 
     override def setup = init(
       FASTA_FILE `=` param.$1(fastaFile) o
@@ -67,12 +67,11 @@ object FastaFormat {
       cd"${WORKDIR}" && 
       csplit"-s -z ${FASTA_FILE} '/>/' '{*}'"                          o
       For(CHR_FILE.$).In(txt"xx{00..23}").Do {
-        //`#`"We extract the name from the header of the file"           o
-        INDEX `=$`(sed"""'s/>// ; s/ .*// ; 1q' "${CHR_FILE}"""")      o
-        mv"${CHR_FILE} ${INDEX}.fa"
-      } Done 
-      echo"finished"
-    
+        __#"Extracting chromosome name from the file"                  o
+        CHR_NAME `=$`(sed"""'s/>// ; s/ .*// ; 1q' "${CHR_FILE}"""")   o
+        mv"${CHR_FILE} ${CHR_NAME}.fa"
+      }.Done 
+   
   }
 
   case class CreateBwaIndex(

@@ -71,7 +71,9 @@ object domain {
   final case class Dollar() extends CommandOp
 
   final case class ArithmeticExpression(value: CmdArgCtx) extends CommandOp
-  final case class ParameterExpander(value: CmdArgCtx) extends CommandOp
+  final case class ParameterExpander(value: CmdArgCtx) extends CommandOp { self => 
+  
+  }
 
   sealed trait ConditionalExpression extends CommandOp
 

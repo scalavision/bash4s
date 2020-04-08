@@ -66,11 +66,19 @@ object ScriptLinter {
             txt = acc.txt + "if " + w + "\n",
             indent = acc.indent + 2
           )
+          case("do", w) => acc.copy(
+            txt = acc.txt + "do " + w + "\n",
+            indent = acc.indent + 2
+          )
           case ("else", w) => acc.copy(
             txt = acc.txt + "else" + w + "\n",
           )
           case ("fi", w) => acc.copy(
             txt = acc.txt + "fi" + w + "\n",
+            indent = acc.indent - 2
+          )
+          case ("done", w) => acc.copy(
+            txt = acc.txt + "done" + w + "\n",
             indent = acc.indent - 2
           )
           case _ => 

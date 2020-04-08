@@ -213,7 +213,7 @@ object ScriptSerializer {
   implicit def cDoSerializer(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CDo] =
-    pure[CDo] { cdo => s"do;\n${enc.apply(cdo.op)}\n" }
+    pure[CDo] { cdo => s"\ndo\n${enc.apply(cdo.op)}\n" }
 
   implicit def cThenSerializer(
       implicit enc: ScriptSerializer[CommandOp]

@@ -591,11 +591,11 @@ object dsl {
     def $(args: Any*) =
       ParameterExpander(CmdArgCtx(args.toVector, s))
 
-    def ##(args: Any*) =
-      CommentLine("##", CmdArgCtx(args.toVector, s))
+    def __#(args: Any*) =
+      CommentLine("# ", CmdArgCtx(args.toVector, s))
 
-    def `#`(args: Any*) =
-      CommentLine("#", CmdArgCtx(args.toVector, s))
+    def __##(args: Any*) =
+      CommentLine("## ", CmdArgCtx(args.toVector, s))
 
     def txt(args: Any*) =
       TextVariable(CmdArgCtx(args.toVector, s))
