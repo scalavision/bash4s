@@ -157,10 +157,10 @@ object ScriptSerializer {
         case TextVariable(value) => s"""${b.name}="${enc.apply(value)}""""
         case ParameterExpanderVariable(value) => 
           val args = value.value.args.collect {
-            case b: BashVariable => 
-              b.name
-          }.head
-          s"""${b.name}=$$${value.value.strCtx.s(args)}"""
+            case b: BashVariable => b.name
+          }.headOption
+          val expansion = args.fold(throw new Exception(s"${value} is not a BashVariable, you need to provide one for this kind of expanions")){ a => value.value.strCtx.s(a)}
+          s"""${b.name}=$$${expansion}"""
         case SubShellVariable(value) => value match {
           case ArithmeticExpression(value) => 
             s"${b.name}=$$((${enc.apply(value)}))"

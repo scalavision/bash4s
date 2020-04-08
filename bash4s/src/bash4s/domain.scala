@@ -47,7 +47,10 @@ object domain {
   sealed trait CommandArg extends CommandOp
 
   final case class DebugValue(value: String) extends CommandOp
-  final case class CommentLine(arg: CmdArgCtx) extends CommandOp
+  final case class CommentLine(prefix: String, arg: CmdArgCtx) extends CommandOp { self =>
+    def o(op: CommandOp) =
+      ScriptBuilder(Vector(self, ScriptLine(), op))
+  }
   
   final case class CmdArgCtx(args: Vector[Any], strCtx: StringContext)
       extends CommandArg
