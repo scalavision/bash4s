@@ -151,6 +151,11 @@ object ScriptSerializer {
       s"""|TMP${paramName}=$${${paramName}:-"${op}"}
       |${variableName}=( "${argName}" "$$TMP${paramName}" )
       |""".stripMargin
+      else if(op.isEmpty() && argName.nonEmpty) {
+        s"""|${variableName}=( "${paramName}" )
+            |
+        |""".stripMargin
+      }
       else s"""|
       |set +u
       |${variableName}=( "$argName" "$$${paramName}" )
@@ -173,6 +178,25 @@ object ScriptSerializer {
       b.value match {
         case UnsetVariable() => s"unset ${b.name}"
         case IntVariable(value) => s"${value.toString()}"
+        case BashCliVecArgVariable(_, value, param) => 
+          s"""|
+          |${b.name}_VALUES=(${value.map {
+            case fileType: FileType => "\"" + fileEnc.apply(fileType) + "\""
+            case any => "\"" + enc.apply(any) + "\""
+          }.mkString(" ")})
+          |${b.name}=( $${${b.name}_VALUES[@]/#/"${param}"} )
+          |""".stripMargin
+        
+        case BashCliFlagArgVariable(_, value, param) => 
+          val flag = s"""${b.name}=( "${param}" )"""
+          if(!value) 
+          s"""|set +u
+          |$flag
+          |unset ${b.name}
+          |set -u
+          |""".stripMargin
+          else flag
+
         case BashCliArgVariable(name, value) => 
           val valueDec = value match {
             case fileType: FileType => fileEnc.apply(fileType)

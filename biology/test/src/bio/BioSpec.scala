@@ -118,7 +118,7 @@ object BioSpec extends DefaultRunnableSpec {
       pprint.pprintln(haplotypeCaller.script)
      
       val vcfToAnnotate = file"/path/to/vcf_to_annotate".vcf
-      val annotatedVcf = file"/path/to/annotated".vcf
+      val annotatedVcf = file"/path/to/annotated".cnn2d.vcf
 
       val cnnAnno = Gatk.CNNScoreVariants1D(vcfToAnnotate, ref, annotatedVcf)
 
@@ -127,6 +127,24 @@ object BioSpec extends DefaultRunnableSpec {
       val cnnAnno2D = Gatk.CNNScoreVariants2D(vcfToAnnotate, ref, annotatedVcf, IntVariable(2), IntVariable(2), txt"read-sensor")      
       pprint.pprintln(cnnAnno2D.script)
 
+      val trancheFilteredVcf = file"/path/to/trancheFiltered".vcf
+
+      val omni1000G = file"/path/to/1000G_omni2.5.b37.sites".vcf
+      val hapmap = file"/path/to/hapmap_3.3.b37.sites".vcf
+
+      val filterVariantTranches = Gatk.FilterVariantTranches(
+        annotatedVcf,
+        txt"CNN_2D",
+        txt"99.9",
+        txt"99.5",
+        trancheFilteredVcf,
+        true,
+        omni1000G,
+        hapmap 
+      )
+
+      pprint.pprintln(filterVariantTranches.script)
+      
       assert(1)(equalTo(1))
     }
   )

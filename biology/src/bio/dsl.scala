@@ -17,7 +17,7 @@ object dsl {
   type BwaIndex = BiologyFileType[BwaIndexed]
   type Dict = BiologyFileType[DictFile]
   type Vcf = BiologyFileType[VcfFile]
-  type Vcf2DCnnScored = BiologyFileType[CnnScored_2D with Vcf]
+  type CnnScored2DVcf = BiologyFileType[CnnScored_2D with VcfFile]
   type Bam = BiologyFileType[BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
 
@@ -48,6 +48,12 @@ object dsl {
       case _ => None
     }
 
+  }
+  
+  implicit class liftBamBioSeqToBash4s[A](f: Seq[BiologyFileType[A]]) {
+    def op: Seq[FileHandle] = f.map { 
+        case BiologyFilePath(fileType) => fileType
+    }
   }
   
   implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)

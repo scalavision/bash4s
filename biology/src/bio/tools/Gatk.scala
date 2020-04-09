@@ -104,36 +104,72 @@ object Gatk extends ToolMetaInfo {
   case class CNNScoreVariants2D(
     vcfToAnnotate: Vcf,
     reference: Fasta,
-    annotatedOut: Vcf,
+    annotatedOut: CnnScored2DVcf,
     inferenceBatchSize: IntVariable,
     transferBatchSize: IntVariable,
     tensorType: TextVariable
   ) extends Gatk {
 
-    val cnnScore1D = CNNScoreVariants1D(vcfToAnnotate, reference, annotatedOut)
-
+    val VCF_TO_ANNOTATE = Arg(param.$1(vcfToAnnotate))
+    val ANNOTATED_VCF_OUT = Arg(param.$3(annotatedOut))
     val INFERENCE_BATCH_SIZE = Arg(param.$4(inferenceBatchSize))
     val TRANSFER_BATCH_SIZE = Arg(param.$5(transferBatchSize))
     val TENSORTYPE = Arg(param.$6(tensorType))
 
     override def setup = init { 
-      cnnScore1D.initVariables o 
+      VCF_TO_ANNOTATE o
+      REF `=` param.$2(reference) o
+      ANNOTATED_VCF_OUT o
       INFERENCE_BATCH_SIZE o
       TRANSFER_BATCH_SIZE o
       TENSORTYPE
     }
-
     def op = gatk"""${name.dropRight(2)} \\
-      -V ${cnnScore1D.VCF_TO_ANNOTATE} \\
+      -V ${VCF_TO_ANNOTATE} \\
       -R ${REF} \\
-      -O ${cnnScore1D.ANNOTATED_VCF_OUT} \\
+      -O ${ANNOTATED_VCF_OUT} \\
       -inference-batch-size ${INFERENCE_BATCH_SIZE} \\
       -transfer-batch-size ${TRANSFER_BATCH_SIZE} \\
       -tensor-type ${TENSORTYPE}""" 
     } 
 
-
     case class FilterVariantTranches(
-      
-    )
+      cnnScored2D: CnnScored2DVcf,
+      infoKey: TextVariable,
+      snpTranche: TextVariable,
+      indelTranche: TextVariable,
+      filtered2DOutput: Vcf,
+      invalidatePreviousFilters: Boolean,
+      resources: Vcf*
+    ) extends Gatk {
+
+      val CNN_SCORED_2D = Arg(param.$1(cnnScored2D))
+      val INFO_KEY = Arg(param.$3(infoKey))
+      val SNP_TRANCHE = Arg(param.$4(snpTranche))
+      val INDEL_TRANCHE = Arg(param.$5(indelTranche))
+      val FILTERED_2D_OUTPUT = Arg(param.$6(filtered2DOutput))
+      val RESOURCES = Array
+      val INVALIDATE_PREVIOUS_FILTERS = Array 
+    
+      override def setup = init(
+        CNN_SCORED_2D o
+        RESOURCES `=` param.$2(resources.op, "--resources") o
+        INFO_KEY  o
+        SNP_TRANCHE o
+        INDEL_TRANCHE o
+        FILTERED_2D_OUTPUT o
+        INVALIDATE_PREVIOUS_FILTERS `=` param.$7(invalidatePreviousFilters, "--invalidate-previous-filters")
+      )
+
+      def op = 
+        gatk"""${name} \\
+          -V ${CNN_SCORED_2D} \\
+          ${RESOURCES} \\
+          --info-key ${INFO_KEY} \\
+          --snp-tranche ${SNP_TRANCHE} \\
+          --indel-tranche ${INDEL_TRANCHE} \\
+          -O ${FILTERED_2D_OUTPUT} \\
+          ${INVALIDATE_PREVIOUS_FILTERS}
+        """
+    }
 }
