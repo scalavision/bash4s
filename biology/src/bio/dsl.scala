@@ -1,12 +1,15 @@
 package bio
 
+import scala.reflect.runtime.universe._
 import bash4s.domain._
 import biomodel._
+import bash4s.dsl._
 //import scala.reflect.ClassTag
-import scala.reflect.runtime.universe._
 import com.github.ghik.silencer.silent
 
 object dsl {
+
+  //val bioModelToOp = bash4s.CommandOpConstructor.gen[BioModel]
 
   type Fasta = BiologyFileType[FastaFile]
   
@@ -17,10 +20,36 @@ object dsl {
   type BwaIndex = BiologyFileType[BwaIndexed]
   type Dict = BiologyFileType[DictFile]
   type Vcf = BiologyFileType[VcfFile]
+  type Ped = BiologyFileType[PedigreeFile]
   type CnnScored2DVcf = BiologyFileType[CnnScored_2D with VcfFile]
   type Bam = BiologyFileType[BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
 
+  /*
+  implicit def optBioModel(implicit enc: BioModel => CommandOp): Option[BioModel] => CommandOp = {
+    case Some(bm) => enc(bm)
+    case None => DebugValue("")
+  }
+
+  implicit def optBioModelExtension(implicit enc: BioModel => CommandOp): Option[BioModel] => CommandOp = {
+    case Some(bm) => enc(bm)
+    case None => DebugValue("")
+  }*/
+
+  /*
+  implicit class optSyntax(bm: Option[BioModel]) {
+    def op(implicit enc: BioModel => CommandOp) = bm match {
+      case None => DebugValue("")
+      case Some(bm) => enc.apply(bm)
+    }
+  }
+
+  implicit class seqSyntax(bm: Seq[BioModel]) {
+    def op(implicit enc: BioModel => CommandOp) = 
+      bm.map(enc.apply)
+  }*/
+
+  /*
   implicit def liftBioToBash4s[A]: BiologyFileType[A] => CommandOp = {
     case bp: BiologyFilePath[A] => bp.fileType
     case _ => throw new Exception("UNSUPPORTED!!!!")
@@ -33,13 +62,32 @@ object dsl {
       }
       case _ => None
   }
-  
+ 
+  /*
+  implicit def liftBioOptToBash4s[A](implicit tag: TypeTag[A]): Option[A] => Option[CommandOp] = {
+      case Some(a) => a match {
+        case BiologyFilePath(fileType) => Some(fileType)
+      }
+      case _ => None
+  }*/
+
   implicit class liftBioToBash4s[A](b: BiologyFileType[A]) {
     def op = b match {
       case bp: BiologyFilePath[A] => bp.fileType
     }
   }
+
+  implicit class bioModelExtension(bm: BioModel) {
+    def op = bioModelToOp.apply(bm)
+  }
   
+  implicit class optBioModel(bm: Option[BioModel]) {
+    def op = bm match {
+      case None => None
+      case Some(bm) => bioModelToOp.apply(bm)
+    }
+  }
+ 
   implicit class liftBamBioOptToBash4s[A](f: Option[BiologyFileType[A]]) {
     def op = f match {
       case Some(a) => a match {
@@ -47,7 +95,6 @@ object dsl {
       }
       case _ => None
     }
-
   }
   
   implicit class liftBamBioSeqToBash4s[A](f: Seq[BiologyFileType[A]]) {
@@ -57,7 +104,10 @@ object dsl {
   }
   
   implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)
+  implicit def liftSAmpleToBash4s: Sample => CommandOp = s => txt"${s.name}"
+  */
 
+  
   implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
     def bam = BiologyFilePath[BamFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "bam")))
     def markdup = BiologyFilePath[Markdup](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "markdup")))

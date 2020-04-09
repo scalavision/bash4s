@@ -1,6 +1,7 @@
 package bio.tools
 
 import bio.dsl._
+import bio.biomodel._
 import bash4s.dsl._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
@@ -172,4 +173,112 @@ object Gatk extends ToolMetaInfo {
           ${INVALIDATE_PREVIOUS_FILTERS}
         """
     }
+
+
+  case class CalculateGenotypePosteriors (
+    ref: Fasta,
+    input: Vcf,
+    family: Ped,
+    population: Vcf,
+    output: Vcf
+  ) extends Gatk {
+
+
+    val INPUT = Arg(param.$2(input))
+    val FAMILY = Arg(param.$3(family))
+    val POPULATION = Arg(param.$4(population))
+    val OUTPUT = Arg(param.$5(output))
+
+    override def setup = init(
+      REF `=` param.$1(ref) o
+      INPUT o
+      FAMILY o
+      POPULATION o
+      OUTPUT
+    )
+
+    def op = 
+      gatk"${name} -R $REF -V $INPUT -ped $FAMILY -supporting $POPULATION -O $OUTPUT"
+
+  }
+
+  case class VariantFiltration(
+    ref: Fasta,
+    input: Vcf,
+    genotypeFilterExpression: TextVariable,
+    genotypeFilterName: TextVariable,
+    output: Vcf
+  ) extends Gatk {
+
+    val INPUT = Arg(param.$2(input))
+    val FILTER_EXPRESSION = Arg(param.$3(genotypeFilterExpression))
+    val FILTER_NAME = Arg(param.$4(genotypeFilterName))
+    val OUTPUT = Arg(param.$5(output))
+
+    override def setup = init(
+      REF `=` param.$1(ref)  o
+      INPUT o
+      FILTER_EXPRESSION o
+      FILTER_NAME o
+      OUTPUT
+    )
+
+    def op = 
+      gatk"${name} -R $REF -V $INPUT --genotype-filter-expression $FILTER_EXPRESSION --genotype-filter-name $FILTER_NAME -O $OUTPUT"
+  }
+
+  def FilterLowConfidenceGQ(
+    ref: Fasta,
+    input: Vcf,
+    output: Vcf
+  ) = 
+  VariantFiltration(ref, input, txt"GC<20", txt"lowGQ", output)
+
+  /*
+  case class VariantAnnotator(
+    ref: Fasta,
+
+  )*/
+
+  case class VariantEval(
+    ref: Fasta,
+    eval: Vcf,
+    truthSet: Vcf,
+    output: Vcf
+  ) extends Gatk {
+
+    val EVAL = Arg(param.$2(eval))
+    val TRUTHSET = Arg(param.$3(truthSet))
+    val OUTPUT = Arg(param.$4(output))
+
+    override def setup = init(
+      REF `=` param.$1(ref) o
+      EVAL o
+      TRUTHSET o
+      OUTPUT
+    )
+
+    def op = 
+      gatk"$name -R $REF -eval $EVAL --comp $TRUTHSET -o $OUTPUT"
+
+  }
+ 
+
+  case class GenotypeConcordance(
+    call: Vcf,
+    sample: Sample,
+    truth: Vcf, 
+    output: Vcf,
+    truthSample: Option[Sample] = None
+  ) extends Gatk {
+   
+    val CALL_VCF = Arg(param.$1(call))
+    val SAMPLE = Arg(param.$2(sample))
+    val TRUTH_VCF = Arg(param.$3(truth))
+    val OUTPUT = Arg(param.$4(output))
+    val TRUTH_SAMPLE = Arg(param.$5(truthSample.op))
+
+    def op = gatk"${name}"
+
+  }
 }
