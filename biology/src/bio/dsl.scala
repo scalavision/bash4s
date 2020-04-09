@@ -17,6 +17,7 @@ object dsl {
   type BwaIndex = BiologyFileType[BwaIndexed]
   type Dict = BiologyFileType[DictFile]
   type Vcf = BiologyFileType[VcfFile]
+  type Vcf2DCnnScored = BiologyFileType[CnnScored_2D with Vcf]
   type Bam = BiologyFileType[BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
 
@@ -55,6 +56,7 @@ object dsl {
     def bam = BiologyFilePath[BamFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "bam")))
     def markdup = BiologyFilePath[Markdup](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "markdup")))
     def vcf = BiologyFilePath[VcfFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "vcf")))
+    def cnn2d = BiologyFilePath[CnnScored_2D](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "cnn2d")))
     def fasta = BiologyFilePath[FastaFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fasta")))
     def fastq = BiologyFilePath[Fastq](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fastq")))
     def gz = BiologyFilePath[Gz](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "gz")))

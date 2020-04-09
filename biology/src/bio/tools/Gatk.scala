@@ -112,15 +112,15 @@ object Gatk extends ToolMetaInfo {
 
     val cnnScore1D = CNNScoreVariants1D(vcfToAnnotate, reference, annotatedOut)
 
-    val INFERENCE_BATCH_SIZE = Var
-    val TRANSFER_BATCH_SIZE = Var
-    val TENSORTYPE = Var
+    val INFERENCE_BATCH_SIZE = Arg(param.$4(inferenceBatchSize))
+    val TRANSFER_BATCH_SIZE = Arg(param.$5(transferBatchSize))
+    val TENSORTYPE = Arg(param.$6(tensorType))
 
     override def setup = init { 
       cnnScore1D.initVariables o 
-      INFERENCE_BATCH_SIZE `=` param.$4(inferenceBatchSize) o
-      TRANSFER_BATCH_SIZE `=` param.$5(transferBatchSize) o
-      TENSORTYPE `=` param.$6(tensorType) 
+      INFERENCE_BATCH_SIZE o
+      TRANSFER_BATCH_SIZE o
+      TENSORTYPE
     }
 
     def op = gatk"""${name.dropRight(2)} \\
@@ -131,4 +131,9 @@ object Gatk extends ToolMetaInfo {
       -transfer-batch-size ${TRANSFER_BATCH_SIZE} \\
       -tensor-type ${TENSORTYPE}""" 
     } 
+
+
+    case class FilterVariantTranches(
+      
+    )
 }

@@ -2,7 +2,7 @@ package bash4s.scripts
 
 import bash4s.domain._
 
-case class ScriptMeta(name: String, description: String, argOpt: List[ArgOpt]) {
+case class ScriptMeta(name: String, description: String, argOpt: List[ArgOptional]) {
   //def $1(op: CommandOp) = BashCliArgVariable(argOpt.head.long, op) 
   def $1(op: CommandOp) = BashCliArgVariable("1", op) 
   def $2(op: CommandOp) = BashCliArgVariable("2", op) 
@@ -29,13 +29,13 @@ case class ScriptMeta(name: String, description: String, argOpt: List[ArgOpt]) {
   //TODO: Add support for VarArgszz
 }
 
-case class ArgOpt(long: String, description: String, short: String = "")
+case class ArgOptional(long: String, description: String, short: String = "")
 
 // Some day, maybe implement something like this
 // https://github.com/matejak/argbash
 object ArgTemplate {
 
-  def argHandler(argOpt: ArgOpt) = s"""
+  def argHandler(argOpt: ArgOptional) = s"""
     |-${argOpt.short}|--${argOpt.long})  # Takes an option argument; ensure it has been specified.
     |   if [ "$$2" ]; then
     |     ${argOpt.long}=$$2
@@ -52,10 +52,10 @@ object ArgTemplate {
     |    ;;
     """.stripMargin
 
-  def initToBlank(argOpt: ArgOpt)   = s"""${argOpt.long}="""
+  def initToBlank(argOpt: ArgOptional)   = s"""${argOpt.long}="""
   
   def optionParser(
-    args: List[ArgOpt]
+    args: List[ArgOptional]
   ) = 
     s"""#!/usr/bin/env bash
     |die() {

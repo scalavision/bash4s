@@ -28,7 +28,7 @@ object ScriptGenerator {
 
   // We only want to extract the parameter names and annotations / documentation
   // Therefor we stop here ..
-  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ScriptMeta("", "", List.empty[ArgOpt])}
+  implicit def nilGenerator[A]: ScriptGenerator[A] = pure[A] { _ => ScriptMeta("", "", List.empty[ArgOptional])}
 
   def combine[T](
       caseClass: CaseClass[ScriptGenerator, T]
@@ -39,7 +39,7 @@ object ScriptGenerator {
         case d: doc => d.description 
       }       
       val paramString = caseClass.parameters.map { p =>
-        ArgOpt(p.label, p.annotations.collect {
+        ArgOptional(p.label, p.annotations.collect {
           case d: arg => d.description
         }.headOption.fold(""){s => s}, 
         p.annotations.collect {
