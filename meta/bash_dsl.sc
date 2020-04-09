@@ -184,6 +184,10 @@ object dsl {
 
   def Var(implicit name: sourcecode.Name) = BashVariable(name.value)
 
+  def Arg(b: BashCliArgVariable)(implicit name: sourcecode.Name) = BashVariable(name.value, b)
+  
+  def ArgOpt(b: BashCliOptArgVariable)(implicit name: sourcecode.Name) = BashVariable(name.value, b)
+  
   def Array(implicit name: sourcecode.Name) = BashVariable(name.value, UnsetArrayVariable())
   
    // True if file exists
