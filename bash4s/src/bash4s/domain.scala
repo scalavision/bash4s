@@ -346,6 +346,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def <&-(op: CommandOp) = copy(postCommands = (self.postCommands :+ CloseStdIn()) :+ op)
     def >&-(op: CommandOp) = copy(postCommands = (self.postCommands :+ CloseStdOut()) :+ op)
 
+    def - = copy(postCommands = self.postCommands :+ DebugValue("-"))
     def & = copy(postCommands = self.postCommands :+ Amper())
     def `;` = copy(postCommands = self.postCommands :+ Semi())
     def `\n` = copy(postCommands = self.postCommands :+ NewLine())

@@ -28,7 +28,7 @@ object TestCases {
     r2,
     ref,
     cores,
-    readGroupInfo
+    Some(readGroupInfo)
   )
 
   val bamAligned = file"/path/to/sample1".markdup.sorted.indexed.bam
@@ -60,7 +60,7 @@ object BioSpec extends DefaultRunnableSpec {
         r2,
         ref,
         cores,
-        readGroupInfo
+        Some(readGroupInfo)
       )
 
       pprint.pprintln(mapAndAlign.script)
@@ -149,6 +149,6 @@ object BioSpec extends DefaultRunnableSpec {
     }
   )
 
-  def spec = suite("BioSpec")(suite1)
+  def spec = suite("BioSpec")(BioFormatSpec.suite1)
   
 }

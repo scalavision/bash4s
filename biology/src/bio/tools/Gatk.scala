@@ -3,6 +3,7 @@ package bio.tools
 import bio.dsl._
 import bio.Sample
 import bash4s.dsl._
+import bash4s.domain._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
 import bash4s.domain.IntVariable
@@ -16,7 +17,7 @@ sealed trait Gatk extends Script {
   val REF = Var
   val OUT_VCF = Var
 
-  def args(bam: MarkdupSortedIndexedBam, ref: Fasta) = 
+  def args(bam: MarkdupIndexedSortedBam, ref: Fasta) = 
     BAM `=` param.$1(bam) o
     REF `=` param.$2(ref)
 
@@ -28,8 +29,32 @@ object Gatk extends ToolMetaInfo {
 
   val HaplotypeCaller = "HaplotypeCaller"
 
+  case class MarkDuplicates(
+    bam: IndexedSortedBam,
+    bamOut: MarkdupIndexedSortedBam,
+    metricsFile: FilePath,
+    tmpDir: Option[FolderPath]
+  ) extends Gatk {
+
+    val BAM_INPUT = Arg(param.$1(bam))
+    val BAM_OUTPUT = Arg(param.$2(bamOut))
+    val METRICS = Arg(param.$3(metricsFile))
+    val TMPDIR = Var 
+
+    override def setup = init(
+      BAM_INPUT o
+      BAM_OUTPUT o
+      METRICS o
+      TMPDIR `=` param.$4(tmpDir, "--TMP_DIR")
+    )
+
+    def op = 
+      gatk"$name -I $BAM_INPUT -O $BAM_OUTPUT -M $METRICS $TMPDIR"
+
+  }
+
   case class HaplotypeCallerBasic(
-   bam: MarkdupSortedIndexedBam,
+   bam: MarkdupIndexedSortedBam,
    reference: Fasta,
    output: Vcf,
    bamOut: Option[Bam] = None
@@ -48,7 +73,7 @@ object Gatk extends ToolMetaInfo {
   }
   
   case class HaplotypeCallerGVCF(
-   bam: MarkdupSortedIndexedBam,
+   bam: MarkdupIndexedSortedBam,
    reference: Fasta,
    output: GVcf
   ) extends Gatk {

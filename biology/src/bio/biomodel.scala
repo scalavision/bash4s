@@ -2,7 +2,8 @@ package bio
 
 import bash4s.domain._
 
-final case class Cores(nrOfCores: Int)
+final case class Cores(value: Int)
+final case class Memory(value: String)
 final case class Sample(name: String)
 
 object biomodel {

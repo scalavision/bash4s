@@ -25,11 +25,33 @@ abstract class Script(implicit n: sourcecode.Name) {
       acc + s"\n # $$${index + 1} (${a.long}): ${a.description}" 
     }
 
+    // If scripts are merged, their environment also needs to be merged,
+    // hence we need to reindex the positional parameters, i.e. $1, $2 .. $8 etc.
+    val argParam: Vector[BashVariable] = {
+      val params: Vector[BashVariable] = setup match {
+        case None => Vector.empty[BashVariable]
+        case Some(value) => value match {
+          case ScriptBuilder(acc) => acc collect {
+            case b: BashVariable => b
+          }
+          case _ => throw new Exception("You can only use BashVariable as a command line argument")
+        }
+      }
+      params.zipWithIndex.map {
+        case (b, index) => b.value match {
+          case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = index.toString))
+          case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = index.toString()))
+          case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = index.toString()))
+          case _ => b
+        }
+      }
+    }
+
     ScriptLinter.lint(
       s"""#!/usr/bin/env bash
       |${comments}
       |${argComments}
-      |${setup.fold(""){_.txt}}
+      |${argParam.map(_.txt).mkString("\n")}
       |${op.txt}
       """.stripMargin
     )

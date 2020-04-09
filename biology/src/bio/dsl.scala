@@ -14,13 +14,15 @@ object dsl {
 //  type Fasta = BiologyFileType[FastaFile]
   type Read1 = BiologyFileType[Fastq with Gz]
   type Read2 = BiologyFileType[Fastq with Gz]
-  type MarkdupSortedIndexedBam = BiologyFileType[Markdup with Sorted with Indexed with BamFile]
+  type MarkdupIndexedSortedBam = BiologyFileType[Markdup with Indexed with Sorted with BamFile]
   type BwaIndex = BiologyFileType[BwaIndexed]
+  type IndexedSortedBam = BiologyFileType[Indexed with Sorted with Bam]
   type Dict = BiologyFileType[DictFile]
   type Ped = BiologyFileType[PedigreeFile]
   type Vcf = BiologyFileType[VcfFile]
   type CnnScored2DVcf = BiologyFileType[CnnScored_2D with VcfFile]
   type Bam = BiologyFileType[BamFile]
+  type SortedBam = BiologyFileType[Sorted with BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
 
   implicit def liftBioToBash4s[A]: BiologyFileType[A] => CommandOp = {
@@ -70,7 +72,8 @@ object dsl {
     }
   }
   
-  implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.nrOfCores)
+  implicit def liftCoresToBash4s: Cores => CommandOp = i => IntVariable(i.value)
+  implicit def liftMemToBash4s: Memory => CommandOp = i => txt"$i"
   implicit def liftSampleNameToBash4s: Sample => CommandOp = i => txt"$i"
 
   implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
@@ -83,10 +86,17 @@ object dsl {
     def gz = BiologyFilePath[Gz](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "gz")))
     def dict = BiologyFilePath[DictFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "dict")))
     def ped = BiologyFilePath[DictFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "ped")))
+    def sorted = BiologyFilePath[Sorted](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "sorted")))
   }
 
   implicit class BioSyntaxInt(i: Int) {
     def cores = Cores(i)
+    def G = Memory(s"${i}G")
+    def Gb = Memory(s"${i}Gb")
+    def GB = Memory(s"${i}GB")
+    def M = Memory(s"${i}M")
+    def Mb = Memory(s"${i}Mb")
+    def MB = Memory(s"${i}MB")
   }
   
   implicit class BioSyntax(private val s: StringContext) extends AnyVal {
