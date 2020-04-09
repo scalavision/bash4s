@@ -1,7 +1,7 @@
 package bio.tools
 
 import bio.dsl._
-import bio.biomodel._
+import bio.Sample
 import bash4s.dsl._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
@@ -262,7 +262,6 @@ object Gatk extends ToolMetaInfo {
       gatk"$name -R $REF -eval $EVAL --comp $TRUTHSET -o $OUTPUT"
 
   }
- 
 
   case class GenotypeConcordance(
     call: Vcf,
@@ -276,7 +275,7 @@ object Gatk extends ToolMetaInfo {
     val SAMPLE = Arg(param.$2(sample))
     val TRUTH_VCF = Arg(param.$3(truth))
     val OUTPUT = Arg(param.$4(output))
-    val TRUTH_SAMPLE = Arg(param.$5(truthSample.op))
+    val TRUTH_SAMPLE = Arg(param.$5(truthSample))
 
     def op = gatk"${name}"
 

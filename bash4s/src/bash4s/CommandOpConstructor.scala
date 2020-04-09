@@ -34,6 +34,10 @@ object CommandOpConstructor {
   implicit def vecConstructor[A](enc: CommandOpConstructor[A]): CommandOpConstructor[Vector[A]] = pure[Vector[A]] { vec => 
     ScriptBuilder(vec.map(enc.apply))
   }
+  
+  implicit def vecStringConstructor[String](enc: CommandOpConstructor[String]): CommandOpConstructor[Vector[String]] = pure[Vector[String]] { vec => 
+    ScriptBuilder(vec.map(enc.apply))
+  }
 
   implicit def optConstructor[A](enc: CommandOpConstructor[A]): CommandOpConstructor[Option[A]] = pure[Option[A]] { 
     _.fold[CommandOp](DebugValue("")) { e => enc.apply(e) }
