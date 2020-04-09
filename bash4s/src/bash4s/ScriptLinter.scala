@@ -90,6 +90,23 @@ object ScriptLinter {
       }.txt
     }
 
+    def splitLongLines(txt: String, maxChar: Int = 10) = {
+
+      def splitter(left: List[Char], accum: List[Char], script: String): String = left match {
+        case Nil => script + accum.mkString
+        case x::Nil => script + accum.mkString + x.toString()
+        case x::y::xs => x.toString() + y.toString() match {
+          case "| " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "|\\\n  ")
+          case "&&" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&&\\\n  ")
+          case "||" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "||\\\n  ")
+          case "& " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&\\\n  ")
+          case _ => splitter(xs, accum :+ x :+ y, script)
+        }
+      }
+
+      splitter(txt.toList, List.empty[Char], "")
+    }
+
     def simplify(op: CommandOp) = {
 
       op.txt.foldLeft("") { (acc, s) =>
