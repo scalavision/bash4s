@@ -25,7 +25,8 @@ object BioFormatSpec {
     test("map and align") {
      
       val output = file"/path/to/sample".markdup.indexed.sorted.bam
-
+      val metricsFile = file"/path/to/metrics.txt"
+      
       val mapAndAlign = BamFormat.MapAndAlign(
         read1,
         read2,
@@ -33,7 +34,8 @@ object BioFormatSpec {
         4.cores,
         2.G,
         output, 
-        None
+        None,
+        metricsFile
       )
 
       println(mapAndAlign.script)

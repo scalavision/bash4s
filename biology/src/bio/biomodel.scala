@@ -60,10 +60,15 @@ object biomodel {
       case BiologyFilePath(fileType) =>
         fileType.dropLastExtension()
     }
+
+    def fileType = self match {
+      case BiologyFilePath(fileType) => fileType
+    }
+
   }
 
   final case class BiologyFilePath[T](
-    fileType: FileHandle
+    override val fileType: FileHandle
   ) extends BiologyFileType[T] { self =>
 
     def e[T2]: String => BiologyFilePath[T2] =

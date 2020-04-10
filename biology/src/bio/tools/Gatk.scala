@@ -36,20 +36,21 @@ object Gatk extends ToolMetaInfo {
     tmpDir: Option[FolderPath]
   ) extends Gatk {
 
-    val BAM_INPUT = Arg(param.$1(bam))
-    val BAM_OUTPUT = Arg(param.$2(bamOut))
+    val MD_BAM_INPUT = Arg(param.$1(bam))
+    val MD_BAM_OUTPUT = Arg(param.$2(bamOut))
     val METRICS = Arg(param.$3(metricsFile))
-    val TMPDIR = Var 
+    val MD_TMPDIR = Var 
 
-    override def setup = init(
-      BAM_INPUT o
-      BAM_OUTPUT o
+    val env = 
+      MD_BAM_INPUT o
+      MD_BAM_OUTPUT o
       METRICS o
-      TMPDIR `=` param.$4(tmpDir, "--TMP_DIR")
-    )
+      MD_TMPDIR `=` param.$4(tmpDir, "--TMP_DIR")
+
+    override def setup = init(env)
 
     def op = 
-      gatk"$name -I $BAM_INPUT -O $BAM_OUTPUT -M $METRICS $TMPDIR"
+      gatk"$name -I $MD_BAM_INPUT -O $MD_BAM_OUTPUT -M $METRICS $MD_TMPDIR"
 
   }
 

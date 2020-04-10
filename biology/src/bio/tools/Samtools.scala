@@ -26,17 +26,17 @@ object Samtools {
     val MEM = Arg(param.$1(mem))
     val SAMTOOLS_SORT_CORES = Arg(param.$2(cores))
     val TMP_NAME = Arg(param.$3(tempName))
-    val BAM_OUT = Arg(param.$4(bamOut))
+    val ST_SORTED_BAM_OUT = Arg(param.$4(bamOut))
 
     val env = 
       MEM o 
       SAMTOOLS_SORT_CORES o 
       TMP_NAME o 
-      BAM_OUT
+      ST_SORTED_BAM_OUT
 
     override def setup = init(env)
     val op = 
-      samtools"sort -m ${MEM} -o ${BAM_OUT} -T ${TMP_NAME} -@ ${SAMTOOLS_SORT_CORES}"
+      samtools"sort -m ${MEM} -o ${ST_SORTED_BAM_OUT} -T ${TMP_NAME} -@ ${SAMTOOLS_SORT_CORES}"
 
   }
 
@@ -88,8 +88,9 @@ object Samtools {
       READ2
     )
     def op = 
-      TMP_READ1 `=` $"{$READ1%.*}" o
-      TMP_READ2 `=` $"{$READ2%.*}" o
+      __#"removing the .gz part of the *.fastq.gz extension" o
+      TMP_READ1 `=` $"{$READ1%.*}"                           o
+      TMP_READ2 `=` $"{$READ2%.*}"                           o
       bamToFastq.op > tmpFile.fileType &&
       (cat"${tmpFile.fileType}" | grep"'^@.*/1$$' -A 3 --no-group-separator" > TMP_READ1.$) &&
       (cat"${tmpFile.fileType}" | grep"'^@.*/2$$' -A 3 --no-group-separator" > TMP_READ2.$) &&

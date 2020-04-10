@@ -16,7 +16,7 @@ object dsl {
   type Read2 = BiologyFileType[Fastq with Gz]
   type MarkdupIndexedSortedBam = BiologyFileType[Markdup with Indexed with Sorted with BamFile]
   type BwaIndex = BiologyFileType[BwaIndexed]
-  type IndexedSortedBam = BiologyFileType[Indexed with Sorted with Bam]
+  type IndexedSortedBam = BiologyFileType[Indexed with Sorted with BamFile]
   type Dict = BiologyFileType[DictFile]
   type Ped = BiologyFileType[PedigreeFile]
   type Vcf = BiologyFileType[VcfFile]
@@ -87,6 +87,7 @@ object dsl {
     def dict = BiologyFilePath[DictFile](p.appendExtension("dict"))
     def ped = BiologyFilePath[DictFile](p.appendExtension("ped"))
     def sorted = BiologyFilePath[Sorted](p.appendExtension("sorted"))
+    def indexed = BiologyFilePath[Indexed](p.appendExtension("indexed"))
   }
 
   implicit class BioSyntaxInt(i: Int) {

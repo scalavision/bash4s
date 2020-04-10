@@ -1,5 +1,6 @@
 package bio.data
 
+import bash4s.domain._
 import bash4s.dsl._
 import bio.dsl._
 import bio.tools._
@@ -22,23 +23,37 @@ object BamFormat {
     cores: Cores,
     mem: Memory,
     bamOut: MarkdupIndexedSortedBam,
-    readGroupInfo: Option[TextVariable]
+    readGroupInfo: Option[TextVariable],
+    metricsFile: FilePath,
+    tmpDir: Option[FolderPath] = None
   ) extends BamFormat {
 
     val bwaMem = Bwa.MapAndAlign(read1, read2, ref, cores, readGroupInfo)
     val sorted = relFile"./temporary_sorted".sorted.bam
+    val sortedAndIndexed = relFile"./temporary_indexed".indexed.sorted.bam
 
     val bamSort = 
       Samtools.Sort(mem, cores.copy(value = if(cores.value > 4) 4 else cores.value), sorted)
 
+    val markDup = Gatk.MarkDuplicates(
+        sortedAndIndexed,
+        bamOut,
+        metricsFile,
+        tmpDir
+      )
+
     override def setup = init(
-      bwaMem.env o bamSort.env 
+      bwaMem.env o 
+      bamSort.env o 
+      markDup.env
     )
     def op = 
       (bwaMem.op | 
         Samtools.ConvertFromSamToBam.- |
         bamSort.op.-
-      ) && Samtools.Index(sorted).op
+      ) && Samtools.Index(sorted).op &&
+      mv"${sorted.fileType} ${sortedAndIndexed.fileType}" &&
+      markDup.op
 
 
   }

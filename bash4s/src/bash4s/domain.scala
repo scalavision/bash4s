@@ -316,7 +316,8 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def `=` (array: ArrayVariable) = copy(value = array)
     def `=` (parameterExpander: ParameterExpander) = copy(value = ParameterExpanderVariable(parameterExpander))
     def `=$` (op: CommandOp) = copy(value = SubShellVariable(op))
-    def expansionSafe: String = "\"" + "$" + "{" + name.trim() + "}" + "\""
+    def expansionSafe: String = 
+      "\"" + "$" + "{" + name.trim() + "}" + "\""
     def o(op: CommandOp) =
       ScriptBuilder(Vector(self, ScriptLine(), op))
   }
