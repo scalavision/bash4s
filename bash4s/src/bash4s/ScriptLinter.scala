@@ -97,10 +97,13 @@ object ScriptLinter {
         case x::Nil => script + accum.mkString + x.toString()
         case x::y::xs => x.toString() + y.toString() match {
           case "| " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "|\\\n  ")
+          case " |" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + " |\\\n  ")
           case "&&" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&&\\\n  ")
           case "||" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "||\\\n  ")
           case "& " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&\\\n  ")
-          case _ => splitter(xs, accum :+ x :+ y, script)
+          case " &" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + " &\\\n  ")
+          case _ => 
+            splitter(xs, accum :+ x :+ y, script)
         }
       }
 

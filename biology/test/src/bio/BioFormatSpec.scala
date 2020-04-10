@@ -34,7 +34,9 @@ object BioFormatSpec {
         None
       )
 
-      pprint.pprintln(ScriptLinter.splitLongLines(mapAndAlign.script))
+      val script = ScriptLinter.splitLongLines(mapAndAlign.script)
+      println(script)
+//      pprint.pprintln(script)
       
       assert(1)(equalTo(1))
     }

@@ -24,19 +24,19 @@ object Samtools {
     val tempName = sample.fold(txt"tmp"){s => txt"tmp_${s.name}"}
 
     val MEM = Arg(param.$1(mem))
-    val CORES = Arg(param.$2(cores))
+    val SAMTOOLS_SORT_CORES = Arg(param.$2(cores))
     val TMP_NAME = Arg(param.$3(tempName))
     val BAM_OUT = Arg(param.$4(bamOut))
 
     val env = 
       MEM o 
-      CORES o 
+      SAMTOOLS_SORT_CORES o 
       TMP_NAME o 
       BAM_OUT
 
     override def setup = init(env)
     val op = 
-      samtools"sort -m ${MEM} -o ${BAM_OUT} -T ${TMP_NAME} -@ ${CORES}"
+      samtools"sort -m ${MEM} -o ${BAM_OUT} -T ${TMP_NAME} -@ ${SAMTOOLS_SORT_CORES}"
 
   }
 

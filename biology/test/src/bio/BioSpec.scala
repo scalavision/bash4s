@@ -121,7 +121,6 @@ object BioSpec extends DefaultRunnableSpec {
       val annotatedVcf = file"/path/to/annotated".cnn2d.vcf
 
       val cnnAnno = Gatk.CNNScoreVariants1D(vcfToAnnotate, ref, annotatedVcf)
-
       pprint.pprintln(cnnAnno.script)
 
       val cnnAnno2D = Gatk.CNNScoreVariants2D(vcfToAnnotate, ref, annotatedVcf, IntVariable(2), IntVariable(2), txt"read-sensor")      

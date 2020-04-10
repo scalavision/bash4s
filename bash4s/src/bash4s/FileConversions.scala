@@ -5,6 +5,7 @@ import domain._
 object FileConversions {
 
   def convertToFilePath(txt: String): FilePath = {
+    pprint.pprintln(txt)
     val root = txt.head
     val folderAndFile = txt.tail.split(root)
     val folders = folderAndFile.dropRight(1).toVector

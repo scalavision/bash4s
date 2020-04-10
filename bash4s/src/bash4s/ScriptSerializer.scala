@@ -46,7 +46,8 @@ object ScriptSerializer {
               "\"" + "$" + "{" + name.trim() + "[@]}" + "\""
             case UnsetArrayVariable() =>
               "\"" + "$" + "{" + b.name.trim() + "[@]}" + "\""
-            case _ => b.expansionSafe
+            case _ => 
+              b.expansionSafe
           }
         case h: HereString => enc.apply(h)
         case h: HereDoc => enc.apply(h)
@@ -152,8 +153,10 @@ object ScriptSerializer {
       |${variableName}=( "${argName}" "$$TMP${paramName}" )
       |""".stripMargin
       else if(op.isEmpty() && argName.nonEmpty) {
-        s"""|${variableName}=( "${paramName}" )
-            |
+        s"""|${variableName}=( "${argName}" "" )
+            |set +u
+            |unset ${variableName}
+            |set -u
         |""".stripMargin
       }
       else s"""|
@@ -210,7 +213,9 @@ object ScriptSerializer {
           }}
           if(paramName.isEmpty) {
             if(valueDec.isEmpty()) {
-             s"""${b.name}=$${$name:+"${name}"}""" 
+             s"""|${b.name}=$${$name:+""}
+                 |unset ${b.name}
+             |""".stripMargin
             } else {
               s"""${b.name}=$${$name:-"${valueDec}"}"""
             }
