@@ -28,7 +28,8 @@ trait common extends ScalaModule {
     "-feature",
     "-Ywarn-value-discard",
     "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen"
+    "-Ywarn-numeric-widen",
+    "-Ypatmat-exhaust-depth", "off"
   )
   
   def scalaVersion = "2.13.1"

@@ -425,6 +425,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class Amper() extends CommandListOp
   final case class Semi() extends CommandListOp
   final case class NewLine() extends CommandListOp
+  final case class BreakLine() extends CommandListOp
   final case class OpenSubShellEnv() extends CommandListOp
   final case class CloseSubShellEnv() extends CommandListOp
   final case class OpenSubShellExp() extends CommandListOp

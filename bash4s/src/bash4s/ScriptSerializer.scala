@@ -710,6 +710,9 @@ object ScriptSerializer {
   implicit def newLineSerializer: ScriptSerializer[NewLine] =
     pure[NewLine] { _ => "\n" }
 
+  implicit def breakLineSerializer: ScriptSerializer[BreakLine] =
+    pure[BreakLine] { _ => "\\\n" }
+
   implicit def redirectStdOutWithStdErrSerializer
       : ScriptSerializer[RedirectStdOutWithStdErr] =
     pure[RedirectStdOutWithStdErr] { _ => "2>&1" }
