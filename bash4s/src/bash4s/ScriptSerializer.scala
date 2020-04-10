@@ -208,7 +208,10 @@ object ScriptSerializer {
           s"""${b.name}=$${$name:-"${valueDec}"}"""
         case BashCliOptArgVariable(name, valueOpt, paramName) => 
           val valueDec = valueOpt.fold(""){ value => value match {
-            case fileType: FileType => fileEnc.apply(fileType)
+            case fileType: FileType => 
+              println("optional cli")
+              pprint.pprintln(fileType)
+              fileEnc.apply(fileType)
             case _ => enc.apply(value)
           }}
           if(paramName.isEmpty) {
@@ -308,7 +311,8 @@ object ScriptSerializer {
     }
 
   implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
-    case FilePath(root, fp, fn) => s"""${root.toString}${fp.mkString(root.toString())}/${fn.baseName.value}${fn.extension.mkString(".")}"""
+    case FilePath(root, fp, fn) => 
+      s"""${root.toString}${fp.mkString(root.toString())}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case FolderPath(r, fp) => 
       s"""${fp.mkString(r.toString())}"""
     case FileDescriptor(value) => value.toString()

@@ -612,7 +612,14 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def parentFolderPath = copy(folders = folders.dropRight(1))
   }
 
-  sealed trait FileHandle extends FileType
+  sealed trait FileHandle extends FileType { self =>
+    def appendExtension(ext: String) = self match {
+      case FileName(baseName, extension) => FileName(baseName, extension :+ ext)
+      case FilePath(root, folderPath, fileName) => FilePath(root, folderPath, FileName(fileName.baseName, fileName.extension :+ ext))
+      case RelPath(folderPath, fileName) => 
+        RelPath(folderPath, FileName(fileName.baseName, fileName.extension :+ ext))
+    }
+  }
 
   final case class FilePath(
       root: Char,
@@ -629,7 +636,7 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       }
   
  final case class RelFolderPath(folders: Vector[String])
-      extends FileHandle{
+      extends FileType {
         def / (fileName: FileName) = RelPath(folders, fileName)
         def lastFolderName = folders.last
         def parentFolderName = folders.dropRight(1).last

@@ -76,17 +76,17 @@ object dsl {
   implicit def liftMemToBash4s: Memory => CommandOp = i => txt"$i"
   implicit def liftSampleNameToBash4s: Sample => CommandOp = i => txt"$i"
 
-  implicit class BioFileSyntax(private val p: FilePath) extends AnyVal {
-    def bam = BiologyFilePath[BamFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "bam")))
-    def markdup = BiologyFilePath[Markdup](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "markdup")))
-    def vcf = BiologyFilePath[VcfFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "vcf")))
-    def cnn2d = BiologyFilePath[CnnScored_2D](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "cnn2d")))
-    def fasta = BiologyFilePath[FastaFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fasta")))
-    def fastq = BiologyFilePath[Fastq](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "fastq")))
-    def gz = BiologyFilePath[Gz](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "gz")))
-    def dict = BiologyFilePath[DictFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "dict")))
-    def ped = BiologyFilePath[DictFile](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "ped")))
-    def sorted = BiologyFilePath[Sorted](p.copy(fileName = p.fileName.copy(extension = p.fileName.extension :+ "sorted")))
+  implicit class BioFileSyntax(private val p: FileHandle) extends AnyVal {
+    def bam = BiologyFilePath[BamFile](p.appendExtension("bam"))
+    def markdup = BiologyFilePath[Markdup](p.appendExtension("markdup"))
+    def vcf = BiologyFilePath[VcfFile](p.appendExtension("vcf"))
+    def cnn2d = BiologyFilePath[CnnScored_2D](p.appendExtension("cnn2d"))
+    def fasta = BiologyFilePath[FastaFile](p.appendExtension("fasta"))
+    def fastq = BiologyFilePath[Fastq](p.appendExtension("fastq"))
+    def gz = BiologyFilePath[Gz](p.appendExtension("gz"))
+    def dict = BiologyFilePath[DictFile](p.appendExtension("dict"))
+    def ped = BiologyFilePath[DictFile](p.appendExtension("ped"))
+    def sorted = BiologyFilePath[Sorted](p.appendExtension("sorted"))
   }
 
   implicit class BioSyntaxInt(i: Int) {

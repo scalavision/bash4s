@@ -23,18 +23,20 @@ object BioFormatSpec {
     "Operations on Bam files"
   )(
     test("map and align") {
-      
+     
+      val output = file"/path/to/sample".markdup.indexed.sorted.bam
+
       val mapAndAlign = BamFormat.MapAndAlign(
         read1,
         read2,
         ref,
         4.cores,
         2.G,
-        file"/path/to/sample".markdup.indexed.sorted.bam,
+        output, 
         None
       )
 
-      val script = ScriptLinter.splitLongLines(mapAndAlign.script)
+      val script = ScriptLinter.splitOnPipesAndLists(mapAndAlign.script)
       println(script)
 //      pprint.pprintln(script)
       

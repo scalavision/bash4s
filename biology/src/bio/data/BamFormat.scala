@@ -26,8 +26,8 @@ object BamFormat {
   ) extends BamFormat {
 
     val bwaMem = Bwa.MapAndAlign(read1, read2, ref, cores, readGroupInfo)
+    val sorted = relFile"./temporary_sorted".sorted.bam
 
-    val sorted = file"sorted".sorted.bam
     val bamSort = 
       Samtools.Sort(mem, cores.copy(value = if(cores.value > 4) 4 else cores.value), sorted)
 

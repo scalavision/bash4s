@@ -90,24 +90,20 @@ object ScriptLinter {
       }.txt
     }
 
-    def splitLongLines(txt: String, maxChar: Int = 10) = {
-
-      def splitter(left: List[Char], accum: List[Char], script: String): String = left match {
-        case Nil => script + accum.mkString
-        case x::Nil => script + accum.mkString + x.toString()
-        case x::y::xs => x.toString() + y.toString() match {
-          case "| " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "|\\\n  ")
-          case " |" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + " |\\\n  ")
-          case "&&" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&&\\\n  ")
-          case "||" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "||\\\n  ")
-          case "& " if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + "&\\\n  ")
-          case " &" if accum.length > maxChar => splitter(xs, List.empty[Char], script + accum.mkString + " &\\\n  ")
-          case _ => 
-            splitter(xs, accum :+ x :+ y, script)
-        }
-      }
-
-      splitter(txt.toList, List.empty[Char], "")
+    // highly experimental and untested!
+    def splitOnPipesAndLists(txt: String) = {
+      txt.toList.sliding(4,2).map {
+        case List(' ', '|','|', ' ') => " || \\\n  ".toList
+        case List('|', '|',' ', ' ') => " || \\\n  ".toList
+        case List(' ', ' ','|', '|') => " || \\\n  ".toList
+        case List(' ', '&','&', ' ') => " && \\\n  ".toList
+        case List('&', '&',' ', ' ') => " && \\\n  ".toList
+        case List(' ', '&',' ', _) => s" & \\\n  ".toList
+        case List(' ', '|',' ', _) => s" | \\\n  ".toList
+        case List(x, ' ','|', ' ') => s"$x | \\\n  ".toList
+        case a =>
+          a.filterNot(_ == '|').filterNot(_ == '&').dropRight(2)
+      }.toList.flatten.mkString
     }
 
     def simplify(op: CommandOp) = {

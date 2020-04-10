@@ -64,7 +64,9 @@ object biomodel {
         self.fileType match {
           case f: FileName => copy( fileType = f.copy(extension = f.extension :+ s))
           case f: RelPath => copy( fileType = f.copy(fileName = f.fileName.copy(extension = f.fileName.extension :+ s)))
-          case f: FilePath => copy(fileType = f.copy(fileName = f.fileName.copy(extension = f.fileName.extension :+ s)))
+          case f: FilePath => 
+            copy(fileType = FilePath(f.root, f.folderPath, FileName(f.fileName.baseName, f.fileName.extension :+ s) ))
+            //copy(fileType = f.copy(fileName = f.fileName.copy(extension = f.fileName.extension :+ s)))
           case _ => copy(fileType = fileType)
         }
 
