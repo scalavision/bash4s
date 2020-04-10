@@ -39,7 +39,7 @@ object Gatk extends ToolMetaInfo {
     val MD_BAM_INPUT = Arg(param.$1(bam))
     val MD_BAM_OUTPUT = Arg(param.$2(bamOut))
     val METRICS = Arg(param.$3(metricsFile))
-    val MD_TMPDIR = Var 
+    val MD_TMPDIR = Array
 
     val env = 
       MD_BAM_INPUT o
