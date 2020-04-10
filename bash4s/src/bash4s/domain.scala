@@ -367,6 +367,10 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
 
     def |(simpleCommand: SimpleCommand) =
       PipelineBuilder(Vector(self, PipeWithStdOut(), simpleCommand))
+    
+    def |(pipelineOp: CommandListBuilder) =
+      pipelineOp.copy(cmds = Vector(self, PipeWithStdOut()) ++ pipelineOp.cmds)
+      //PipelineBuilder(Vector(self, PipeWithStdOut(), simpleCommand))
 
     def |&(simpleCommand: SimpleCommand) =
       PipelineBuilder(Vector(self, PipeWithStdOut(), simpleCommand))
@@ -376,6 +380,9 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
 
     def &&(pipelineOp: PipelineOp) =
       CommandListBuilder(Vector(self, And(), pipelineOp))
+    
+    def &&(pipelineOp: CommandListBuilder) =
+      pipelineOp.copy(cmds = Vector(self, And()) ++ pipelineOp.cmds)
   }
 
   final case class PipelineBuilder(cmds: Vector[CommandOp]) extends PipelineOp {
@@ -431,6 +438,9 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       copy(cmds = (self.cmds :+ Or()) :+ cmdListOp)
 
     def &&(cmdListOp: CommandListOp) =
+      copy(cmds = (self.cmds :+ And()) :+ cmdListOp)
+    
+   def &&(cmdListOp: SimpleCommand) =
       copy(cmds = (self.cmds :+ And()) :+ cmdListOp)
 
     def & =
@@ -618,6 +628,13 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       case FilePath(root, folderPath, fileName) => FilePath(root, folderPath, FileName(fileName.baseName, fileName.extension :+ ext))
       case RelPath(folderPath, fileName) => 
         RelPath(folderPath, FileName(fileName.baseName, fileName.extension :+ ext))
+    }
+    
+    def dropLastExtension() = self match {
+      case FileName(baseName, extension) => FileName(baseName, extension.dropRight(1))
+      case FilePath(root, folderPath, fileName) => FilePath(root, folderPath, FileName(fileName.baseName, fileName.extension.dropRight(1)))
+      case RelPath(folderPath, fileName) => 
+        RelPath(folderPath, FileName(fileName.baseName, fileName.extension.dropRight(1)))
     }
   }
 
