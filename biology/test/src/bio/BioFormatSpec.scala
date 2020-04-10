@@ -7,7 +7,7 @@ import zio.test.Assertion._
 import bash4s.dsl._
 import bio.dsl._
 import bio.data._
-import bash4s.ScriptLinter
+//import bash4s.ScriptLinter
 
 object BamFileSetup {
   val read1 = file"/path/to/fastq_R1".fastq.gz
@@ -36,8 +36,7 @@ object BioFormatSpec {
         None
       )
 
-      val script = ScriptLinter.splitOnPipesAndLists(mapAndAlign.script)
-      println(script)
+      println(mapAndAlign.script)
 //      pprint.pprintln(script)
       
       assert(1)(equalTo(1))

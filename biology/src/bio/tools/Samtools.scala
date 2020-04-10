@@ -74,27 +74,27 @@ object Samtools {
 
     val bamToFastq = BamToFastq(bam)
     val tmpFile = relFile"./tmp".fastq
-    val tmpRead1 = read1.dropLastExtension
-    val tmpRead2 = read1.dropLastExtension
 
     val TMP_FASTQ = Arg(param.$2(tmpFile))
-    val TMP_READ1 = Arg(param.$3(tmpRead1))
-    val TMP_READ2 = Arg(param.$3(tmpRead2))
+    val READ1 = Arg(param.$3(read1))
+    val READ2 = Arg(param.$3(read2))
+    val TMP_READ1 = Var
+    val TMP_READ2 = Var
     
     override def setup = init(
       bamToFastq.env o 
       TMP_FASTQ o
-      TMP_READ1 o
-      TMP_READ2
+      READ1 o
+      READ2
     )
-
-    def op = bamToFastq.op > tmpFile &&
-      (cat"${tmpFile}" | grep"'^@.*/1$$' -A 3 --no-group-separator '" > TMP_READ1.$) &&
-      (cat"${tmpFile}" | grep"'^@.*/2$$' -A 3 --no-group-separator '" > TMP_READ2.$) &&
+    def op = 
+      TMP_READ1 `=` $"{$READ1%.*}" o
+      TMP_READ2 `=` $"{$READ2%.*}" o
+      bamToFastq.op > tmpFile.fileType &&
+      (cat"${tmpFile.fileType}" | grep"'^@.*/1$$' -A 3 --no-group-separator" > TMP_READ1.$) &&
+      (cat"${tmpFile.fileType}" | grep"'^@.*/2$$' -A 3 --no-group-separator" > TMP_READ2.$) &&
       bgzip"${TMP_READ1}" &&
       bgzip"${TMP_READ2}" &&
-      rm"$TMP_READ1" && 
-      rm"$TMP_READ2" &&
       rm"${TMP_FASTQ}"
 
   }

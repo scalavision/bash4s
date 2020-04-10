@@ -7,7 +7,7 @@ import zio.test.Assertion._
 import bash4s.dsl._
 import bio.dsl._
 //import bio.data._
-import bash4s.ScriptLinter
+//import bash4s.ScriptLinter
 
 object SamtoolsSpecSetup {
   val read1 = file"/path/to/fastq_R1".fastq.gz
@@ -29,8 +29,9 @@ object SamtoolsSpec {
         bam, read1, read2
       )
 
-      val script = ScriptLinter.splitOnPipesAndLists(fastqGenerated.script)
-      println(script)
+      //val script = ScriptLinter.splitOnPipesAndLists(fastqGenerated.script)
+//      val script = ScriptLinter.splitOnPipesAndLists(fastqGenerated.script)
+      println(fastqGenerated.script)
 //      pprint.pprintln(script)
       
       assert(1)(equalTo(1))

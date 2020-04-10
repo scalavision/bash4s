@@ -90,21 +90,38 @@ object ScriptLinter {
       }.txt
     }
 
-    // highly experimental and untested!
+
+    def splitUp(txt: String) = {
+
+      val splitOnAmper = txt.split("&&").map { chunk =>
+        chunk.split("&").mkString("& \\\n")
+      }.mkString(" && \\\n")
+
+       splitOnAmper.split("||").map { chunk =>
+        chunk.split("|")
+      }.mkString(" || \\\n")
+
+    }
+
+    // NOT WORKING!!!
+    /*
     def splitOnPipesAndLists(txt: String) = {
       txt.toList.sliding(4,2).map {
-        case List(' ', '|','|', ' ') => " || \\\n  ".toList
-        case List('|', '|',' ', ' ') => " || \\\n  ".toList
-        case List(' ', ' ','|', '|') => " || \\\n  ".toList
-        case List(' ', '&','&', ' ') => " && \\\n  ".toList
-        case List('&', '&',' ', ' ') => " && \\\n  ".toList
-        case List(' ', '&',' ', _) => s" & \\\n  ".toList
-        case List(' ', '|',' ', _) => s" | \\\n  ".toList
-        case List(x, ' ','|', ' ') => s"$x | \\\n  ".toList
-        case a =>
-          a.filterNot(_ == '|').filterNot(_ == '&').dropRight(2)
+        case List(' ', '|','|', ' ') => " || \\\n ".toList
+        case List('|', '|',' ', x) => s" || \\\n $x".toList
+        case List(x, ' ','|', '|') => s"$x || \\\n ".toList
+        case List(' ', '&','&', ' ') => " && \\\n ".toList
+        case List('&', '&',' ', x) => s" && \\\n $x".toList
+        case List(x, ' ','&', '&') => s"$x && \\\n ".toList
+        case List(' ', '&',' ', x) => s" & \\\n $x".toList
+        case List(' ', '|',' ', x) => s" | \\\n $x".toList
+        case List(x, ' ','|', ' ') => s"$x | \\\n ".toList
+        case List(' ', ' ', '&', '&') => " ".toList
+        case List(' ', ' ', '|', '|') => " ".toList
+        case a => a.drop(1).dropRight(1)
+          
       }.toList.flatten.mkString
-    }
+    }*/
 
     def simplify(op: CommandOp) = {
 

@@ -58,11 +58,24 @@ object ScriptSerializer {
   }
 
   implicit def simpleCommand(
-      implicit enc: ScriptSerializer[CommandOp]
+      implicit 
+      enc: ScriptSerializer[CommandOp],
+      fEnc: ScriptSerializer[FileType]
   ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
 
     val quoted = if(sc.name == "echo") true else false
-    
+   
+    val opEncoder: CommandOp => String = {
+      case b: BashVariable => 
+        if(b.isExpanded) 
+          b.expansionSafe
+        else {
+          enc.apply(b) 
+        }
+      case f: FileType => fEnc.apply(f)
+      case c: CommandOp => enc.apply(c)
+    }
+
     val args = sc.arg match {
       case CmdArgs(args) => if(args.isEmpty) "" else args.mkString(" ")
       case c: CmdArgCtx  => enc.apply(c)
@@ -71,11 +84,11 @@ object ScriptSerializer {
       case h: HereDoc => enc.apply(h)
     }
 
-    if(args.isEmpty()) s"${sc.name} ${sc.postCommands.map(enc.apply).mkString(" ")}"
+    if(args.isEmpty()) s"${sc.name} ${sc.postCommands.map { opEncoder }.mkString(" ")}"
     else {
       val argTxt = if(quoted) s""""${args}"""" else args
-      val preCommands = if(sc.preCommands.nonEmpty) sc.preCommands.map(enc.apply).mkString(" ") + " " else ""
-      val postCommands = if(sc.postCommands.nonEmpty) sc.postCommands.map(enc.apply).mkString(" ") else ""
+      val preCommands = if(sc.preCommands.nonEmpty) sc.preCommands.map(opEncoder).mkString(" ") + " " else ""
+      val postCommands = if(sc.postCommands.nonEmpty) sc.postCommands.map(opEncoder).mkString(" ") else ""
       s"""${preCommands}${sc.name} ${argTxt} ${postCommands}"""
     }
     

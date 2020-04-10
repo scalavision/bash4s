@@ -111,7 +111,7 @@ object dsl {
       SimpleCommand("samtools", CmdArgCtx(args.toVector, s))
     
     def bgzip(args: Any*) = 
-      SimpleCommand("samtools", CmdArgCtx(args.toVector, s))
+      SimpleCommand("bgzip", CmdArgCtx(args.toVector, s))
     
     
   }

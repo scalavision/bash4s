@@ -39,9 +39,9 @@ abstract class Script(implicit n: sourcecode.Name) {
       }
       params.zipWithIndex.map {
         case (b, index) => b.value match {
-          case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = index.toString))
-          case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = index.toString()))
-          case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = index.toString()))
+          case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString))
+          case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
+          case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
           case _ => b
         }
       }
