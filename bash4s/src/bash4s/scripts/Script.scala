@@ -12,35 +12,61 @@ abstract class Script(implicit n: sourcecode.Name) {
   def init(op: CommandOp) = Some(op)
   def setup: Option[CommandOp] = Option.empty[CommandOp]
 
+  //TODO: This could probably be generalized even more
   def lint = {
 
+    def addBreakEnd: CommandOp => List[CommandOp] = {
+      case Amper() => List(Amper(), BreakLine())
+      case PipeWithStdOut() => List(PipeWithStdOut(), BreakLine())
+      case PipeWithError() => List(PipeWithError(), BreakLine())
+      case Or() => List(Or(), BreakLine())
+      case And() => List(And(), BreakLine())
+      case b => List(b)
+    }
+
+    def break(builder: ScriptBuilder): CommandOp => ScriptBuilder = {
+      case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())
+      case And()=> builder.copy(acc = builder.acc :+ And() :+ BreakLine())
+      case PipeWithStdOut()=> builder.copy(acc = builder.acc :+ PipeWithStdOut() :+ BreakLine())
+      case PipeWithError() => builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
+      case Or() => builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
+      case PipelineBuilder(cmds) => cmds match {
+        case Vector() => builder.copy(acc = builder.acc :+ PipelineBuilder(cmds))
+        case _ +: _ => builder.copy(acc = builder.acc :+ PipelineBuilder( cmds.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+          acc ++ addBreakEnd(c) 
+        }
+        ))
+      }
+      case CommandListBuilder(cmds) => cmds match {
+        case Vector() => builder.copy(acc = builder.acc :+ PipelineBuilder(cmds))
+        case _ +: _ => builder.copy(acc = builder.acc :+ PipelineBuilder( cmds.foldLeft(Vector.empty[CommandOp]) { (acc, c) =>
+          acc ++ addBreakEnd(c) 
+        }
+        ))
+      }
+      case head => builder.copy(acc = builder.acc :+ head)
+    }
+
     def loop(op: CommandOp, builder: ScriptBuilder): CommandOp = op match {
-      case ScriptBuilder(acc) => loop(ScriptBuilder(acc.tail), acc.head match {
-        case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())
-        case And()=> builder.copy(acc = builder.acc :+ And() :+ BreakLine())
-        case PipeWithStdOut()=> builder.copy(acc = builder.acc :+ PipeWithStdOut() :+ BreakLine())
-        case PipeWithError() => builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
-        case Or()=> builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
-        case _ => builder.copy(acc = builder.acc :+ acc.head)
-      })
-       case CommandListBuilder(cmds) => cmds match {
-         case Vector() =>  builder
-         case x +: xs => loop(CommandListBuilder(xs), x match {
-            case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())
-            case And()=> builder.copy(acc = builder.acc :+ And() :+ BreakLine())
-            case PipeWithStdOut()=> builder.copy(acc = builder.acc :+ PipeWithStdOut() :+ BreakLine())
-            case PipeWithError() => builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
-            case Or()=> builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
-            case _ => builder.copy(acc = builder.acc :+ cmds.head)
-         })
-       }
-       case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())
-       case And()=> builder.copy(acc = builder.acc :+ And() :+ BreakLine())
-       case PipeWithStdOut()=> builder.copy(acc = builder.acc :+ PipeWithStdOut() :+ BreakLine())
-       case PipeWithError()=> builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
-       case Or()=> builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
-       
-       case _ => builder.copy(acc = builder.acc :+ op)
+      case ScriptBuilder(acc) => acc match {
+        case Vector() => builder
+        case x +: xs => loop(ScriptBuilder(xs), break(builder)(x))
+      }
+      case CommandListBuilder(cmds) => cmds match {
+        case Vector() =>  builder
+        case x +: xs => loop(CommandListBuilder(xs), break(builder)(x))
+      }
+      case PipelineBuilder(cmds) => cmds match {
+        case Vector() => builder
+        case x +: xs => loop(PipelineBuilder(xs), break(builder)(x))
+      }
+
+      case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())
+      case And() => builder.copy(acc = builder.acc :+ And() :+ BreakLine())
+      case PipeWithStdOut() => builder.copy(acc = builder.acc :+ PipeWithStdOut() :+ BreakLine())
+      case PipeWithError() => builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
+      case Or() => builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
+      case _ => builder.copy(acc = builder.acc :+ op)
        /*
        case AnsiCQuoted(_)=> ???
        case AppendStdOut()=> ???

@@ -41,9 +41,9 @@ object BioFormatSpec {
       println(mapAndAlign.script)
 //      pprint.pprintln(script)
       
-      pprint.pprintln(mapAndAlign.lint.txt)
-      pprint.pprintln(mapAndAlign.op)
       pprint.pprintln(mapAndAlign.lint)
+      pprint.pprintln(mapAndAlign.lint.txt)
+//      pprint.pprintln(mapAndAlign.op)
       assert(1)(equalTo(1))
     }
   )
