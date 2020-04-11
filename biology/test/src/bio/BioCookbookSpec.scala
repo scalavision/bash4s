@@ -6,8 +6,7 @@ import zio.test.Assertion._
 
 import bash4s.dsl._
 import bio.dsl._
-import bio.data._
-//import bash4s.ScriptLinter
+import bio.cookbook._
 
 object BamFileSetup {
   val read1 = file"/path/to/fastq_R1".fastq.gz
@@ -17,7 +16,7 @@ object BamFileSetup {
 
 import BamFileSetup._
 
-object BioFormatSpec {
+object BioCookbookSpec {
 
   val suite1 = suite(
     "Operations on Bam files"
@@ -27,7 +26,7 @@ object BioFormatSpec {
       val output = file"/path/to/sample".markdup.indexed.sorted.bam
       val metricsFile = file"/path/to/metrics.txt"
       
-      val mapAndAlign = BamFormat.MapAndAlign(
+      val mapAndAlign = FastqOperations.MapAndAlign(
         read1,
         read2,
         ref,
@@ -39,12 +38,21 @@ object BioFormatSpec {
       )
 
       println(mapAndAlign.script)
-//      pprint.pprintln(script)
-      
-      pprint.pprintln(mapAndAlign.lint)
-      pprint.pprintln(mapAndAlign.lint.txt)
-//      pprint.pprintln(mapAndAlign.op)
       assert(1)(equalTo(1))
+    },
+    test("merge fastq files") {
+
+      val readsLocation = dirPath"/path/to/reads"
+      
+      val mergeReads = FastqOperations.MergeReads(
+        readsLocation,
+        read1,
+        read2
+      )
+
+      pprint.pprintln(mergeReads.script)
+      assert(1)(equalTo(1))
+
     }
   )
 

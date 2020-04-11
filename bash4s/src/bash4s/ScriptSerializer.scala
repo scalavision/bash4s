@@ -125,7 +125,7 @@ object ScriptSerializer {
   implicit def cInSerializer(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CIn] =
-    pure[CIn] { cdo => s"in ${enc.apply(cdo.op)}" }
+    pure[CIn] { cdo => s"in ${enc.apply(cdo.op)};\n" }
 
   implicit def forLoopSerializer(
       implicit enc: ScriptSerializer[CommandOp]
@@ -299,7 +299,7 @@ object ScriptSerializer {
   implicit def cDoSerializer(
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CDo] =
-    pure[CDo] { cdo => s"\ndo\n${enc.apply(cdo.op)}\n" }
+    pure[CDo] { cdo => s"do\n${enc.apply(cdo.op)}\n" }
 
   implicit def cThenSerializer(
       implicit enc: ScriptSerializer[CommandOp]
@@ -648,8 +648,11 @@ object ScriptSerializer {
     "$"
   }
 
-  implicit def subShellExpSerializer: ScriptSerializer[OpenSubShellExp] =
+  implicit def openSubShellExpSerializer: ScriptSerializer[OpenSubShellExp] =
     pure[OpenSubShellExp] { _ => "$(" }
+
+  implicit def closeSubShellExpSerializer: ScriptSerializer[CloseSubShellExp] =
+    pure[CloseSubShellExp] { _ => ")" }
 
   implicit def openDoubleSquareBracketSerializer
       : ScriptSerializer[OpenDoubleSquareBracket] =
@@ -659,13 +662,13 @@ object ScriptSerializer {
     pure[OpenSubShellEnv] { _ => "(\n" }
   
   implicit def closeSubShellEnvSerializer: ScriptSerializer[CloseSubShellEnv] =
-    pure[CloseSubShellEnv] { _ => "\n)\n" }
+    pure[CloseSubShellEnv] { _ => "\n)" }
 
   implicit def openCommandListSerializer: ScriptSerializer[OpenGroupInContext] =
     pure[OpenGroupInContext] { _ => "{\n" }
   
   implicit def closeCommandListSerializer: ScriptSerializer[CloseGroupInContext] =
-    pure[CloseGroupInContext] { _ => "\n}\n" }
+    pure[CloseGroupInContext] { _ => "\n}" }
 
   implicit def pipeWithStdOutSerializer: ScriptSerializer[PipeWithStdOut] =
     pure[PipeWithStdOut] { _ => "|" }

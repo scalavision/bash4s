@@ -148,6 +148,6 @@ object BioSpec extends DefaultRunnableSpec {
     }
   )
 
-  def spec = suite("BioSpec")(BioFormatSpec.suite1, SamtoolsSpec.suite1)
+  def spec = suite("BioSpec")(BioCookbookSpec.suite1, SamtoolsSpec.suite1)
   
 }

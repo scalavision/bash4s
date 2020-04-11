@@ -44,12 +44,13 @@ object Samtools {
     bam: Bam
   ) extends Samtools {
 
-    val BAM = Arg(param.$1(bam))
-    
-    override def setup = init(BAM) 
+    val BAMFILE_TO_INDEX= Arg(param.$1(bam))
+   
+    val env = BAMFILE_TO_INDEX
+    override def setup = init(env) 
 
     val op =
-      samtools"index $BAM"
+      samtools"index $BAMFILE_TO_INDEX"
 
   }
 

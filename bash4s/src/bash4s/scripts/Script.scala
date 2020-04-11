@@ -12,8 +12,8 @@ abstract class Script(implicit n: sourcecode.Name) {
   def init(op: CommandOp) = Some(op)
   def setup: Option[CommandOp] = Option.empty[CommandOp]
 
-  //TODO: This could probably be generalized even more
-  def lint = {
+  //TODO: This could probably be generalized a lot
+  def scriptFormatter = {
 
     def addBreakEnd: CommandOp => List[CommandOp] = {
       case Amper() => List(Amper(), BreakLine())
@@ -67,98 +67,6 @@ abstract class Script(implicit n: sourcecode.Name) {
       case PipeWithError() => builder.copy(acc = builder.acc :+ PipeWithError() :+ BreakLine())
       case Or() => builder.copy(acc = builder.acc :+ Or() :+ BreakLine())
       case _ => builder.copy(acc = builder.acc :+ op)
-       /*
-       case AnsiCQuoted(_)=> ???
-       case AppendStdOut()=> ???
-       case AppendStdOutWithSdErr()=> ???
-       case ArithmeticExpression(_)=> ???
-       case ArrayVariable(_)=> ???
-       case BashCliArgVariable(_) => ???
-       case BashCliFlagArgVariable(_)=> ???
-       case BashCliOptArgVariable(_)=> ???
-       case BashCliVecArgVariable(_)=> ???
-       case BashVariable(_)=> ???
-       case CDo(_)=> ???
-       case CDone()=> ???
-       case CElif(_)=> ???
-       case CElse(_)=> ???
-       case CFi()=> ???
-       case CFileDescriptorIsOpenAndReferTerminal(_)=> ???
-       case CFor(_)=> ???
-       case CGroupIdBitSet(_)=> ???
-       case CIf(_)=> ???
-       case CIfIsFile(_)=> ???
-       case CIn(_)=> ???
-       case CIsBlock(_)=> ???
-       case CIsCharacter(_)=> ???
-       case CIsDirectory(_)=> ???
-       case CIsExecutable(_)=> ???
-       case CIsFile(_)=> ???
-       case CIsGreaterThanZero(_)=> ???
-       case CIsModifiedSinceLastRead(_)=> ???
-       case CIsNamedPipe(_)=> ???
-       case CIsOwnedByEffectiveGroupId(_)=> ???
-       case CIsOwnedByEffectiveUserId(_)=> ???
-       case CIsReadAble(_)=> ???
-       case CIsSocket(_)=> ???
-       case CIsSymbolLink(_)=> ???
-       case CIsSymbolicLink(_)=> ???
-       case CIsWritable(_)=> ???
-       case CStickyBitSet(_)=> ???
-       case CThen(_)=> ???
-       case CUntil(_)=> ???
-       case CUserIdBitSet(_)=> ???
-       case CWhile(_)=> ???
-       case CloseDoubleSquareBracket()=> ???
-       case CloseGroupInContext()=> ???
-       case CloseStdIn()=> ???
-       case CloseStdOut()=> ???
-       case CloseSubShellEnv()=> ???
-       case CloseSubShellExp()=> ???
-       case CmdArgCtx(_)=> ???
-       case CmdArgs(_)=> ???
-       case CommandListBuilder(_)=> ???
-       case CommentLine(_)=> ???
-       case ConditionalBuilder(_)=> ???
-       case DebugValue(_)=> ???
-       case Dollar()=> ???
-       case EmptyArg()=> ???
-       case FileDescriptor(_)=> ???
-       case FileName(_)=> ???
-       case FilePath(_)=> ???
-       case FolderPath(_)=> ???
-       case HereDoc(_)=> ???
-       case HereString(_)=> ???
-       case IntVariable(_)=> ???
-       case LocalizationString(_)=> ???
-       case Negate()=> ???
-       case NewLine()=> ???
-       case OpenDoubleSquareBracket()=> ???
-       case OpenGroupInContext()=> ???
-       case OpenSubShellEnv()=> ???
-       case OpenSubShellExp()=> ???
-       case Or()=> ???
-       case ParameterExpander(_)=> ???
-       case ParameterExpanderVariable(_)=> ???
-       case PipeWithError()=> ???
-       case PipeWithStdOut()=> ???
-       case PipelineBuilder(_)=> ???
-       case RedirectStdOutWithStdErr()=> ???
-       case RelFolderPath(_)=> ???
-       case RelPath(_)=> ???
-       case ScriptLine()=> ???
-       case Semi()=> ???
-       case SheBang(_)=> ???
-       case SimpleCommand(_)=> ???
-       case StdErr()=> ???
-       case StdIn()=> ???
-       case StdOut()=> ???
-       case StdOutWithStdErr()=> ???
-       case SubShellVariable(_)=> ???
-       case TextVariable(_)=> ???
-       case UnsetArrayVariable()=> ???
-       case UnsetVariable(_) => ???
-       */
     }
 
     loop(op, ScriptBuilder(Vector.empty))
@@ -205,8 +113,102 @@ abstract class Script(implicit n: sourcecode.Name) {
       |${comments}
       |${argComments}
       |${argParam.map(_.txt).mkString("\n")}
-      |${op.txt}
+      |${scriptFormatter.txt}
       """.stripMargin
     )
   }
+  
 }
+
+/* A list of most common CommandOp types, lacking some of the FileType types etc.
+case AnsiCQuoted(_)=> ???
+case AppendStdOut()=> ???
+case AppendStdOutWithSdErr()=> ???
+case ArithmeticExpression(_)=> ???
+case ArrayVariable(_)=> ???
+case BashCliArgVariable(_) => ???
+case BashCliFlagArgVariable(_)=> ???
+case BashCliOptArgVariable(_)=> ???
+case BashCliVecArgVariable(_)=> ???
+case BashVariable(_)=> ???
+case CDo(_)=> ???
+case CDone()=> ???
+case CElif(_)=> ???
+case CElse(_)=> ???
+case CFi()=> ???
+case CFileDescriptorIsOpenAndReferTerminal(_)=> ???
+case CFor(_)=> ???
+case CGroupIdBitSet(_)=> ???
+case CIf(_)=> ???
+case CIfIsFile(_)=> ???
+case CIn(_)=> ???
+case CIsBlock(_)=> ???
+case CIsCharacter(_)=> ???
+case CIsDirectory(_)=> ???
+case CIsExecutable(_)=> ???
+case CIsFile(_)=> ???
+case CIsGreaterThanZero(_)=> ???
+case CIsModifiedSinceLastRead(_)=> ???
+case CIsNamedPipe(_)=> ???
+case CIsOwnedByEffectiveGroupId(_)=> ???
+case CIsOwnedByEffectiveUserId(_)=> ???
+case CIsReadAble(_)=> ???
+case CIsSocket(_)=> ???
+case CIsSymbolLink(_)=> ???
+case CIsSymbolicLink(_)=> ???
+case CIsWritable(_)=> ???
+case CStickyBitSet(_)=> ???
+case CThen(_)=> ???
+case CUntil(_)=> ???
+case CUserIdBitSet(_)=> ???
+case CWhile(_)=> ???
+case CloseDoubleSquareBracket()=> ???
+case CloseGroupInContext()=> ???
+case CloseStdIn()=> ???
+case CloseStdOut()=> ???
+case CloseSubShellEnv()=> ???
+case CloseSubShellExp()=> ???
+case CmdArgCtx(_)=> ???
+case CmdArgs(_)=> ???
+case CommandListBuilder(_)=> ???
+case CommentLine(_)=> ???
+case ConditionalBuilder(_)=> ???
+case DebugValue(_)=> ???
+case Dollar()=> ???
+case EmptyArg()=> ???
+case FileDescriptor(_)=> ???
+case FileName(_)=> ???
+case FilePath(_)=> ???
+case FolderPath(_)=> ???
+case HereDoc(_)=> ???
+case HereString(_)=> ???
+case IntVariable(_)=> ???
+case LocalizationString(_)=> ???
+case Negate()=> ???
+case NewLine()=> ???
+case OpenDoubleSquareBracket()=> ???
+case OpenGroupInContext()=> ???
+case OpenSubShellEnv()=> ???
+case OpenSubShellExp()=> ???
+case Or()=> ???
+case ParameterExpander(_)=> ???
+case ParameterExpanderVariable(_)=> ???
+case PipeWithError()=> ???
+case PipeWithStdOut()=> ???
+case PipelineBuilder(_)=> ???
+case RedirectStdOutWithStdErr()=> ???
+case RelFolderPath(_)=> ???
+case RelPath(_)=> ???
+case ScriptLine()=> ???
+case Semi()=> ???
+case SheBang(_)=> ???
+case SimpleCommand(_)=> ???
+case StdErr()=> ???
+case StdIn()=> ???
+case StdOut()=> ???
+case StdOutWithStdErr()=> ???
+case SubShellVariable(_)=> ???
+case TextVariable(_)=> ???
+case UnsetArrayVariable()=> ???
+case UnsetVariable(_) => ???
+*/
