@@ -38,15 +38,13 @@ object Mosdepth {
     val MOSDEPTH_SAMPLE = Arg(param.$6(txt"${sample.name}"))
     val MOSDEPTH_FLAGS = Arg(param.$7(IntVariable(flags)))
 
-    val env =  
+    override def args =  
       MOSDEPTH_WINDOW_SIZE o
       MOSDEPTH_CORES o
       MOSDEPTH_MAPPING_QUALITY o
       MOSDEPTH_SAMPLE o
       MOSDEPTH_FLAGS o
       args(bam, ref)
-
-    override def setup = init(env)
     def op = 
       mosdepth"-t $MOSDEPTH_CORES -b $MOSDEPTH_WINDOW_SIZE -f $MOSDEPTH_REF -F $MOSDEPTH_FLAGS -Q $MOSDEPTH_MAPPING_QUALITY $MOSDEPTH_SAMPLE $MOSDEPTH_BAM"
 

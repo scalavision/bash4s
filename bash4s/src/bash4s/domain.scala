@@ -43,6 +43,7 @@ object domain {
 
   }
 
+  final case class NoOp() extends CommandOp
   final case class ScriptLine() extends CommandOp
   sealed trait CommandArg extends CommandOp
 

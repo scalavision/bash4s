@@ -37,11 +37,10 @@ object BamOperations {
     )
 
     val MOSDEPTH_WORKDIR = Arg(param.$1(workFolder))
-    override def setup = init(
+    override def args =
       MOSDEPTH_WORKDIR o 
-      (convertToBigWig.env) o
+      convertToBigWig.env o
       readDepth.env  
-    )
    
     val op = 
       rm"-rf ${MOSDEPTH_WORKDIR}"    o

@@ -17,13 +17,12 @@ sealed trait Gatk extends Script {
   val REF = Var
   val OUT_VCF = Var
 
-  def args(bam: MarkdupIndexedSortedBam, ref: Fasta) = 
+  def setup(bam: MarkdupIndexedSortedBam, ref: Fasta) = 
     BAM `=` param.$1(bam) o
     REF `=` param.$2(ref)
-
 }
 
-object Gatk extends ToolMetaInfo {
+object Gatk { 
   val packageName = "gatk"
   val version = "4.1.6.0"
 
@@ -41,13 +40,11 @@ object Gatk extends ToolMetaInfo {
     val METRICS = Arg(param.$3(metricsFile))
     val MD_TMPDIR = Array
 
-    val env = 
+    override def args = 
       MD_BAM_INPUT o
       MD_BAM_OUTPUT o
       METRICS o
       MD_TMPDIR `=` param.$4(tmpDir, "--TMP_DIR")
-
-    override def setup = init(env)
 
     def op = 
       gatk"$name -I $MD_BAM_INPUT -O $MD_BAM_OUTPUT -M $METRICS $MD_TMPDIR"
@@ -62,11 +59,10 @@ object Gatk extends ToolMetaInfo {
   ) extends Gatk {
 
     val BAM_OUT = Array
-    override def setup = init(
-      args(bam, reference) o
+    override def args =
+      setup(bam, reference) o
       OUT_VCF `=` param.$3(output) o
       BAM_OUT `=` param.$4(bamOut.op, "-bamout")
-    )
 
     def op = 
       gatk"$HaplotypeCaller -R ${REF} -I ${BAM} -O ${OUT_VCF} ${BAM_OUT}"
@@ -79,10 +75,9 @@ object Gatk extends ToolMetaInfo {
    output: GVcf
   ) extends Gatk {
 
-    override def setup = init(
-      args(bam, reference) o
+    override def args =
+      setup(bam, reference) o
       OUT_VCF `=` param.$3(output)
-    )
 
     def op = 
       gatk"$HaplotypeCaller -R ${REF} -I ${BAM} -O ${OUT_VCF}"
@@ -97,11 +92,10 @@ object Gatk extends ToolMetaInfo {
 
     val VARIANTS = Var
 
-    override def setup = init(
+    override def args =
       REF `=` param.$1(reference) o
       VARIANTS `=` param.$2(variants) o
       OUT_VCF `=` param.$3(finalVariantsOutput)
-    )
 
     def op = 
       gatk"${name} -R ${REF} -V ${VARIANTS} -O ${OUT_VCF}"
@@ -117,12 +111,10 @@ object Gatk extends ToolMetaInfo {
     val VCF_TO_ANNOTATE = Var
     val ANNOTATED_VCF_OUT = Var
 
-    val initVariables = 
+    override def args = 
       VCF_TO_ANNOTATE `=` param.$1(vcfToAnnotate) o
       REF `=` param.$2(reference) o
       ANNOTATED_VCF_OUT `=` param.$3(annotatedOut)
-
-    override def setup = init(initVariables)
 
     def op = gatk"${name.dropRight(2)} -V ${VCF_TO_ANNOTATE} -R ${REF} -O ${ANNOTATED_VCF_OUT}"
 
@@ -143,14 +135,14 @@ object Gatk extends ToolMetaInfo {
     val TRANSFER_BATCH_SIZE = Arg(param.$5(transferBatchSize))
     val TENSORTYPE = Arg(param.$6(tensorType))
 
-    override def setup = init { 
+    override def args = 
       VCF_TO_ANNOTATE o
       REF `=` param.$2(reference) o
       ANNOTATED_VCF_OUT o
       INFERENCE_BATCH_SIZE o
       TRANSFER_BATCH_SIZE o
       TENSORTYPE
-    }
+      
     def op = gatk"""${name.dropRight(2)} \\
       -V ${VCF_TO_ANNOTATE} \\
       -R ${REF} \\
@@ -178,7 +170,7 @@ object Gatk extends ToolMetaInfo {
       val RESOURCES = Array
       val INVALIDATE_PREVIOUS_FILTERS = Array 
     
-      override def setup = init(
+      override def args =
         CNN_SCORED_2D o
         RESOURCES `=` param.$2(resources.op, "--resources") o
         INFO_KEY  o
@@ -186,7 +178,6 @@ object Gatk extends ToolMetaInfo {
         INDEL_TRANCHE o
         FILTERED_2D_OUTPUT o
         INVALIDATE_PREVIOUS_FILTERS `=` param.$7(invalidatePreviousFilters, "--invalidate-previous-filters")
-      )
 
       def op = 
         gatk"""${name} \\
@@ -215,13 +206,12 @@ object Gatk extends ToolMetaInfo {
     val POPULATION = Arg(param.$4(population))
     val OUTPUT = Arg(param.$5(output))
 
-    override def setup = init(
+    override def args =
       REF `=` param.$1(ref) o
       INPUT o
       FAMILY o
       POPULATION o
       OUTPUT
-    )
 
     def op = 
       gatk"${name} -R $REF -V $INPUT -ped $FAMILY -supporting $POPULATION -O $OUTPUT"
@@ -241,13 +231,12 @@ object Gatk extends ToolMetaInfo {
     val FILTER_NAME = Arg(param.$4(genotypeFilterName))
     val OUTPUT = Arg(param.$5(output))
 
-    override def setup = init(
+    override def args =
       REF `=` param.$1(ref)  o
       INPUT o
       FILTER_EXPRESSION o
       FILTER_NAME o
       OUTPUT
-    )
 
     def op = 
       gatk"${name} -R $REF -V $INPUT --genotype-filter-expression $FILTER_EXPRESSION --genotype-filter-name $FILTER_NAME -O $OUTPUT"
@@ -277,12 +266,11 @@ object Gatk extends ToolMetaInfo {
     val TRUTHSET = Arg(param.$3(truthSet))
     val OUTPUT = Arg(param.$4(output))
 
-    override def setup = init(
+    override def args =
       REF `=` param.$1(ref) o
       EVAL o
       TRUTHSET o
       OUTPUT
-    )
 
     def op = 
       gatk"$name -R $REF -eval $EVAL --comp $TRUTHSET -o $OUTPUT"

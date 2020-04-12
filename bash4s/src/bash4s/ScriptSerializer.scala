@@ -736,4 +736,6 @@ object ScriptSerializer {
   implicit def scriptLineSerializer: ScriptSerializer[ScriptLine] =
     pure[ScriptLine] { _ => "\n" }
 
+  implicit def noOpSerializer: ScriptSerializer[NoOp] =
+    pure[NoOp] { _ => "" }
 }

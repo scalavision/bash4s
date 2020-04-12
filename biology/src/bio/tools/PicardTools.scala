@@ -1,6 +1,6 @@
 package bio.tools
 
-object PicardTools extends ToolMetaInfo {
+object PicardTools {
   val packageName = "picard-tools"
   val version = "2.21.8"
 }

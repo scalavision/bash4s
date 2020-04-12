@@ -43,12 +43,11 @@ object FastqOperations {
         tmpDir
       )
 
-    override def setup = init(
-      bwaMem.env o 
-      bamSort.env o 
-      bamIndex.env o
-      markDup.env
-    )
+    override def args =
+      bwaMem.args o 
+      bamSort.args o 
+      bamIndex.args o
+      markDup.args
     
     def op = 
       (bwaMem.op | 
@@ -74,8 +73,8 @@ object FastqOperations {
     val READ1 = Arg(param.$2(read1))
     val READ2 = Arg(param.$3(read2))
 
-    override def setup = 
-      init(FASTQ_FOLDER o READ1 o READ2)
+    override def args = 
+      FASTQ_FOLDER o READ1 o READ2
 
     private def mergeCmd(read: String) = 
       cat %(find"""-maxdepth 1 -name "*${read}*.fastq.gz" | sort""")

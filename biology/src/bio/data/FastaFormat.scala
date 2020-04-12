@@ -25,7 +25,7 @@ object FastaFormat {
   ) extends Script with FastaFormat {
     
     val DICT_FILE = Var
-    override def setup = init(
+    override def args = (
       defineFasta(fastaFile, param)    o
       DICT_FILE `=` param.$2(dictFile)
     )
@@ -36,7 +36,7 @@ object FastaFormat {
   case class CreateIndex(
     fastaFile: Fasta
   ) extends Script with FastaFormat {
-    override def setup = init(defineFasta(fastaFile, param))
+    override def args = (defineFasta(fastaFile, param))
     def op = 
       samtools"faidx ${FASTA_FILE}"
   }
@@ -57,7 +57,7 @@ object FastaFormat {
     val CHR_FILE = Var 
     val CHR_NAME = Var
 
-    override def setup = init(
+    override def args = (
       FASTA_FILE `=` param.$1(fastaFile) o
       WORKDIR `=` param.$2(workDir) o
       RESULTDIR `=` param.$3(resultDir) 
@@ -77,7 +77,7 @@ object FastaFormat {
   case class CreateBwaIndex(
     fastaFile: Fasta
   ) extends Script with FastaFormat {
-    override def setup = init(defineFasta(fastaFile, param))
+    override def args = (defineFasta(fastaFile, param))
     def op = 
       bwa"index ${FASTA_FILE}"
   }

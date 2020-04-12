@@ -28,13 +28,12 @@ object Samtools {
     val TMP_NAME = Arg(param.$3(tempName))
     val ST_SORTED_BAM_OUT = Arg(param.$4(bamOut))
 
-    val env = 
+    override def args = 
       MEM o 
       SAMTOOLS_SORT_CORES o 
       TMP_NAME o 
       ST_SORTED_BAM_OUT
 
-    override def setup = init(env)
     val op = 
       samtools"sort -m ${MEM} -o ${ST_SORTED_BAM_OUT} -T ${TMP_NAME} -@ ${SAMTOOLS_SORT_CORES}"
 
@@ -46,9 +45,7 @@ object Samtools {
 
     val BAMFILE_TO_INDEX= Arg(param.$1(bam))
    
-    val env = BAMFILE_TO_INDEX
-    override def setup = init(env) 
-
+    override def args = BAMFILE_TO_INDEX
     val op =
       samtools"index $BAMFILE_TO_INDEX"
 
@@ -59,8 +56,7 @@ object Samtools {
   ) extends Samtools {
 
     val BAM_FILE = Arg(param.$1(bam))
-    val env = BAM_FILE 
-    override def setup = init(env)
+    override def args = BAM_FILE 
   
     // Prints to stdout
     def op = samtools"bam2fq ${BAM_FILE}" 
@@ -82,12 +78,12 @@ object Samtools {
     val TMP_READ1 = Var
     val TMP_READ2 = Var
     
-    override def setup = init(
-      bamToFastq.env o 
+    override def args = 
+      bamToFastq.args o 
       TMP_FASTQ o
       READ1 o
       READ2
-    )
+
     def op = 
       __#"removing the .gz part of the *.fastq.gz extension" o
       TMP_READ1 `=` $"{$READ1%.*}"                           o

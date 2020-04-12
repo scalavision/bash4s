@@ -21,11 +21,10 @@ case class BedGraphToBigWig(
 
   val LC_COLLATE = Var
 
-  val env = 
+  override def args = 
     BEDGRAPH_REGION_GZ o
     BEDGRAPH_GENOME_FILE o
     BEDGRAPH_SORT_TMP_FOLDER
-  override def setup = init(env)
   def op = 
     LC_COLLATE `=` txt"C"                                   o
     LC_COLLATE.export                                       o
