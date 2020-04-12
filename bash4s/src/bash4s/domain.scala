@@ -305,7 +305,8 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
   final case class BashVariable(
     name: String, 
     value: VariableValue = UnsetVariable(),
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    isExported: Boolean = false
   ) extends BashParameter { self =>
     def $ = copy(isExpanded = true)
     def `=` (txt: TextVariable) = copy(value = txt)
@@ -320,6 +321,9 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       "\"" + "$" + "{" + name.trim() + "}" + "\""
     def o(op: CommandOp) =
       ScriptBuilder(Vector(self, ScriptLine(), op))
+
+    def export = copy(isExported = true)
+    
   }
   
   final case class LocalizationString(value: CmdArgCtx) extends CommandOp

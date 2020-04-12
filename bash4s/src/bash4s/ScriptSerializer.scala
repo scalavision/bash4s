@@ -131,7 +131,7 @@ object ScriptSerializer {
       implicit enc: ScriptSerializer[CommandOp]
   ): ScriptSerializer[CFor] = pure[CFor] { w =>
     val indexer = w.args.head match {
-      case BashVariable(name, _, _) => 
+      case BashVariable(name, _, _, _) =>
         s"$name"
       case _ => enc.apply(w.args.head)
     }
@@ -188,8 +188,10 @@ object ScriptSerializer {
     enc: ScriptSerializer[CommandOp],
     fileEnc: ScriptSerializer[FileType]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
-
-    if(b.isExpanded) s"$$${b.name}"
+    if(b.isExported) {
+      s"export $$${b.name}"
+    }
+    else if(b.isExpanded) s"${b.name}"
     else {
       b.value match {
         case UnsetVariable() => s"unset ${b.name}"

@@ -12,8 +12,8 @@ object dsl {
   type Fasta = BiologyFileType[FastaFile]
   
 //  type Fasta = BiologyFileType[FastaFile]
-  type Read1 = BiologyFileType[Fastq with Gz]
-  type Read2 = BiologyFileType[Fastq with Gz]
+  type Read1 = BiologyFileType[Fastq with GzFile]
+  type Read2 = BiologyFileType[Fastq with GzFile]
   type MarkdupIndexedSortedBam = BiologyFileType[Markdup with Indexed with Sorted with BamFile]
   type BwaIndex = BiologyFileType[BwaIndexed]
   type IndexedSortedBam = BiologyFileType[Indexed with Sorted with BamFile]
@@ -24,6 +24,7 @@ object dsl {
   type Bam = BiologyFileType[BamFile]
   type SortedBam = BiologyFileType[Sorted with BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
+  type RegionsBedGz = BiologyFileType[RegionsFile with BedFile with GzFile]
 
   implicit def liftBioToBash4s[A]: BiologyFileType[A] => CommandOp = {
     case bp: BiologyFilePath[A] => bp.fileType
@@ -83,11 +84,13 @@ object dsl {
     def cnn2d = BiologyFilePath[CnnScored_2D](p.appendExtension("cnn2d"))
     def fasta = BiologyFilePath[FastaFile](p.appendExtension("fasta"))
     def fastq = BiologyFilePath[Fastq](p.appendExtension("fastq"))
-    def gz = BiologyFilePath[Gz](p.appendExtension("gz"))
+    def gz = BiologyFilePath[GzFile](p.appendExtension("gz"))
     def dict = BiologyFilePath[DictFile](p.appendExtension("dict"))
     def ped = BiologyFilePath[DictFile](p.appendExtension("ped"))
     def sorted = BiologyFilePath[Sorted](p.appendExtension("sorted"))
     def indexed = BiologyFilePath[Indexed](p.appendExtension("indexed"))
+    def region = BiologyFilePath[RegionFile](p.appendExtension("region"))
+    def regions = BiologyFilePath[RegionsFile](p.appendExtension("regions"))
   }
 
   implicit class BioSyntaxInt(i: Int) {
@@ -114,6 +117,14 @@ object dsl {
     def bgzip(args: Any*) = 
       SimpleCommand("bgzip", CmdArgCtx(args.toVector, s))
     
+    def mosdepth(args: Any*) = 
+      SimpleCommand("mosdepth", CmdArgCtx(args.toVector, s))
+    
+    def tabix(args: Any*) = 
+      SimpleCommand("tabix", CmdArgCtx(args.toVector, s))
+      
+    def bedGraphToBigWig(args: Any*) = 
+      SimpleCommand("bedGraphToBigWig", CmdArgCtx(args.toVector, s))
     
   }
 }
