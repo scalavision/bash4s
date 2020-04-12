@@ -23,9 +23,11 @@ object BedGraphToBigWigSpec {
     "Operations on Bam files"
   )(
     test("map and align") {
-   
+ 
+      val genomeFile = file"/path/to/human".genome
       val convertBedGraphToBigWig = BedGraphToBigWig(
-        bedGraph
+        bedGraph,
+        genomeFile
       )
 
       pprint.pprintln(convertBedGraphToBigWig.script) 

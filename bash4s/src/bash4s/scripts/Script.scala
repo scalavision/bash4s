@@ -10,7 +10,6 @@ abstract class Script(implicit n: sourcecode.Name) {
   def run() = op.run(name)
   def param: ScriptMeta
   def init(op: CommandOp) = {
-    pprint.pprintln(op)
     Some(op)
   }
   def setup: Option[CommandOp] = Option.empty[CommandOp]
