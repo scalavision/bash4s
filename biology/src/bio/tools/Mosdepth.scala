@@ -12,12 +12,12 @@ sealed trait Mosdepth extends Script {
 
   def param = ScriptGenerator.gen[Mosdepth](this.asInstanceOf[Mosdepth])
 
-  val BAM = Var
-  val REF = Var 
+  val MOSDEPTH_BAM = Var
+  val MOSDEPTH_REF = Var 
 
   def args(bam: Bam, ref: Fasta) =
-    BAM `=` param.$1(bam) o
-    REF `=` param.$2(ref)
+    MOSDEPTH_BAM `=` param.$1(bam) o
+    MOSDEPTH_REF `=` param.$2(ref)
 }
 
 object Mosdepth {
@@ -32,23 +32,23 @@ object Mosdepth {
     flags: Int = 0
   ) extends Mosdepth {
 
-    val WINDOW_SIZE = Arg(param.$3(IntVariable(windowSize)))
-    val CORES = Arg(param.$4(cores))
-    val MAPPING_QUALITY = Arg(param.$5(IntVariable(mappingQuality)))
-    val SAMPLE = Arg(param.$6(sample))
-    val FLAGS = Arg(param.$7(IntVariable(flags)))
+    val MOSDEPTH_WINDOW_SIZE = Arg(param.$3(IntVariable(windowSize)))
+    val MOSDEPTH_CORES = Arg(param.$4(cores))
+    val MOSDEPTH_MAPPING_QUALITY = Arg(param.$5(IntVariable(mappingQuality)))
+    val MOSDEPTH_SAMPLE = Arg(param.$6(txt"${sample.name}"))
+    val MOSDEPTH_FLAGS = Arg(param.$7(IntVariable(flags)))
 
-    override def setup = init(
-      args(bam, ref) o
-      WINDOW_SIZE o
-      CORES o
-      MAPPING_QUALITY o
-      SAMPLE o
-      FLAGS
-    )
+    val env =  
+      MOSDEPTH_WINDOW_SIZE o
+      MOSDEPTH_CORES o
+      MOSDEPTH_MAPPING_QUALITY o
+      MOSDEPTH_SAMPLE o
+      MOSDEPTH_FLAGS o
+      args(bam, ref)
 
+    override def setup = init(env)
     def op = 
-      mosdepth"-t $CORES -b $WINDOW_SIZE -F $FLAGS -Q $MAPPING_QUALITY $SAMPLE $BAM"
+      mosdepth"-t $MOSDEPTH_CORES -b $MOSDEPTH_WINDOW_SIZE -F $MOSDEPTH_FLAGS -Q $MOSDEPTH_MAPPING_QUALITY $MOSDEPTH_SAMPLE $MOSDEPTH_BAM"
 
   }
 

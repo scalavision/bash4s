@@ -9,7 +9,10 @@ abstract class Script(implicit n: sourcecode.Name) {
   def txt = op.txt
   def run() = op.run(name)
   def param: ScriptMeta
-  def init(op: CommandOp) = Some(op)
+  def init(op: CommandOp) = {
+    pprint.pprintln(op)
+    Some(op)
+  }
   def setup: Option[CommandOp] = Option.empty[CommandOp]
 
   //TODO: This could probably be generalized a lot

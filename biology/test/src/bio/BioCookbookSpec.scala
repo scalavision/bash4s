@@ -12,6 +12,7 @@ object BamFileSetup {
   val read1 = file"/path/to/fastq_R1".fastq.gz
   val read2 = file"/path/to/fastq_R2".fastq.gz
   val ref = file"/path/to/human38".fasta
+  val bamFile = file"/path/to/test".bam
 }
 
 import BamFileSetup._
@@ -21,6 +22,7 @@ object BioCookbookSpec {
   val suite1 = suite(
     "Operations on Bam files"
   )(
+    /*
     test("map and align") {
      
       val output = file"/path/to/sample".markdup.indexed.sorted.bam
@@ -53,6 +55,16 @@ object BioCookbookSpec {
       pprint.pprintln(mergeReads.script)
       assert(1)(equalTo(1))
 
+    },*/
+    test("read depth stats and bigWig conversion") {
+
+      val readDepthOps = BamOperations.ReadDepthStatsAndVisualisation(
+        bamFile, ref, 4.cores, Sample("HG002"), 50
+      )
+
+      pprint.pprintln(readDepthOps.script)
+
+      assert(1)(equalTo(1))
     }
   )
 

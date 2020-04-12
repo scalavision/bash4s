@@ -148,7 +148,7 @@ object BioSpec extends DefaultRunnableSpec {
     }
   )
 
-  // BioCookbookSpec.suite1, SamtoolsSpec.suite1
-  def spec = suite("BioSpec")(BedGraphToBigWigSpec.suite1)
+  // BioCookbookSpec.suite1, SamtoolsSpec.suite1 BedGraphToBigWigSpec.suite1// 
+  def spec = suite("BioSpec")(BioCookbookSpec.suite1)
   
 }

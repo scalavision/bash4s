@@ -189,7 +189,7 @@ object ScriptSerializer {
     fileEnc: ScriptSerializer[FileType]
   ): ScriptSerializer[BashVariable] = pure[BashVariable] { b =>
     if(b.isExported) {
-      s"export $$${b.name}"
+      s"export ${b.name}"
     }
     else if(b.isExpanded) s"${b.name}"
     else {
