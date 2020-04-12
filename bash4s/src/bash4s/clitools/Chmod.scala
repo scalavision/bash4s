@@ -4,7 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
-    //Change file modes.
+    
     case class ChmodWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

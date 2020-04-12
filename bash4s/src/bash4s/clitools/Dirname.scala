@@ -4,7 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
-    //Return directory portion of pathname.
+    
     case class DirnameWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

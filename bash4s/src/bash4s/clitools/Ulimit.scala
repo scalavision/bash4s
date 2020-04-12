@@ -4,7 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
-    //Set or report file size limit.
+    
     case class UlimitWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

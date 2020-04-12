@@ -28,8 +28,6 @@ case class BedGraphToBigWig(
     rm"-f $BEDGRAPH_SORT_TMP_FOLDER"  o
     mkdir"-p $BEDGRAPH_SORT_TMP_FOLDER" o
     pushd"$BEDGRAPH_SORT_TMP_FOLDER" o
-
-
     popd
     
 //    bedGraphToBigWig"$BEDGRAPH"

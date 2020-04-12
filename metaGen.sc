@@ -24,8 +24,9 @@ def generateDomain(dest: os.Path): Unit = {
 //val bashPath = dest / "bash4s" / "dsl.scala"
 //os.write.over(bashPath, Formatter.style(bashDsl, bashPath))
     
- //val bashCliPath = dest / "clitools"
- //createCommandToolClasses(bashCliPath)
+//val bashCliPath = dest / "bash4s" / "clitools"
+//createCommandToolClasses(bashCliPath)
+
 
 }
 

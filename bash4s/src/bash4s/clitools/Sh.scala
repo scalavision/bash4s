@@ -4,7 +4,7 @@
     import bash4s.domain._
     import bash4s.BashCommandAdapter
 
-    //Shell, the standard command language interpreter.
+    
     case class ShWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>

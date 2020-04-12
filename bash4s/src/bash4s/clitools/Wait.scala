@@ -8,7 +8,7 @@
     case class WaitWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("wait", args)
+      def toCmd = SimpleCommand("Wait", args)
       def help = copy(args = self.args :+ "--help")
     }
     

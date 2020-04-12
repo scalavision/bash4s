@@ -94,7 +94,6 @@ locate
 slocate
 whereis
 whic
-file
 rename
 mmv
 time
@@ -134,7 +133,6 @@ bzip2recover
 bzme
 tar
 convert
-import
 display
 identify
 mogrify
