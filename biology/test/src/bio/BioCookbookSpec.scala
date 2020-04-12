@@ -58,8 +58,10 @@ object BioCookbookSpec {
     },*/
     test("read depth stats and bigWig conversion") {
 
+      val genomeFile = file"/path/to/human".genome
+
       val readDepthOps = BamOperations.ReadDepthStatsAndVisualisation(
-        bamFile, ref, 4.cores, Sample("HG002"), 50
+        bamFile, ref, 4.cores, Sample("HG002"), genomeFile, 50
       )
 
       pprint.pprintln(readDepthOps.script)

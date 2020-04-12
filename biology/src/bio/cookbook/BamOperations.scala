@@ -19,6 +19,7 @@ object BamOperations {
     ref: Fasta,
     cores: Cores,
     sample: Sample,
+    humanGenome: Genome,
     windowSize: Int,
     workFolder: FolderPath = dirPath"/tmp/mosdepth",
     mappingQuality: Int = 20,
@@ -32,7 +33,7 @@ object BamOperations {
     val bedGraphFile = (workFolder / (fileName"${sample.name}")).regions.bed.gz
 
     val convertToBigWig = BedGraphToBigWig(
-      bedGraphFile
+      bedGraphFile, humanGenome
     )
 
     val MOSDEPTH_WORKDIR = Arg(param.$1(workFolder))

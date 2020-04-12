@@ -25,6 +25,7 @@ object dsl {
   type SortedBam = BiologyFileType[Sorted with BamFile]
   type GVcf = BiologyFileType[G with VcfFile]
   type RegionsBedGz = BiologyFileType[RegionsFile with BedFile with GzFile]
+  type Genome = BiologyFileType[GenomeFile]
 
   implicit def liftBioToBash4s[A]: BiologyFileType[A] => CommandOp = {
     case bp: BiologyFilePath[A] => bp.fileType
@@ -91,6 +92,7 @@ object dsl {
     def indexed = BiologyFilePath[Indexed](p.appendExtension("indexed"))
     def region = BiologyFilePath[RegionFile](p.appendExtension("region"))
     def regions = BiologyFilePath[RegionsFile](p.appendExtension("regions"))
+    def genome = BiologyFilePath[GenomeFile](p.appendExtension("genome"))
   }
 
   implicit class BioSyntaxInt(i: Int) {
