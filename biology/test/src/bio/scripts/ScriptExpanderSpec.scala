@@ -29,7 +29,7 @@ object ScriptExpanderSpec {
       val vars = ScriptExpander.extractBashVariables(script.args)
       val result = ScriptExpander.expandBashVariable(script.op, vars)
       pprint.pprintln(result.txt)
-      pprint.pprintln(script.args.txt)
+      pprint.pprintln(script.script)
       assert(1)(equalTo(1))
     }
   )

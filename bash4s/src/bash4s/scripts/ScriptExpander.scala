@@ -79,17 +79,18 @@ object ScriptIdentity {
 }
 object ScriptExpander {
 
-  def searchParam(op: CommandOp): Vector[BashVariable] = op match {
-    case PipelineBuilder(op0@_) => searchParam(op)
-    case CommandListBuilder(op0@_) =>  searchParam(op)
+  private def searchCommandLineArguments(op: CommandOp): Vector[BashVariable] = op match {
+    case PipelineBuilder(op0@_) => searchCommandLineArguments(op)
+    case CommandListBuilder(op0@_) =>  searchCommandLineArguments(op)
     case ScriptBuilder(acc) => acc.collect { case b: BashVariable => b }
     case b: BashVariable => Vector(b)
     case _ => Vector.empty[BashVariable]
   } 
 
-  def extractBashVariables(op: CommandOp): Map[String, BashVariable] = searchParam(op).map { b =>
-    (b.name -> b)
-  }.toMap
+  def extractBashVariables(op: CommandOp): Map[String, BashVariable] = 
+    searchCommandLineArguments(op).map { b =>
+      b.name -> b
+    }.toMap
 
   def expandBashVariable(op: CommandOp, mem: Map[String, BashVariable]): CommandOp = op match {
     
@@ -108,7 +109,8 @@ object ScriptExpander {
           case b: BashVariable => 
             val optV: Option[BashVariable] = mem.get(b.name)      
             optV match {
-              case None => b
+              case None => 
+                b
               case Some(x) => x.value
             }
           case a => a
@@ -121,13 +123,13 @@ object ScriptExpander {
     case b: BashVariable =>
       val optV: Option[BashVariable] = mem.get(b.name)      
       optV match {
-        case None => b
-        case Some(x) => x.value
+        case None => 
+          b
+        case Some(x) => 
+          x.value
       }
 
-    case a => {
-      a
-    }
+    case a => a
 
   }
 

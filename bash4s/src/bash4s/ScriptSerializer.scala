@@ -48,7 +48,6 @@ object ScriptSerializer {
       _: String,
       value: CommandOp
     ) => 
-      pprint.pprintln(value)
       value match {
         case ft: FileType => fEnc.apply(ft)
         case op => enc.apply(op)
@@ -58,7 +57,6 @@ object ScriptSerializer {
       value: Option[CommandOp],
       _: String
     ) =>
-      pprint.pprintln(value)
       value.fold(""){ 
         case ft: FileType => fEnc.apply(ft)
         case op => enc.apply(op)
@@ -69,7 +67,6 @@ object ScriptSerializer {
       value: Vector[CommandOp],
       _: String
     ) =>
-      pprint.pprintln(value)
       value.map {
         case ft: FileType => fEnc.apply(ft)
         case op => enc.apply(op)
