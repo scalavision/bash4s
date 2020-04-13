@@ -61,7 +61,7 @@ trait common extends ScalaModule {
     ivy"com.lihaoyi::pprint:0.5.8",
     ivy"com.lihaoyi::os-lib:0.6.3",
     ivy"com.propensive::mercator:0.2.1",
-    ivy"com.propensive::magnolia:0.12.8",
+    ivy"com.propensive::magnolia:0.14.4",
     ivy"org.scalameta::scalafmt-dynamic:2.4.2",
     ivy"org.scalameta::scalafmt-core:2.4.2",
     ivy"eu.timepit::refined:0.9.12",
