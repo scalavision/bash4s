@@ -16,11 +16,10 @@ case class BedGraphToBigWig(
   val BEDGRAPH_REGION_GZ = Arg(param.$1(mosdepthRegionFile))
   val BEDGRAPH_SORT_TMP_FOLDER = Arg(param.$2(sortTmpFolder))
   val BEDGRAPH_GENOME_FILE = Arg(param.$3(humanGenome))
+
   val BEDGRAPH_FILE = Var
   val BEDGRAPH_SAMPLE_NAME = Var
-
   val LC_COLLATE = Var
-
   override def args = 
     BEDGRAPH_REGION_GZ o
     BEDGRAPH_GENOME_FILE o
@@ -29,7 +28,7 @@ case class BedGraphToBigWig(
     LC_COLLATE `=` txt"C"                                   o
     LC_COLLATE.export                                       o
     BEDGRAPH_FILE `=$`(basename"-- ${BEDGRAPH_REGION_GZ}")  o
-    BEDGRAPH_SAMPLE_NAME `=` $"{$BEDGRAPH_FILE%%.*}"       o
+    BEDGRAPH_SAMPLE_NAME `=` $"{$BEDGRAPH_FILE%%.*}"        o
     rm"-rf $BEDGRAPH_SORT_TMP_FOLDER"                       && 
     mkdir"-p $BEDGRAPH_SORT_TMP_FOLDER"                     o
     pushd"$BEDGRAPH_SORT_TMP_FOLDER" || exit(1)             o 

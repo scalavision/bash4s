@@ -23,6 +23,7 @@ sealed trait Gatk extends Script {
 }
 
 object Gatk { 
+
   val packageName = "gatk"
   val version = "4.1.6.0"
 
@@ -80,7 +81,7 @@ object Gatk {
       OUT_VCF `=` param.$3(output)
 
     def op = 
-      gatk"$HaplotypeCaller -R ${REF} -I ${BAM} -O ${OUT_VCF}"
+      gatk"$HaplotypeCaller -R ${REF} -I ${BAM} -O ${OUT_VCF} -ERC GVCF"
 
   }
 
@@ -248,12 +249,6 @@ object Gatk {
     output: Vcf
   ) = 
   VariantFiltration(ref, input, txt"GC<20", txt"lowGQ", output)
-
-  /*
-  case class VariantAnnotator(
-    ref: Fasta,
-
-  )*/
 
   case class VariantEval(
     ref: Fasta,

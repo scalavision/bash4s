@@ -56,8 +56,8 @@ object ScriptLinter {
 
     def lint(txt: String): String = {
       val cleanedForMultiSpace: String = txt.replaceAll(" +", " ")
-      val cleanedForMultiNewLines: String = cleanedForMultiSpace.replaceAll("\n+", "\n")
-      cleanedForMultiNewLines.split("\n").toList.filter(_.nonEmpty).foldLeft(Indenter("", 0)) { (acc, l) =>
+      //val cleanedForMultiNewLines: String = cleanedForMultiSpace.replaceAll("\n+", "\n")
+      cleanedForMultiSpace.split("\n").toList.filter(_.nonEmpty).foldLeft(Indenter("", 0)) { (acc, l) =>
 
         val w: (String,String) = startWord(l)
 

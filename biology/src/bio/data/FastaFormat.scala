@@ -91,8 +91,8 @@ object FastaFormat {
     lazy val createBwaIndex = CreateBwaIndex(fastaFile)
     lazy val createDictionary = CreateDictionary(fastaFile, dictFile)
 
-    override def setup = 
-      createDictionary.setup
+    override def args = 
+      createDictionary.args
 
     def op = 
       createIndex.op && 
@@ -109,7 +109,7 @@ object FastaFormat {
     lazy val createBwaIndex = CreateBwaIndex(fastaFile)
     lazy val createDictionary = CreateDictionary(fastaFile, dictFile)
     
-    override def setup = createDictionary.setup
+    override def args = createDictionary.args
     
     def op = 
       createIndex.op.&          o
