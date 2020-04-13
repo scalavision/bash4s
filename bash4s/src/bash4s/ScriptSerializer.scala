@@ -33,13 +33,66 @@ object ScriptSerializer {
     _.toString()
   }
 
+  implicit def variableSerializer(implicit 
+    enc: ScriptSerializer[CommandOp],
+    fEnc: ScriptSerializer[FileType]
+  ): ScriptSerializer[VariableValue] = pure[VariableValue] {
+    case TextVariable(value: CmdArgCtx) => enc.apply(value)
+    case IntVariable(value: Int) => value.toString()
+    case ArrayVariable(value: CmdArgCtx) => enc.apply(value)
+    case ParameterExpanderVariable(value: ParameterExpander) => enc.apply(value)
+    case SubShellVariable(value: CommandOp) => enc.apply(value)
+    case UnsetVariable() => ""
+    case UnsetArrayVariable() => ""
+    case BashCliArgVariable(
+      _: String,
+      value: CommandOp
+    ) => 
+      pprint.pprintln(value)
+      value match {
+        case ft: FileType => fEnc.apply(ft)
+        case op => enc.apply(op)
+      }
+    case BashCliOptArgVariable(
+      _: String,
+      value: Option[CommandOp],
+      _: String
+    ) =>
+      pprint.pprintln(value)
+      value.fold(""){ 
+        case ft: FileType => fEnc.apply(ft)
+        case op => enc.apply(op)
+      }
+
+    case BashCliVecArgVariable(
+      _: String,
+      value: Vector[CommandOp],
+      _: String
+    ) =>
+      pprint.pprintln(value)
+      value.map {
+        case ft: FileType => fEnc.apply(ft)
+        case op => enc.apply(op)
+      }.mkString(" ")
+
+    case BashCliFlagArgVariable(
+      _: String,
+      value: Boolean,
+      param: String
+    ) =>
+      if(value) param else ""
+  }
+
   implicit def cmdArgCtx(
-      implicit enc: ScriptSerializer[CommandOp],
-      fEnc: ScriptSerializer[FileType]
+      implicit 
+      enc: ScriptSerializer[CommandOp],
+      fEnc: ScriptSerializer[FileType],
+      variableValueEnc: ScriptSerializer[VariableValue]
   ): ScriptSerializer[CmdArgCtx] = pure[CmdArgCtx] {
     case CmdArgCtx(args: Vector[Any], stringContext) =>
       val serializedArgs = args.map {
         case f: FileType => fEnc.apply(f)
+        case b: VariableValue => variableValueEnc.apply(b)
         case b: BashVariable => 
           b.value match {
             case BashCliOptArgVariable(name,_,_) =>
