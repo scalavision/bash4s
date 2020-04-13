@@ -13,6 +13,11 @@ object BamFileSetup {
   val read2 = file"/path/to/fastq_R2".fastq.gz
   val ref = file"/path/to/human38".fasta
   val bamFile = file"/path/to/test".bam
+  val genomeFile = file"/path/to/human".genome
+
+  val readDepthOps = BamOperations.ReadDepthStatsAndVisualisation(
+    bamFile, ref, 4.cores, Sample("HG002"), genomeFile, 50
+  )
 }
 
 import BamFileSetup._
@@ -58,11 +63,6 @@ object BioCookbookSpec {
     },*/
     test("read depth stats and bigWig conversion") {
 
-      val genomeFile = file"/path/to/human".genome
-
-      val readDepthOps = BamOperations.ReadDepthStatsAndVisualisation(
-        bamFile, ref, 4.cores, Sample("HG002"), genomeFile, 50
-      )
 
       pprint.pprintln(readDepthOps.script)
 

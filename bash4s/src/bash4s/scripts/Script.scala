@@ -49,6 +49,7 @@ abstract class Script(implicit n: sourcecode.Name) {
     ScriptLinter.lint(
       s"""#!/usr/bin/env bash
       |set -euo pipefail
+      |
       |${comments}
       |${argComments}
       |${argParam.map(_.txt).mkString("\n")}
