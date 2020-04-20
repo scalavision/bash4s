@@ -20,7 +20,21 @@ object BamFileSetup {
   )
 }
 
-import BamFileSetup._
+object SharpTest {
+
+ val path = "/stash/usit/cluster/projects/p22/dev/p22-tomegil/data/workdata"
+ val bamFile = file"${path}/DownSmp_Flex300".bam
+ val genomeFile = file"${path}/human".genome
+ val ref = file"/stash/usit/cluster/projects/p22/dev/p22-tomegil/ref/hum37/human_g1k_v37_decoy".fasta
+
+ val readDepthOps = BamOperations.ReadDepthStatsAndVisualisation(
+   bamFile, ref, 2.cores, Sample("DownSmp_Flex300"), genomeFile, 50
+ )
+
+}
+
+//import BamFileSetup._
+import SharpTest._
 
 object BioCookbookSpec {
 
