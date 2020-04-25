@@ -1,12 +1,8 @@
-package bash4s
+package object bash4s {
 
-import domain._
+  import domain._
 
-trait BashCommandAdapter {
-  def toCmd: SimpleCommand
-}
-
-object dsl {
+  type Script = scripts.Script
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
@@ -53,7 +49,7 @@ object dsl {
       SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
 
-  def await = bash4s.clitools.AwaitWrapper()
+  def await = clitools.AwaitWrapper()
 
   object For {
     def apply(indexVariable: CommandOp) =
@@ -773,9 +769,6 @@ object dsl {
   def samba_tool(args: String*) =
     clitools.Samba_toolWrapper(CmdArgs(args.toVector))
   def samba_tool = clitools.Samba_toolWrapper()
-
-  def scala(args: String*) = clitools.ScalaWrapper(CmdArgs(args.toVector))
-  def scala = clitools.ScalaWrapper()
 
   def scp(args: String*) = clitools.ScpWrapper(CmdArgs(args.toVector))
   def scp = clitools.ScpWrapper()

@@ -4,7 +4,7 @@ import zio.test.{assert, suite, test}
 import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
-import bash4s.dsl._
+import bash4s._
 import bio.dsl._
 import bio.cookbook._
 

@@ -1,13 +1,11 @@
 package bash4s
 
-import magnolia._
-
 import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
 import scala.language.implicitConversions
 
-import bash4s.domain._
-import bash4s.dsl._
+import magnolia._
+import domain._
 
 @implicitNotFound(
   """Cannot find an BiologySerializer for type ${T}.

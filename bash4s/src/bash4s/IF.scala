@@ -1,6 +1,6 @@
 package bash4s
 
-import bash4s.dsl._
+import bash4s._
 import domain._
 
 object IF {
