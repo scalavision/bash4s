@@ -5,10 +5,10 @@
     import bash4s.BashCommandAdapter
 
     
-    case class FalseWrapper (
+    case class ScalaWrapper (
       args: CmdArgs = CmdArgs(Vector.empty[String])
     ) extends BashCommandAdapter { self =>
-      def toCmd = SimpleCommand("false", args)
+      def toCmd = SimpleCommand("scala", args)
       def help = copy(args = self.args :+ "--help")
     }
     

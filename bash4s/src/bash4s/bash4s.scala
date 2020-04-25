@@ -12,27 +12,27 @@ package object bash4s {
   type `/dev/null` = DevNull.type
   type `/dev/random` = DevRandom.type
 
-  implicit def cmdAliasConverter: BashCommandAdapter => domain.SimpleCommand = _.toCmd
+  implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
   object Until {
-    def `[[`(op: domain.CommandOp) = domain.CUntil(Vector(domain.OpenDoubleSquareBracket(), op))
+    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object While {
-    def `[[`(op: domain.CommandOp) = domain.CWhile(Vector(domain.OpenDoubleSquareBracket(), op))
+    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object If {
-    def `[[`(op: CommandOp) = domain.CIf(Vector(domain.OpenDoubleSquareBracket(), op))
+    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
 
   object #! {
-    def apply(shebang: String) = domain.SheBang(s"#!${shebang}")
-    def `/usr/bin/env`(shebang: String) = domain.SheBang(s"#!/usr/bin/env $shebang")
-    def `/bin/bash` = domain.SheBang("#!/bin/bash")
-    def `/bin/sh` = domain.SheBang("#!/bin/sh")
-    def bash = domain.SheBang("#!/usr/bin/env bash")
-    def sh = domain.SheBang("#!/usr/bin/env sh")
+    def apply(shebang: String) = SheBang(s"#!${shebang}")
+    def `/usr/bin/env`(shebang: String) = SheBang(s"#!/usr/bin/env $shebang")
+    def `/bin/bash` = SheBang("#!/bin/bash")
+    def `/bin/sh` = SheBang("#!/bin/sh")
+    def bash = SheBang("#!/usr/bin/env bash")
+    def sh = SheBang("#!/usr/bin/env sh")
   }
 
   def `[[`(op: CommandOp) =
@@ -57,7 +57,7 @@ package object bash4s {
       SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
 
-  def await = clitools.AwaitWrapper()
+  def await = bash4s.clitools.AwaitWrapper()
 
   object For {
     def apply(indexVariable: CommandOp) =
@@ -138,11 +138,11 @@ package object bash4s {
   // True if file exists and is owned by the effective user id
   def O(op: CommandOp) = CIsSocket(op)
 
+  def Await(args: String*) = clitools.AwaitWrapper(CmdArgs(args.toVector))
+  def Await = clitools.AwaitWrapper()
+
   def R(args: String*) = clitools.RWrapper(CmdArgs(args.toVector))
   def R = clitools.RWrapper()
-
-  def Wait(args: String*) = clitools.WaitWrapper(CmdArgs(args.toVector))
-  def Wait = clitools.WaitWrapper()
 
   def alias(args: String*) = clitools.AliasWrapper(CmdArgs(args.toVector))
   def alias = clitools.AliasWrapper()
@@ -778,6 +778,9 @@ package object bash4s {
     clitools.Samba_toolWrapper(CmdArgs(args.toVector))
   def samba_tool = clitools.Samba_toolWrapper()
 
+  def sc(args: String*) = clitools.ScWrapper(CmdArgs(args.toVector))
+  def sc = clitools.ScWrapper()
+
   def scp(args: String*) = clitools.ScpWrapper(CmdArgs(args.toVector))
   def scp = clitools.ScpWrapper()
 
@@ -1064,7 +1067,7 @@ package object bash4s {
     def m(args: Any*) =
       ArithmeticExpression(CmdArgCtx(args.toVector, s))
 
-    def file(args: Any*): FilePath =
+    def filePath(args: Any*): FilePath =
       FileConversions.convertToFilePath(s.s(args: _*))
 
     def relFile(args: Any*): RelPath =
@@ -1085,11 +1088,11 @@ package object bash4s {
     def `../`(args: Any*): RelFolderPath =
       FileConversions.convertToRelFolderPath(s.s("../" + args: _*))
 
+    def Await(args: Any*) =
+      SimpleCommand("Await", CmdArgCtx(args.toVector, s))
+
     def R(args: Any*) =
       SimpleCommand("R", CmdArgCtx(args.toVector, s))
-
-    def Wait(args: Any*) =
-      SimpleCommand("Wait", CmdArgCtx(args.toVector, s))
 
     def alias(args: Any*) =
       SimpleCommand("alias", CmdArgCtx(args.toVector, s))
@@ -1715,8 +1718,8 @@ package object bash4s {
     def samba_tool(args: Any*) =
       SimpleCommand("samba_tool", CmdArgCtx(args.toVector, s))
 
-    def scala(args: Any*) =
-      SimpleCommand("scala", CmdArgCtx(args.toVector, s))
+    def sc(args: Any*) =
+      SimpleCommand("sc", CmdArgCtx(args.toVector, s))
 
     def scp(args: Any*) =
       SimpleCommand("scp", CmdArgCtx(args.toVector, s))

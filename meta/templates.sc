@@ -84,7 +84,7 @@ def cli(tools: List[Command]) =
       |  def m(args: Any*) =
       |    ArithmeticExpression(CmdArgCtx(args.toVector, s))
       |
-      |  def file(args: Any*): FilePath =
+      |  def filePath(args: Any*): FilePath =
       |    FileConversions.convertToFilePath(s.s(args: _*))
       |
       |  def relFile(args: Any*): RelPath =
@@ -107,6 +107,7 @@ def cli(tools: List[Command]) =
       |
       |  ${tools.map(cliTool).mkString("\n  ")}
       |}""".stripMargin
+      
 
 def cliAlias(tool: Command) = 
     s"""

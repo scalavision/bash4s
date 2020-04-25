@@ -10,9 +10,9 @@ import bio._
 //import bash4s.ScriptLinter
 
 object BedGraphToBigWigSpecSetup {
-  val ref = file"/path/to/human38".fasta
-  val bam = file"/path/to/sample".bam
-  val bedGraph = file"/path/to/bedGraph".regions.bed.gz
+  val ref = filePath"/path/to/human38".fasta
+  val bam = filePath"/path/to/sample".bam
+  val bedGraph = filePath"/path/to/bedGraph".regions.bed.gz
 }
 
 import BedGraphToBigWigSpecSetup._
@@ -24,7 +24,7 @@ object BedGraphToBigWigSpec {
   )(
     test("map and align") {
  
-      val genomeFile = file"/path/to/human".genome
+      val genomeFile = filePath"/path/to/human".genome
       val convertBedGraphToBigWig = BedGraphToBigWig(
         bedGraph,
         genomeFile

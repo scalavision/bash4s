@@ -10,10 +10,10 @@ import bio._
 //import bash4s.ScriptLinter
 
 object SamtoolsSpecSetup {
-  val read1 = file"/path/to/fastq_R1".fastq.gz
-  val read2 = file"/path/to/fastq_R2".fastq.gz
-  val ref = file"/path/to/human38".fasta
-  val bam = file"/path/to/sample".bam
+  val read1 = filePath"/path/to/fastq_R1".fastq.gz
+  val read2 = filePath"/path/to/fastq_R2".fastq.gz
+  val ref = filePath"/path/to/human38".fasta
+  val bam = filePath"/path/to/sample".bam
 }
 
 import SamtoolsSpecSetup._

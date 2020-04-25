@@ -24,7 +24,7 @@ object Bwa {
     bwaIndexedFasta: Fasta,
     @arg("The number of cores that will be used")
     nrOfCores: Cores,
-    @arg("Read Group info that should be added to the bam file")
+    @arg("Read Group info that should be added to the bam filePath")
     readGroupInfo: Option[TextVariable]
   ) extends Script {
 
@@ -59,7 +59,7 @@ object Bwa {
   |- https://gatkforums.broadinstitute.org/gatk/discussion/2798/howto-prepare-a-reference-for-use-with-bwa-and-gatk
   """.stripMargin)
   case class BuildIndex(
-    @arg("path to fasta file")
+    @arg("path to fasta filePath")
     fasta: Fasta
   ) extends Script {
 

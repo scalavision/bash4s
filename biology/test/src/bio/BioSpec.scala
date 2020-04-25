@@ -12,14 +12,14 @@ import TestCases._
 import bash4s.domain.IntVariable
 object TestCases {
 
-  val fastaFile = file"/test/hello".fasta
-  val dictFile = file"/test/hello".dict
+  val fastaFile = filePath"/test/hello".fasta
+  val dictFile = filePath"/test/hello".dict
 
   val bwaIndex = Bwa.BuildIndex(fastaFile)
 
-  val r1 = file"/path/to/fastq".fastq.gz
-  val r2 = file"/path/to/fastq".fastq.gz
-  val ref = file"/path/to/ref".fasta
+  val r1 = filePath"/path/to/fastq".fastq.gz
+  val r2 = filePath"/path/to/fastq".fastq.gz
+  val ref = filePath"/path/to/ref".fasta
   val cores = 12.cores
   val readGroupInfo = txt"@RG:Test"
 
@@ -31,16 +31,16 @@ object TestCases {
     Some(readGroupInfo)
   )
 
-  val bamAligned = file"/path/to/sample1".markdup.sorted.indexed.bam
+  val bamAligned = filePath"/path/to/sample1".markdup.sorted.indexed.bam
 
 }
 
 object BioSpec extends DefaultRunnableSpec {
 
   val suite1 = suite("Bwa methods")(
-    test("index fasta file") {
+    test("index fasta filePath") {
 
-      val path = file"/test/hello".fasta
+      val path = filePath"/test/hello".fasta
       println(path)
 
       pprint.pprintln(Bwa.BuildIndex(path).script)
@@ -49,9 +49,9 @@ object BioSpec extends DefaultRunnableSpec {
     },
     test("map and align fastq files") {
 
-      val r1 = file"/path/to/fastq".fastq.gz
-      val r2 = file"/path/to/fastq".fastq.gz
-      val ref = file"/path/to/ref".fasta
+      val r1 = filePath"/path/to/fastq".fastq.gz
+      val r2 = filePath"/path/to/fastq".fastq.gz
+      val ref = filePath"/path/to/ref".fasta
       val cores = 12.cores
       val readGroupInfo = txt"@RG:Test"
 
@@ -110,15 +110,15 @@ object BioSpec extends DefaultRunnableSpec {
     },
     test("gatk operations") {
 
-      val vcfOutput = file"/path/to/output".vcf
-//      val bamOutput =file"/path/bam/haplotyped".bam
+      val vcfOutput = filePath"/path/to/output".vcf
+//      val bamOutput =filePath"/path/bam/haplotyped".bam
 
       //val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput, Some(bamOutput))
       val haplotypeCaller = Gatk.HaplotypeCallerBasic(bamAligned, ref, vcfOutput)
       pprint.pprintln(haplotypeCaller.script)
      
-      val vcfToAnnotate = file"/path/to/vcf_to_annotate".vcf
-      val annotatedVcf = file"/path/to/annotated".cnn2d.vcf
+      val vcfToAnnotate = filePath"/path/to/vcf_to_annotate".vcf
+      val annotatedVcf = filePath"/path/to/annotated".cnn2d.vcf
 
       val cnnAnno = Gatk.CNNScoreVariants1D(vcfToAnnotate, ref, annotatedVcf)
       pprint.pprintln(cnnAnno.script)
@@ -126,10 +126,10 @@ object BioSpec extends DefaultRunnableSpec {
       val cnnAnno2D = Gatk.CNNScoreVariants2D(vcfToAnnotate, ref, annotatedVcf, IntVariable(2), IntVariable(2), txt"read-sensor")      
       pprint.pprintln(cnnAnno2D.script)
 
-      val trancheFilteredVcf = file"/path/to/trancheFiltered".vcf
+      val trancheFilteredVcf = filePath"/path/to/trancheFiltered".vcf
 
-      val omni1000G = file"/path/to/1000G_omni2.5.b37.sites".vcf
-      val hapmap = file"/path/to/hapmap_3.3.b37.sites".vcf
+      val omni1000G = filePath"/path/to/1000G_omni2.5.b37.sites".vcf
+      val hapmap = filePath"/path/to/hapmap_3.3.b37.sites".vcf
 
       val filterVariantTranches = Gatk.FilterVariantTranches(
         annotatedVcf,

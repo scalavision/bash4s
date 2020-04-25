@@ -103,7 +103,7 @@ val toMany = readDat("all.dat"){
     }.filter(_.nonEmpty) ++ 
         readDat("basic_ops.dat"){ case s => s } ++ 
         readDat("builtins.dat"){ 
-          case "wait" => "Wait"
+          case "wait" => "Await"
           case s if s == "false" ||
             s == "true"  ||
             s == "import" ||
