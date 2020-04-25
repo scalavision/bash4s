@@ -1,6 +1,7 @@
 package bash4s
 
 import scala.util.Try
+import os.CommandResult
 
 object domain {
 
@@ -50,15 +51,39 @@ object domain {
       println(result.exitCode)
       
     }
-
-    def lines(name: String = "")(implicit implicitName: sourcecode.Name) = {
-
+    
+    def lines(name: String = "")(implicit implicitName: sourcecode.Name): Vector[String] = {
+      
       if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
 
       val fileName = if(name.isEmpty()) implicitName.value else name
       val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
       val result = runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
       result.out.lines
+      
+    }
+
+    def proc(name: String = "")(implicit implicitName: sourcecode.Name) = {
+
+      if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
+
+      val fileName = if(name.isEmpty()) implicitName.value else name
+      val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
+      val scriptPath = wd / s"$fileName"
+
+      os.write.over(scriptPath, shebang + "\n" + txt)
+      os.perms.set(scriptPath, "rwxr-xr-x") 
+      os.proc(scriptPath)
+
+    }
+    
+    def result(name: String = "")(implicit implicitName: sourcecode.Name): CommandResult = {
+
+      if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
+
+      val fileName = if(name.isEmpty()) implicitName.value else name
+      val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
+      runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
 
     }
 
