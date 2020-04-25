@@ -2,7 +2,7 @@ package examples.bash
 
 import scala.language.postfixOps
 //import domain._
-import bash4s.dsl._
+import bash4s._
 
 object Examples {
     val script = du"ok" > du"hello"                                 o

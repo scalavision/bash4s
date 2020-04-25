@@ -6,7 +6,7 @@ import zio.test.Assertion._
 //import zio.test.TestAspect._
 
 //import domain._
-import bash4s.dsl._
+import bash4s._
 import scripts._
 
 object TargetScript{

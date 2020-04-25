@@ -7,7 +7,7 @@ import zio.test.Assertion._
 import bio.dsl._
 import bio.tools._
 //import bio.data._
-import bash4s.dsl._
+import bash4s._
 import TestCases._
 import bash4s.domain.IntVariable
 object TestCases {
