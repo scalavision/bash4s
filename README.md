@@ -2,25 +2,27 @@
 
 Build bash scripts directly in the scala language. The library facilitates:
 
-* Type safety
+* Type safety (still `WIP`, but a lot better than raw bash scripts)
 * Reusable script parts that can be merged into larger scripts
 * Testability
 * Introspection of your scripts
-* Extensible, you could very easily create wrappers to run these scripts on a slurm cluster, docker container, kubernets or devops pipeline.
+* Extensible, you could very easily create wrappers to run these scripts on a slurm cluster, 
+  in a docker container, on kubernets or in your devops pipeline.
 
 This is much more a PoC than a production ready library, but if you write your tests, you should
 still be far better off than running your bash scripts directly.
 
-## How to Bash4s for people not used to scala
+## How to
 
 ### Installation and setup
 
-This library has not been published to ``maven central`` yet. This is `wip`. To use it:
+This library has not been published to ``maven central`` yet. This is `WIP`, to use it:
 
 Install:
 
-* [mill](http://www.lihaoyi.com/mill/) scala build tool
-* scala script runner [ammonite](https://github.com/lihaoyi/Ammonite).
+* [mill](http://www.lihaoyi.com/mill/), an excellent scala build tool
+* [ammonite](https://github.com/lihaoyi/Ammonite), incredibly rich scala script runner
+* This only works with scala `2.13`
 
 Simple way of installing ammonite:
 
@@ -35,28 +37,57 @@ Simple way of installing mill:
 sudo curl -L https://github.com/lihaoyi/mill/releases/download/0.6.2/0.6.2 > /usr/local/bin/mill && sudo chmod +x /usr/local/bin/mill
 ```
 
-First you need to create the library jar that you will use in your script:
+You can run this [setup](https://github.com/scalavision/bash4s/setup) in an `empty` !! directory to get started:
+
+`CAUTION!!` It will write the script `listFiles` to the current directory! Since it is empty, it really shouldn't do
+any harm at all (just so you know ..).
 
 ```bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
 git clone https://github.com/scalavision/bash4s.git
+
+pushd ./bash4s || { echo "unable to enter bash4s folder, was it correclty cloned?"; exit 1; }
 mill bash4s.assembly
-cp out/bash4s/assembly/out.jar ./bash4s.jar
-cat <<EOF > myscript.sc
+popd
+
+cp ./bash4s/out/bash4s/assembly/dest/out.jar ./bash4s.jar
+
+cat <<EOF > ./myscript.sc
 import \$cp.bash4s
 import bash4s._
+
+val wd = os.pwd
+val listFiles = ls"-hal \$wd".runAt(wd)
+pprint.pprintln(listFiles)
 EOF
-# This should now work, having bash4s library on your classpath
-# inside the script
-amm -w myscript.sc
+
+# The ammonite script runner will watch the file and rerun everytime it is saved
+amm -w ./myscript.sc
 ```
 
-### Your first script
+It will build the `bash4s` library into a fat jar and copy it to the current working directory.
+All you need to run bash4s dsl scripts is inside this library. See the next section on how
+to use it.
 
-Open your editor of choice ([metals plugin](https://scalameta.org/metals/) with [vscode](https://code.visualstudio.com/download) is a good choice) and type:
+Remember to keep `ammonite` running while you edit your script. It recompiles and reruns your script
+every time you save it.
+
+```bash
+amm -w <path to my script.sc>
+```
+
+### Your first script, and `java.io.tmp` as the default rundir
+
+Open `myscript.sc` from above in your favorite editor of choice ([metals plugin](https://scalameta.org/metals/) with [vscode](https://code.visualstudio.com/download) is a good choice):
+
+You can change it as follows:
 
 ```scala
-// This should already be there
 // We add the bash4s.jar to the classpath
+// Everything that is needed is inside the library
 import $cp.bash4s
 
 // importing the bash4s dsl into scope
@@ -68,13 +99,13 @@ import bash4s._
 ls"-halt .".run("test.sh")
 ```
 
-And save !
+And save the file in your editor!
 
 It should compile, run and output: `0`
 
-As a successful result type from the script that was run.
+As a `successful` result type from running the script in the background (this way of running it is blocking!).
 
-Other good editors supported by metals (scala language server) are:
+Other good editors supported by `metals` (scala language server) are:
 
 * neovim with coc-metals
 * emacs
@@ -83,7 +114,7 @@ Other good editors supported by metals (scala language server) are:
 
 ### Implicitly naming of script
 
-If you make a script point to a variable name, the script will be saved with the name of the variable.
+If you make a variable point to the script, the variable name will implicitly be used as the name of the script.
 
 ```scala
 import $cp.bash4s
@@ -91,6 +122,8 @@ import bash4s._
 
 val scriptTest = ls"-halt .".run()
 ```
+
+(Remember to save the file!)
 
 Then
 
@@ -105,7 +138,7 @@ yields:
 ls -halt .
 ```
 
-### capture script output, mix with scala code
+### Capture script output, mix with scala code
 
 To capture the output from the script, you can run it like this:
 
@@ -127,9 +160,10 @@ The Scala variables inside a bash command will use the `toString()` method.
 
 So if you put complex objects inside the command it might not work as expected.
 
-Use the `print()` feature to see what actually gets created as arguments.
+Use the `print()` feature to see what actually gets created as arguments. The built in
+library and dsl should handle this correctly, if not, issue a bug request.
 
-### simple debugging of the script
+### Simple debug output of the script
 
 You can do a very simple debugging of your script using the `print()` and `printRich()` commands:
 
@@ -142,7 +176,14 @@ val dirContent = ls"-halt $wd".printRich()
 
 It will print the script to screen instead of running it.
 
-The `printRich()` command will use the excellent [pprint](https://www.lihaoyi.com/PPrint/) library that is made by `lihaoyi` and that is also built into ammonite. It will cut the output after specific amount of lines etc.
+The `printRich()` command will use the excellent [pprint](https://www.lihaoyi.com/PPrint/) library that is
+made by `Lihaoyi` and that is also built into ammonite. It will cut the output after specific amount of lines etc.
+
+You can also get a textual representation of the script with the `.txt` method.
+
+```scala
+val dirContentScript = ls"-halt $wd".txt
+```
 
 ## Background
 

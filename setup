@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+git clone https://github.com/scalavision/bash4s.git
+
+pushd ./bash4s || { echo "unable to enter bash4s folder, was it correclty cloned?"; exit 1; }
+mill bash4s.assembly
+popd
+
+cp ./bash4s/out/bash4s/assembly/dest/out.jar ./bash4s.jar
+
+cat <<EOF > ./myscript.sc
+import \$cp.bash4s
+import bash4s._
+
+val wd = os.pwd
+val listFiles = ls"-hal \$wd".runAt(wd)
+pprint.pprintln(listFiles)
+EOF
+
+amm -w ./myscript.sc
+

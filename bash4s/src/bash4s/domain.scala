@@ -40,6 +40,17 @@ object domain {
       
     }
 
+    def runAt(path: os.Path, name: String = "")(implicit implicitName: sourcecode.Name): Unit = {
+      
+      if(implicitName.value.isEmpty()) 
+        throw new Exception("You need to provide a name for the script!")
+
+      val fileName = if(name.isEmpty()) implicitName.value else name
+      val result = runScript(shebang + "\n" + txt, path / s"$fileName", wd)
+      println(result.exitCode)
+      
+    }
+
     def lines(name: String = "")(implicit implicitName: sourcecode.Name) = {
 
       if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
@@ -48,7 +59,7 @@ object domain {
       val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
       val result = runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
       result.out.lines
-      
+
     }
 
     def save(path: os.Path) = 
