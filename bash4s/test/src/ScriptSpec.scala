@@ -41,6 +41,6 @@ object ScriptSpec extends DefaultRunnableSpec {
 
   )
 
-  def spec = suite("TestSuite for BashDsl")(suite2)
+  def spec = suite("TestSuite for BashDsl")(ScriptIOSpec.suite1)
 
 }

@@ -34,7 +34,8 @@ abstract class Script(implicit n: sourcecode.Name) {
           case ScriptBuilder(acc) => acc collect {
             case b: BashVariable => b
           }
-          case _ => throw new Exception("You can only use BashVariable as a command line argument")
+          case NoOp() => Vector.empty[BashVariable]
+          case _ => throw new Exception(s"Unhandled CommandOp: ${args}")
       }
       params.zipWithIndex.map {
         case (b, index) => b.value match {

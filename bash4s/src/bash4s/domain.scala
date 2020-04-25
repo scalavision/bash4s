@@ -6,6 +6,8 @@ object domain {
 
   sealed abstract class CommandOp() { self =>
 
+    val shebang = "#!/usr/bin/env bash"
+
     val serializer = ScriptSerializer.gen[CommandOp]
 
     def txt = ScriptLinter.lint(
@@ -33,8 +35,19 @@ object domain {
 
       val fileName = if(name.isEmpty()) implicitName.value else name
       val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
-      val result = runScript(txt, wd / s"$fileName", wd)
+      val result = runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
       println(result.exitCode)
+      
+    }
+
+    def lines(name: String = "")(implicit implicitName: sourcecode.Name) = {
+
+      if(implicitName.value.isEmpty()) throw new Exception("You need to provide a name for the script!")
+
+      val fileName = if(name.isEmpty()) implicitName.value else name
+      val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
+      val result = runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
+      result.out.lines
       
     }
 
