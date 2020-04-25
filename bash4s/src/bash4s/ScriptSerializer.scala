@@ -384,14 +384,14 @@ object ScriptSerializer {
     case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
     case RelPath(folders,fn) => s"""${folders.mkString("/")}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
     case RelFolderPath(folders) => s"""${folders.mkString("/")}"""
-    case `/dev/null` => "/dev/null"
-    case `/dev/random` => "/dev/random"
-    case `/dev/stderr` => "/dev/stderr"
-    case `/dev/stdin` => "/dev/stdin"
-    case `/dev/stdout` => "/dev/stdout"
-    case `/dev/fd`(fd) => s"/dev/fd/${fd.value}"
-    case `/dev/tcp`(h,p) => s"/dev/tcp/${h}/${p}"
-    case `/dev/udp`(h,p) => s"/dev/udp/${h}/${p}"
+    case DevNull => "/dev/null"
+    case DevRandom => "/dev/random"
+    case DevStdErr => "/dev/stderr"
+    case DevStdIn => "/dev/stdin"
+    case DevStdOut => "/dev/stdout"
+    case DevFd(fd) => s"/dev/fd/${fd.value}"
+    case DevTcp(h,p) => s"/dev/tcp/${h}/${p}"
+    case DevUdp(h,p) => s"/dev/udp/${h}/${p}"
   }
 
   implicit def vectorSerializerAny(

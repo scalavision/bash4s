@@ -1,30 +1,38 @@
 package object bash4s {
-
   import domain._
 
   type Script = scripts.Script
 
-  implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
+  type `/dev/stdin` = DevStdIn.type
+  type `/dev/stdout` = DevStdOut.type
+  type `/dev/stderr` = DevStdErr.type
+  type `/dev/fd` = DevFd
+  type `/dev/tcp` = DevTcp
+  type `/dev/udp` = DevUdp
+  type `/dev/null` = DevNull.type
+  type `/dev/random` = DevRandom.type
+
+  implicit def cmdAliasConverter: BashCommandAdapter => domain.SimpleCommand = _.toCmd
 
   object Until {
-    def `[[`(op: CommandOp) = CUntil(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: domain.CommandOp) = domain.CUntil(Vector(domain.OpenDoubleSquareBracket(), op))
   }
 
   object While {
-    def `[[`(op: CommandOp) = CWhile(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: domain.CommandOp) = domain.CWhile(Vector(domain.OpenDoubleSquareBracket(), op))
   }
 
   object If {
-    def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
+    def `[[`(op: CommandOp) = domain.CIf(Vector(domain.OpenDoubleSquareBracket(), op))
   }
 
   object #! {
-    def apply(shebang: String) = SheBang(s"#!${shebang}")
-    def `/usr/bin/env`(shebang: String) = SheBang(s"#!/usr/bin/env $shebang")
-    def `/bin/bash` = SheBang("#!/bin/bash")
-    def `/bin/sh` = SheBang("#!/bin/sh")
-    def bash = SheBang("#!/usr/bin/env bash")
-    def sh = SheBang("#!/usr/bin/env sh")
+    def apply(shebang: String) = domain.SheBang(s"#!${shebang}")
+    def `/usr/bin/env`(shebang: String) = domain.SheBang(s"#!/usr/bin/env $shebang")
+    def `/bin/bash` = domain.SheBang("#!/bin/bash")
+    def `/bin/sh` = domain.SheBang("#!/bin/sh")
+    def bash = domain.SheBang("#!/usr/bin/env bash")
+    def sh = domain.SheBang("#!/usr/bin/env sh")
   }
 
   def `[[`(op: CommandOp) =

@@ -1,0 +1,8 @@
+final case object  extends FileType
+  final case object  extends FileType
+  final case object  extends FileType
+  final case class (fileDescriptor: FileDescriptor) extends FileType
+  final case class (host: Host, port: Port) extends FileType
+  final case class (host: Host, port: Port) extends FileType
+  final case object  extends FileType
+  final case object  extends FileType

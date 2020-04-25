@@ -670,13 +670,13 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
         def parentFolderPath = copy(folders = folders.dropRight(1))
       }
 
-  final case object `/dev/stdin` extends FileType
-  final case object `/dev/stdout` extends FileType
-  final case object `/dev/stderr` extends FileType
-  final case class `/dev/fd`(fileDescriptor: FileDescriptor) extends FileType
-  final case class `/dev/tcp`(host: Host, port: Port) extends FileType
-  final case class `/dev/udp`(host: Host, port: Port) extends FileType
-  final case object `/dev/null` extends FileType
-  final case object `/dev/random` extends FileType
+  final case object DevStdIn extends FileType
+  final case object DevStdOut extends FileType
+  final case object DevStdErr extends FileType
+  final case class DevFd(fileDescriptor: FileDescriptor) extends FileType
+  final case class DevTcp(host: Host, port: Port) extends FileType
+  final case class DevUdp(host: Host, port: Port) extends FileType
+  final case object DevNull extends FileType
+  final case object DevRandom extends FileType
 
 }

@@ -117,17 +117,15 @@ val toMany = readDat("all.dat"){
         m.copy(name = m.name.trim())
       }.distinctBy(s => s.name).toList.sorted
 
-def bashDsl = s"""
-package bash4s
+val exportDevPathTypes = 
+  "`/dev/stdin` `/dev/stdout` `/dev/stderr` `/dev/fd` `/dev/tcp` `/dev/udp` `/dev/null` `/dev/random`".list
 
-import domain._
+val exportDevPathNames = 
+    "DevStdIn DevStdOut DevStdErr DevFd DevTcp DevUdp DevNull DevRandom".list
 
-trait BashCommandAdapter {
-  def toCmd: SimpleCommand
-}
+def bashDsl = s"""package object bash4s {
+  import domain._
 
-object dsl {
-  
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
   object Until {

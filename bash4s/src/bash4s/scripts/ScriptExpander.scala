@@ -1,18 +1,13 @@
 package bash4s.scripts
 
 import bash4s.domain._
-case class ScriptExpander() {
-
-}
-
-
 object ScriptIdentity {
 
   // Identity function, going through this function should not change anything
   def id(op: CommandOp): CommandOp =  op match {
-    case `/dev/fd`(op0@_) => `/dev/fd`(op0)
-    case `/dev/tcp`(op0@_, op1@_) => `/dev/tcp`(op0, op1) 
-    case `/dev/udp`(op0@_, op1@_) => `/dev/udp`(op0, op1) 
+    case DevFd(op0@_) => DevFd(op0)
+    case DevTcp(op0@_, op1@_) => DevTcp(op0, op1) 
+    case DevUdp(op0@_, op1@_) => DevUdp(op0, op1) 
     case AnsiCQuoted(op0@_) => AnsiCQuoted(op0)
     case ArithmeticExpression(op0@_) => ArithmeticExpression(op0)
     case ArrayVariable(op0@_) => ArrayVariable(op0)
@@ -134,9 +129,9 @@ object ScriptExpander {
   }
 
   def expandAll(op: CommandOp): CommandOp = op match {
-    case `/dev/fd`(op0@_) => `/dev/fd`(op0)
-    case `/dev/tcp`(op0@_, op1@_) => `/dev/tcp`(op0, op1) 
-    case `/dev/udp`(op0@_, op1@_) => `/dev/udp`(op0, op1) 
+    case DevFd(op0@_) => DevFd(op0)
+    case DevTcp(op0@_, op1@_) => DevTcp(op0, op1) 
+    case DevUdp(op0@_, op1@_) => DevUdp(op0, op1) 
     case AnsiCQuoted(op0@_) => AnsiCQuoted(op0)
     case ArithmeticExpression(op0@_) => ArithmeticExpression(op0)
     case ArrayVariable(op0@_) => ArrayVariable(op0)
@@ -205,17 +200,16 @@ object ScriptExpander {
     println(script)
   }
 
-
   def handleAll(op: CommandOp) = op match {
     case ScriptBuilder(acc@_) => ???
-    case `/dev/fd`(op0@_) => ???
-    case `/dev/null`=>  ???
-    case `/dev/random`=>  ???
-    case `/dev/stderr`=>  ???
-    case `/dev/stdin`=>  ???
-    case `/dev/stdout`=>  ???
-    case `/dev/tcp`(op0@_, op1@_) => ???
-    case `/dev/udp`(op0@_, op1@_) => ???
+    case DevFd(op0@_) => DevFd(op0)
+    case DevTcp(op0@_, op1@_) => DevTcp(op0, op1) 
+    case DevUdp(op0@_, op1@_) => DevUdp(op0, op1) 
+    case DevNull =>  ???
+    case DevRandom =>  ???
+    case DevStdErr =>  ???
+    case DevStdIn =>  ???
+    case DevStdOut =>  ???
     case Amper() =>  ???
     case And() =>  ???
     case AnsiCQuoted(op0@_) => ???
