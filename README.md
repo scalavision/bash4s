@@ -16,7 +16,7 @@ still be far better off than running your bash scripts directly.
 
 ### Installation and setup
 
-This library has not been published to ``maven central`` yet. This is `WIP`, to use it:
+The library has not been published to ``maven central`` yet. This is `WIP`, to use it,
 
 Install:
 
@@ -59,21 +59,31 @@ cat <<EOF > ./myscript.sc
 import \$cp.bash4s
 import bash4s._
 
+// getting the current working directory
 val wd = os.pwd
+
+// will save and run the script ./listFiles in
+// current working directory
+// You will see 0 printed to the screen
+// if the script terminated successfully
 val listFiles = ls"-hal \$wd".runAt(wd)
-pprint.pprintln(listFiles)
 EOF
 
 # The ammonite script runner will watch the file and rerun everytime it is saved
 amm -w ./myscript.sc
 ```
 
-It will build the `bash4s` library into a fat jar and copy it to the current working directory.
+The `bash4s` library will be built into a fat jar and copied to the current working directory.
 All you need to run bash4s dsl scripts is inside this library. See the next section on how
 to use it.
 
 Remember to keep `ammonite` running while you edit your script. It recompiles and reruns your script
-every time you save it.
+every time you save it. Also remember that you can use the `print()` or `printRich()` command to
+just print the script content, as it will look when saved to file.
+
+At last a `warning` !!! When you run `bash` scripts, they have `nasty` side effects like deleting files
+and what not, so be `careful` whenever you use this tool. In the future more guards will probably
+be added to avoid `accidents` happening.
 
 ```bash
 amm -w <path to my script.sc>
@@ -94,16 +104,16 @@ import $cp.bash4s
 import bash4s._
 
 // !! This will write the script named `test.sh` to /tmp/test.sh
-// as long as the java "java.io.tmp" variable is available
-// or it will save it to current working directory
+// as long as the java "java.io.tmp" variable is available,
+// or the script will be saved to current working directory.
 ls"-halt .".run("test.sh")
 ```
 
 And save the file in your editor!
 
-It should compile, run and output: `0`
+It should compile, run and print : `0` to the screen.
 
-As a `successful` result type from running the script in the background (this way of running it is blocking!).
+`0` is the `successful` result type, returned by the shell from running the script in the background (this way of running it is blocking!).
 
 Other good editors supported by `metals` (scala language server) are:
 
@@ -145,7 +155,7 @@ To capture the output from the script, you can run it like this:
 ```scala
 // capture the current working directory in scala
 val wd = os.pwd
-// It will return a Vector[String] of content in the current
+// It will return a Vector[String], with the content that exists in the current
 // working directory.
 val dirContent = ls"-halt $wd".lines()
 // rich printing the content to the console
@@ -165,7 +175,7 @@ library and dsl should handle this correctly, if not, issue a bug request.
 
 ### Simple debug output of the script
 
-You can do a very simple debugging of your script using the `print()` and `printRich()` commands:
+It is very simple to debug your script using the `print()` and `printRich()` commands:
 
 ```bash
 val wd = os.pwd
@@ -177,7 +187,7 @@ val dirContent = ls"-halt $wd".printRich()
 It will print the script to screen instead of running it.
 
 The `printRich()` command will use the excellent [pprint](https://www.lihaoyi.com/PPrint/) library that is
-made by `Lihaoyi` and that is also built into ammonite. It will cut the output after specific amount of lines etc.
+made by `Lihaoyi`, it is also part of ammonite script engine. It will cut the output after specific amount of lines etc.
 
 You can also get a textual representation of the script with the `.txt` method.
 
