@@ -5,7 +5,7 @@ import zio.test.Assertion.equalTo
 import zio.test.Assertion._
 
 import bash4s._
-import bio.dsl._
+import bio._
 import bio.cookbook._
 
 object BamFileSetup {

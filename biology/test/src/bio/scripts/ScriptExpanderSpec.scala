@@ -8,7 +8,7 @@ import bash4s._
 //import bash4s.scripts.ScriptExpander
 import bash4s.scripts.ScriptIdentity
 import bash4s.scripts.ScriptExpander
-//import bio.dsl._
+//import bio._
 //import bio.cookbook._
 
 object ScriptExpanderSetup {

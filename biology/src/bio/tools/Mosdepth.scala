@@ -1,6 +1,6 @@
 package bio.tools
 
-import bio.dsl._
+import bio._
 import bio.{Cores, Sample}
 import bash4s._
 import bash4s.domain._

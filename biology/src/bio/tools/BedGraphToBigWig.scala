@@ -1,6 +1,6 @@
 package bio.tools
 
-import bio.dsl._
+import bio._
 import bash4s._
 import bash4s.domain._
 import bash4s.ScriptGenerator

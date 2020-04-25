@@ -1,4 +1,4 @@
-package bio
+package object bio {
 
 import scala.reflect.runtime.universe._
 import bash4s.domain._
@@ -6,8 +6,6 @@ import bash4s._
 import biomodel._
 //import scala.reflect.ClassTag
 import com.github.ghik.silencer.silent
-
-object dsl {
 
   type Fasta = BiologyFileType[FastaFile]
   

@@ -2,7 +2,7 @@ package bio.cookbook
 
 import bash4s.domain._
 import bash4s._
-import bio.dsl._
+import bio._
 import bio.tools._
 import bio.Cores
 import bio.Memory

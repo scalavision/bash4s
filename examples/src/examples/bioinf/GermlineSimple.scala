@@ -1,7 +1,7 @@
 package examples.bioinf
 
 //import bio.tools.Bwa
-import bio.dsl._
+import bio._
 
 case class GermlineSimple(
   read1: Read1,

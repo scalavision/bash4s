@@ -2,7 +2,7 @@ package bio.tools
 
 import bash4s.ScriptGenerator
 import bio.{Cores, Sample, Memory}
-import bio.dsl._
+import bio._
 import bash4s._
 import bash4s.scripts.Script
 import bio.Memory
