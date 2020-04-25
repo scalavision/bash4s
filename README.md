@@ -12,6 +12,6 @@ This is much more a PoC than a production ready library, but if you write your t
 still be far better off than running your bash scripts directly.
 
 It started out as an idea to build bash processing workflow frameworks like `nextflow`, `chromwell` or
-``apache airflow`` in order to build better `bioinformatic` pipelines. However, it turns you that
-you do not need a framework to do these things in `scala`. It already have libraries that are a much
-better fit and that you easily can adapt to run your bash scripts.
+``apache airflow`` in order to build better `bioinformatic` pipelines. However, it turns out that
+you do not need a framework to do these things in `scala`. Scala already have
+excellent libraries that are a much better fit to build complex pipelines.
