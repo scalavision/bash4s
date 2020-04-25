@@ -180,7 +180,7 @@ def bashDsl = s"""package object bash4s {
   object exit {
     def apply(code: Int) = SimpleCommand("exit", CmdArgs(Vector(code.toString())))
   }
- 
+
   def await = bash4s.clitools.AwaitWrapper()
 
   object For {

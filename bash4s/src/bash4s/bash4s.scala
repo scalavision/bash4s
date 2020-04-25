@@ -1079,15 +1079,6 @@ package object bash4s {
     def dirPath(args: Any*): FolderPath =
       FileConversions.convertToFolderPath(s.s(args: _*))
 
-    def /(args: Any*): FolderPath =
-      FileConversions.convertToFolderPath("/" + s.s(args: _*))
-
-    def `./`(args: Any*): RelFolderPath =
-      FileConversions.convertToRelFolderPath(s.s("./" + args: _*))
-
-    def `../`(args: Any*): RelFolderPath =
-      FileConversions.convertToRelFolderPath(s.s("../" + args: _*))
-
     def Await(args: Any*) =
       SimpleCommand("Await", CmdArgCtx(args.toVector, s))
 
