@@ -125,6 +125,17 @@ val exportDevPathNames =
 
 def bashDsl = s"""package object bash4s {
   import domain._
+  
+  type Script = scripts.Script
+
+  type `/dev/stdin` = DevStdIn.type
+  type `/dev/stdout` = DevStdOut.type
+  type `/dev/stderr` = DevStdErr.type
+  type `/dev/fd` = DevFd
+  type `/dev/tcp` = DevTcp
+  type `/dev/udp` = DevUdp
+  type `/dev/null` = DevNull.type
+  type `/dev/random` = DevRandom.type
 
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
@@ -276,7 +287,7 @@ def bashDsl = s"""package object bash4s {
 def createCommandToolClasses(path: os.Path): Unit =
   commands.filter(_.name != "cat").map(c => tmpl.cliAlias(tmpl.Command(c.name, c.description))).zip(commands.filter(_.name != "cat")).foreach {
     case (src, cmd)  =>
-      val file = path / s"${cmd.name.capFirst}.scala"
+      val file = path / s"${cmd.name.capFirst}Wrapper.scala"
       os.write.over(file, src)
   }
 
