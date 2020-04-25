@@ -46,7 +46,7 @@ object domain {
         throw new Exception("You need to provide a name for the script!")
 
       val fileName = if(name.isEmpty()) implicitName.value else name
-      val result = runScript(shebang + "\n" + txt, path / s"$fileName", wd)
+      val result = runScript(shebang + "\n" + txt, path / s"$fileName", path)
       println(result.exitCode)
       
     }

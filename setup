@@ -15,6 +15,7 @@ import \$cp.bash4s
 import bash4s._
 
 val wd = os.pwd
+
 val listFiles = ls"-hal \$wd".runAt(wd)
 pprint.pprintln(listFiles)
 EOF
