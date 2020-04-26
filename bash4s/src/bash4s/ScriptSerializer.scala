@@ -110,25 +110,50 @@ object ScriptSerializer {
   implicit def simpleCommand(
       implicit 
       enc: ScriptSerializer[CommandOp],
-      fEnc: ScriptSerializer[FileType]
+      fEnc: ScriptSerializer[FileType],
+      variableValueEnc: ScriptSerializer[VariableValue]
   ): ScriptSerializer[SimpleCommand] = pure[SimpleCommand] { sc =>
 
     val quoted = if(sc.name == "echo") true else false
    
     val opEncoder: CommandOp => String = {
       case b: BashVariable => 
-        if(b.isExpanded) 
+        if(b.isExpanded) {
           b.expansionSafe
+        }
         else {
           enc.apply(b) 
         }
       case f: FileType => fEnc.apply(f)
-      case c: CommandOp => enc.apply(c)
+      case c: CommandOp => 
+        enc.apply(c)
     }
 
     val args = sc.arg match {
       case CmdArgs(args) => if(args.isEmpty) "" else args.mkString(" ")
-      case c: CmdArgCtx  => enc.apply(c)
+      case c: CmdArgCtx  => 
+        val serializedArgs = c.args.map {
+          case f: FileType => fEnc.apply(f)
+          case b: VariableValue => variableValueEnc.apply(b)
+          case b: BashVariable => 
+            b.value match {
+              case BashCliOptArgVariable(name,_,_) =>
+                "\"" + "$" + "{" + name.trim() + "[@]}" + "\""
+              case UnsetArrayVariable() =>
+                "\"" + "$" + "{" + b.name.trim() + "[@]}" + "\""
+              case _ => 
+                if(quoted) {
+                  b.expandUnquoted 
+                } else {
+                  b.expansionSafe
+                }
+            }
+          case h: HereString => enc.apply(h)
+          case h: HereDoc => enc.apply(h)
+          case c: CommandOp => enc.apply(c)
+          case other        => other
+        }
+        c.strCtx.s(serializedArgs: _*)
       case EmptyArg()    => ""
       case h: HereString => enc.apply(h)
       case h: HereDoc => enc.apply(h)

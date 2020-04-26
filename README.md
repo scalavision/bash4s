@@ -35,11 +35,11 @@ import Annotations.doc
 )
 case class WorkDir (
   @arg("path to the folder", "p")
-  path: FolderPath 
+  path: FolderPath
 ) extends Script {
 
   assert(
-    path.folders.size >= 2, 
+    path.folders.size >= 2,
     s"Invalid path for workdir: $path, must have at least two levels, like /parent/child"
   )
 
@@ -89,7 +89,7 @@ It will generate a bash script like this:
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-# Creates a empty workdir at the given path. 
+# Creates a empty workdir at the given path.
 # If the workdir already exists, the original workfolder will be renamed to:
 # <nr of existing folders>_<date as YYYY_mm_dd_hh_M>
 # Thus, you have an idempotent work folder for your jobs
@@ -110,7 +110,9 @@ fi
 echo ""${WORKFOLDER}" was successfully created!"
 ```
 
-Unfortunately this library is still in its infancy, everything has been created after work hours, so it is more a PoC than production ready, but if you write your tests, you should still be far better off than running your bash scripts directly.
+Unfortunately this library is still in its infancy, everything has been created after work hours, so it is more a PoC than production ready. You should test it,
+and check that everything looks good, file issues wherever possible. It has been modelled after the [bash reference manual](https://www.gnu.org/software/bash/manual/bash.html)
+as much as possible.
 
 The library is for the most part, based upon very approachable scala. I think anyone with minimal knowledge to the language would be able to browse the code and understand how it works, and even contribute.
 
