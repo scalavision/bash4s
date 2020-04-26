@@ -107,14 +107,21 @@ else
   CREATION_DATE=$(date "+%Y__%m_%d__%H_%M" )
   mv "${WORKFOLDER}" "${BACKUP_FOLDER_NAME}"__"${CREATION_DATE}"_"${WORKFOLDER}" && mkdir -p "${WORKFOLDER}"
 fi
-echo ""${WORKFOLDER}" was successfully created!"
+echo "${WORKFOLDER} was successfully created!"
 ```
 
-Unfortunately this library is still in its infancy, everything has been created after work hours, so it is more a PoC than production ready. You should test it,
-and check that everything looks good, file issues wherever possible. It has been modelled after the [bash reference manual](https://www.gnu.org/software/bash/manual/bash.html)
-as much as possible.
+Unfortunately this library is still in its very `infancy`, everything has been created on my free time,
+so it is more a PoC than production ready. You should really test everything you do, and check that everything looks
+good, file issues wherever possible.
 
-The library is for the most part, based upon very approachable scala. I think anyone with minimal knowledge to the language would be able to browse the code and understand how it works, and even contribute.
+It has been modelled after the [bash reference manual](https://www.gnu.org/software/bash/manual/bash.html)
+as much as possible and trying to utilise bash best practices as much as possible with the use of quoting etc.
+
+It you see anything suspicious let me know!
+
+I am planning to integrate `shellcheck` as part of the test setup.
+
+The library is for the most part, based upon very approachable scala. I think anyone with minimal knowledge to the language would be able to browse the code and understand how it works, and even contribute. Documenting the design is very high up on my `TODO` list!
 
 ## Quick start
 
