@@ -110,6 +110,11 @@ fi
 echo "${WORKFOLDER} was successfully created!"
 ```
 
+The library supports `pipelines`, `redirections`, ``for loops``, ``while loops``, ``conditional expressions``, `heredoc`,
+``mathematical expressions``, `brace expansion` and probably much more.
+
+Extending it with more functionality is possible with not too much effort, but the focus now is to write tests and documentation.
+
 Unfortunately this library is still in its very `infancy`, everything has been created on my free time,
 so it is more a PoC than production ready. You should ``really test everything you do``, and ``check that everything looks good``,
 file issues wherever possible.
