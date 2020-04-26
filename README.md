@@ -1,16 +1,26 @@
 # Bash dsl for scala (bash4s)
 
-Build bash scripts directly in the scala language. The library facilitates:
+Targets ``data engineers``, ``devops engineers``, ``bioinformaticians``, ``data scientists`` that
+want to build bash scripts directly in the scala language. The library facilitates:
 
+* The most seamless integration with `bash`, no other multi purpose programming language is even close.
 * Type safety (still `WIP`, but a lot better than raw bash scripts)
-* Reusable script parts that safely can be merged into larger scripts
+* Reusable, standalone script snippets, that easily can be merged into larger scripts
 * Testability
-* Introspection of your scripts
-* Extensible, you could very easily create wrappers to run these scripts on a slurm cluster, 
+* Introspection of your scripts (still `WIP`)
+* Flexibility, write most of your scripts in the ``bash dsl`` or in `scala` or somewhere between
+* Extensible, you could very easily create wrappers to run these scripts on a slurm cluster,
   in a docker container, on kubernets or in your devops pipeline.
 
-This is much more a PoC than a production ready library, but if you write your tests, you should
-still be far better off than running your bash scripts directly.
+Read in data from bash via `cat`:
+
+```scala
+val lines: Vector[String] = cat"/path/to/file.txt".lines()
+```
+
+Unfortunately this library is still in its infancy, and more a PoC than a production ready library, but if you write your tests, you should still be far better off than running your bash scripts directly.
+
+The library is for the most part, based upon very approachable scala. I think anyone with minimal knowledge to the language would be able to browse the code and understand how it works, and even contribute.
 
 ## Quick start
 
@@ -20,13 +30,13 @@ The library has not yet been published to ``maven central``. That is `WIP`, but 
 
 #### Prerequisities:
 
-* [mill](http://www.lihaoyi.com/mill/), an excellent scala build tool
-* [ammonite](https://github.com/lihaoyi/Ammonite), incredibly rich scala script runner
-* This only works with scala `2.13`, handled below
+* [mill](http://www.lihaoyi.com/mill/), an excellent scala build tool, used to build the library.
+* [ammonite](https://github.com/lihaoyi/Ammonite), incredibly rich scala script runner, used to run the scripts.
+* This only works with scala `2.13`
 
-Those tools needs at least `jdk8` to be installed as well.
+Those tools also needs `jdk8` or `jdk11` to be installed as well.
 
-#### Simple installation of prerequisities
+#### Simple installation of prerequisities (mill and ammonite)
 
 This is copied from their respective documentation pages.
 
@@ -47,8 +57,6 @@ sudo curl -L https://github.com/lihaoyi/mill/releases/download/0.6.2/0.6.2 > /us
 
 You can run this [setup](https://github.com/scalavision/bash4s/setup) (or copy paste the script below) in an `empty` !! directory, to get started.
 
-`CAUTION!!` It will write the script `listFiles` to the current directory! Since it is empty, it really shouldn't do
-any harm at all (just so you know ..).
 
 ```bash
 #!/usr/bin/env bash
@@ -136,7 +144,7 @@ And save the file in your editor!
 
 It should compile, run and print : `0` to the screen.
 
-`0` is the `successful` result type, returned by the shell from running the script in the background (also this way of running it is blocking!).
+`0` is the `successful` result type, returned by the shell from running the script in the background (remember that this way of running it is blocking!).
 
 Other good editors supported by `metals` (scala language server) are:
 
@@ -146,18 +154,6 @@ Other good editors supported by `metals` (scala language server) are:
 * eclipse
 
 ### installation, make bash4s available for all future scripts and the repl
-
-One `unfortunate` side effect of adding the `bash4s` classpath to ammonite is that the `exit` command
-no long works inside the `ammonite` repl. This is because the `bash` exit command will overwrite it.
-
-To exit the `ammonite` repl, you must use the `exit` method via the `interp` object handle, like this:
-
-```bash
-interp.exit
-```
-
-If there are other ammonite script commands that doesn't work please file and issue in
-the bug tracker and try to use the `interp` object handle.
 
 Ammonite has a ``~/.ammonite/predef.sc`` file you can use to configure a default setup for all of your
 ammonite scripts. For instance, you might want to add `bash4s` library as a mandatory part of
@@ -186,9 +182,23 @@ echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predef.sc
 echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predefScript.sc
 ```
 
+One `unfortunate` side effect of adding the `bash4s` classpath to ammonite is that the `exit` command
+no longer works inside the `ammonite` repl. This is because the `bash`'s exit command will override it
+in the scope of the `repl`.
+
+To exit the `ammonite` repl, you must use the `exit` method via the `interp` object handle, like this:
+
+```bash
+interp.exit
+```
+
+If there are other ammonite script commands that doesn't work, please file and issue in
+the bug tracker and try to use the `interp` object handle to escape the shading from `bash4s` library.
+
 `REMEMBER`:
 
 * You will need the `bash4s` on the classpath wherever you run your ammonite bash4s scripts.
+  * This will be simplified once I get to publish it to ``maven central``.
 * Beware that we are using `>>`, this will clobber the ammonite predef scripts if the install script is run multiple times!
   * (Some day I'll add a `sed` command to fix this ..)
 
@@ -243,7 +253,46 @@ The Scala variables inside a bash command will use the `toString()` method.
 
 If you put complex objects inside the command it might not work as expected.
 
-Use the `print()` feature to see how your complete script looks like.
+```scala
+val wd = os.pwd
+
+case class Person(name: String, age: Int)
+
+val person = Person("John Doe", 99)
+
+val script = 
+  echo"$person".printRich()
+```
+
+Will yield:
+
+```s
+echo "Person(John Doe,99)"
+```
+
+Instead you would might want to do this:
+
+```scala
+case class Person(name: String, age: Int) {
+  // override the toString method to tell how it should
+  // look like as a String.
+  override def toString = s"name: $name, age: $age"
+}
+
+val person = Person("John Doe", 99)
+
+val script =
+  echo"$person".printRich(
+```
+
+The `toString()` method tells scala how the `class` or `object` should be
+represented  as a String. This is not ideal, but very easy for beginners
+to scala. In the future hopefully, there will be
+some typeclass instance that could be used for this.
+
+```s
+Use the `printRich` and `print()` feature to see how your complete script looks like.
+```
 
 Another example, printing the script content from itself:
 
@@ -286,7 +335,7 @@ val script = cat"./test.sc".proc().call(
 println(script.mkString("\n"))
 ```
 
-See more about the `proc` later in this documentation.
+See more about the `proc` capabilites later in this documentation, or in the [os-lib](https://github.com/lihaoyi/os-lib#osproccall)  documentation.
 
 ### Simple print output debugging
 
@@ -299,7 +348,7 @@ val dirContent = ls"-halt $wd".printRich()
 // ls -halt <path to wherever your current working directory is pointing to>
 ```
 
-We print the script to screen instead of running it. A very safe way to investigating that paths are correct etc.
+We print the script to screen instead of running it. A very safe way to investigate that paths are correct etc.
 
 The `printRich()` command will use the excellent [pprint](https://www.lihaoyi.com/PPrint/) library that is
 made by `Lihaoyi`, it is also part of ammonite script engine. It will cut the output after specific amount of lines etc.
@@ -319,7 +368,7 @@ ls -halt .
 
 ### embrace os-lib, zio-process, zio and the scala and java apis
 
-You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all of the rich functionality this library provides:
+You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all of the rich functionality this library provides when it comes to running it, setting paths and pipe via `stdin`, `stderr`, `stdout`:
 
 ```scala
 // creating a handle to a process description that will be run later.
@@ -329,12 +378,14 @@ val myProc = ls"-halt .".proc
 myProc.call(cwd = os.Path("/path/to/somehwere"))
 ```
 
-The text that is generated by the `bash4s.dsl` is available via the `.txt` function. You can use it to build your own
-script runner, or safer version of whats provided here. `zio-process`, the scala api and the java api have
-a lot of capabilities that could be useful. Also the `zio` core library would make it possible to make
-very complex workflows that is resource safe, retriable, async and the lot.
+[zio-process](https://github.com/zio/zio-process), [zio-core](https://zio.dev/), [zio-config](https://zio.github.io/zio-config/docs/quickstart/quickstart_index) would make it possible to create very complex workflows
+that are resource safe, retriable, async, providing typesafe configuration and so much more.
 
-There is a lot more that should be done to make this part safer and / or more convenient. As for now, ease of
+In addition scala has the best `notebook` implementation through `netflix`'s [polynote](https://polynote.org/).
+
+Low level `shell` programming features are available via [scala api](https://www.scala-lang.org/api/current/scala/sys/process/ProcessBuilder.html) that wraps the [java api](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/ProcessBuilder.html).
+
+There is a lot more that could be done to make bash4s library richer, safer and even more convenient. As for now, ease of
 use has been the priority. When creating scripts, you very often just wants something that works there and then.
 
 ## Background
