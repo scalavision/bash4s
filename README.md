@@ -129,7 +129,7 @@ The library is for the most part, based upon very approachable scala. I think an
 
 The library has not yet been published to ``maven central``. That is `WIP`, but you can use it as follows:
 
-#### Prerequisities:
+#### Prerequisities
 
 * [mill](http://www.lihaoyi.com/mill/), an excellent scala build tool, used to build the library.
 * [ammonite](https://github.com/lihaoyi/Ammonite), incredibly rich scala script runner, used to run the scripts.
@@ -157,7 +157,6 @@ sudo curl -L https://github.com/lihaoyi/mill/releases/download/0.6.2/0.6.2 > /us
 #### Simple setup of the bash4s library for scripting
 
 You can run this [setup](https://github.com/scalavision/bash4s/setup) (or copy paste the script below) in an `empty` !! directory, to get started.
-
 
 ```bash
 #!/usr/bin/env bash
