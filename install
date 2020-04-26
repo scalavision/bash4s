@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+[[ -f ./out/bash4s/assembly/dest/out.jar ]] || \
+ { echo "you need to build the project using mill bash4s.assembly command"; exit 1; }
+
+mkdir -p ~/.ammonite
+
+# add the library to the classpath of all running instances of ammonite repl
+echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predef.sc
+
+# add the library to the classpath of all ammonite scripts run by ammonite
+echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predefScript.sc

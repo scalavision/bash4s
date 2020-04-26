@@ -91,6 +91,8 @@ The `bash4s` library will be built into a fat jar and copied to the current work
 All you need to run bash4s dsl scripts is inside this library. See the next section on how
 to use it.
 
+#### Tips for further exploration
+
 Remember to keep `ammonite` running while you edit your script. It recompiles and reruns your script
 every time you save it.
 
@@ -112,7 +114,7 @@ be added to avoid `accidents` happening.
 
 ### Your first script, and `java.io.tmp` as the default rundir
 
-Open `myscript.sc` from above in your favorite editor of choice ([metals plugin](https://scalameta.org/metals/) with [vscode](https://code.visualstudio.com/download) is a good choice):
+Open `myscript.sc` from above in your favorite editor of choice ([metals plugin](https://scalameta.org/metals/) with [vscode](https://code.visualstudio.com/download) is a great choice):
 
 You can change it as follows:
 
@@ -134,7 +136,7 @@ And save the file in your editor!
 
 It should compile, run and print : `0` to the screen.
 
-`0` is the `successful` result type, returned by the shell from running the script in the background (this way of running it is blocking!).
+`0` is the `successful` result type, returned by the shell from running the script in the background (also this way of running it is blocking!).
 
 Other good editors supported by `metals` (scala language server) are:
 
@@ -142,6 +144,53 @@ Other good editors supported by `metals` (scala language server) are:
 * emacs
 * atom
 * eclipse
+
+### installation, make bash4s available for all future scripts and the repl
+
+One `unfortunate` side effect of adding the `bash4s` classpath to ammonite is that the `exit` command
+no long works inside the `ammonite` repl. This is because the `bash` exit command will overwrite it.
+
+To exit the `ammonite` repl, you must use the `exit` method via the `interp` object handle, like this:
+
+```bash
+interp.exit
+```
+
+If there are other ammonite script commands that doesn't work please file and issue in
+the bug tracker and try to use the `interp` object handle.
+
+Ammonite has a ``~/.ammonite/predef.sc`` file you can use to configure a default setup for all of your
+ammonite scripts. For instance, you might want to add `bash4s` library as a mandatory part of
+all your scripts.
+
+To achieve this, run the [install](./install) script, or copy paste the following into your own script:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# check that your assembled fat jar exists, if not build it
+[[ -f ./out/bash4s/assembly/dest/out.jar ]] || \
+ { echo "you need to build the project using mill bash4s.assembly command"; exit 1; }
+
+# the ammonite path should exist if you already have run ammonite
+mkdir -p ~/.ammonite
+
+# copy the library in named as bash4s.jar
+cp ./out/bash4s/assembly/dest/out.jar ~/.ammonite/bash4s.jar
+
+# add the library to the classpath of all running instances of ammonite repl
+echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predef.sc
+
+# add the library to the classpath of all ammonite scripts run by ammonite
+echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predefScript.sc
+```
+
+`REMEMBER`:
+
+* You will need the `bash4s` on the classpath wherever you run your ammonite bash4s scripts.
+* Beware that we are using `>>`, this will clobber the ammonite predef scripts if the install script is run multiple times!
+  * (Some day I'll add a `sed` command to fix this ..)
 
 ### Implicitly naming of your script
 
@@ -154,7 +203,7 @@ import bash4s._
 val scriptTest = ls"-halt .".run()
 ```
 
-(Remember to save the file!)
+(Remember to save the scala script file, as it will trigger recompilation and rerun it!)
 
 Then
 
@@ -179,22 +228,67 @@ val wd = os.pwd
 // It will return a Vector[String], with the content that exists in the current
 // working directory.
 val dirContent = ls"-halt $wd".lines()
-// rich printing the content to the console
-pprint.pprintln(dirContent)
+
+// convert the Vector[String] into text separated by newline (\n)
+// print to console
+println(dirContent.mkString("\n"))
 ```
 
 In this example we where mixing scala code with our bash command.
 
 ```s
 The Scala variables inside a bash command will use the `toString()` method.
+`wd` is a scala variable in this example.
 ```
 
-So if you put complex objects inside the command it might not work as expected.
+If you put complex objects inside the command it might not work as expected.
 
-Use the `print()` feature to see what actually gets created as arguments. The built in
-library and dsl should handle this correctly, if not, issue a bug request.
+Use the `print()` feature to see how your complete script looks like.
 
-### Simple debug output of the script
+Another example, printing the script content from itself:
+
+```scala
+// cd into ~/tmp and create the script ~/tmp/test.sc
+// then run it from the ~/tmp folder:
+// amm -w ./test.sc
+val wd = os.pwd
+val script = cat"$wd/test.sc".lines()
+println(script.mkString("\n"))
+```
+
+yields:
+
+```s
+val wd = os.pwd
+
+val script = cat"$wd/test.sc".lines()
+
+println(script.mkString("\n"))
+```
+
+Note that if you move to some other directory and run the ammonite script from there, like:
+
+```bash
+cd /home/scalavision
+amm -w ./tmp/test.sc
+```
+
+the `os.pwd` command will have some other value, and the `path` to `test.sc` script will be wrong.
+
+You can circumvent that by using the underlying `os-lib` functionality of the `proc()` function:
+
+```scala
+val wd = os.pwd
+val script = cat"./test.sc".proc().call(
+  // we specify the location where the ammonite script will be run from
+  cwd = os.Path("/home/scalavision/tmp"
+)).out.lines
+println(script.mkString("\n"))
+```
+
+See more about the `proc` later in this documentation.
+
+### Simple print output debugging
 
 It is very simple to debug your script using the `print()` and `printRich()` commands:
 
@@ -205,7 +299,7 @@ val dirContent = ls"-halt $wd".printRich()
 // ls -halt <path to wherever your current working directory is pointing to>
 ```
 
-It will print the script to screen instead of running it.
+We print the script to screen instead of running it. A very safe way to investigating that paths are correct etc.
 
 The `printRich()` command will use the excellent [pprint](https://www.lihaoyi.com/PPrint/) library that is
 made by `Lihaoyi`, it is also part of ammonite script engine. It will cut the output after specific amount of lines etc.
@@ -213,7 +307,14 @@ made by `Lihaoyi`, it is also part of ammonite script engine. It will cut the ou
 You can also get a textual representation of the script with the `.txt` method.
 
 ```scala
-val dirContentScript: String = ls"-halt $wd".txt
+val dirContentScript: String = ls"-halt .".txt
+println(dirContentScripts)
+```
+
+Yields:
+
+```s
+ls -halt .
 ```
 
 ### embrace os-lib, zio-process, zio and the scala and java apis
