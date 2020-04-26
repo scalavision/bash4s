@@ -483,6 +483,7 @@ object ScriptSerializer {
     val negated = if(ce.isNegated) "! " else ""
     val inner = ce.op match {
       case f: FileType => fEnc.apply(f)
+      case b: BashVariable => b.expansionSafe
       case _ => enc.apply(ce.op)
     }
     s"""${negated}-d $inner"""

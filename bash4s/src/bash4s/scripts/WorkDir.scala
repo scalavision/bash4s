@@ -37,8 +37,8 @@ case class WorkDir (
       If `[[` ! (-d(WORKFOLDER.$)) `]]` Then {
         mkdir"-p $WORKFOLDER"
       } Else {
-        PARENT_FOLDER_PATH `=` $"{$WORKFOLDER%/*}"                   o
-        WORKFOLDER `=` $"{$WORKFOLDER##*/}"                          o
+        PARENT_FOLDER_PATH `=` $"{$WORKFOLDER%/*}"                    o
+        WORKFOLDER `=` $"{$WORKFOLDER##*/}"                           o
         cd"${PARENT_FOLDER_PATH}" || exit(1)                          o
         NR_OF_SUBFOLDERS `=$`(find". -maxdepth 1 -type d" | wc"-l")   o
         BACKUP_FOLDER_NAME `=$`(m"${NR_OF_SUBFOLDERS} - 1")           o

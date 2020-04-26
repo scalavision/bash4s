@@ -66,7 +66,7 @@ case class WorkDir (
         CREATION_DATE `=$`(date""""+%Y__%m_%d__%H_%M"""")             o
         mv"${WORKFOLDER} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${WORKFOLDER}" &&
           mkdir"-p ${WORKFOLDER}"
-      } Fi 
+      } Fi
     echo"${WORKFOLDER} was successfully created!"
 }
 
@@ -96,7 +96,7 @@ set -euo pipefail
 
 # $1 (path): path to the folder
 WORKFOLDER=${1:-"/tmp/workspace/job1"}
-if [[ ! -d WORKFOLDER ]] ;then
+if [[ ! -d "${WORKFOLDER}" ]] ;then
   mkdir -p "${WORKFOLDER}"
 else
   PARENT_FOLDER_PATH=${WORKFOLDER%/*}
