@@ -34,6 +34,7 @@ abstract class Script(implicit n: sourcecode.Name) {
           case ScriptBuilder(acc) => acc collect {
             case b: BashVariable => b
           }
+          case b: BashVariable => Vector(b)
           case NoOp() => Vector.empty[BashVariable]
           case _ => throw new Exception(s"Unhandled CommandOp: ${args}")
       }

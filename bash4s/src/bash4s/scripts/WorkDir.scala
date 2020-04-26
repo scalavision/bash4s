@@ -1,6 +1,5 @@
 package bash4s.scripts
 
-import scala.language.postfixOps
 import bash4s._
 import domain._
 import Annotations.arg
@@ -25,32 +24,29 @@ case class WorkDir (
 
   def param = ScriptGenerator.gen[WorkDir](this.asInstanceOf[WorkDir])
 
-  val WORKFOLDER = Var
-  val FOLDER_PATH = Var
+  val WORKFOLDER = Arg(param.$1(path))
+
+  override def args = WORKFOLDER
+  
   val PARENT_FOLDER_PATH = Var
   val NR_OF_SUBFOLDERS = Var
   val BACKUP_FOLDER_NAME = Var
   val CREATION_DATE = Var
 
   def op: CommandOp = 
-    FOLDER_PATH `=` param.$1(path)                                      o
-    {
-      If `[[` ! (-d(FOLDER_PATH.$)) `]]` Then {
-        mkdir"-p $FOLDER_PATH"
+      If `[[` ! (-d(WORKFOLDER.$)) `]]` Then {
+        mkdir"-p $WORKFOLDER"
       } Else {
-        PARENT_FOLDER_PATH `=` $"{$FOLDER_PATH%/*}"                   o
-        WORKFOLDER `=` $"{$FOLDER_PATH##*/}"                          o
+        PARENT_FOLDER_PATH `=` $"{$WORKFOLDER%/*}"                   o
+        WORKFOLDER `=` $"{$WORKFOLDER##*/}"                          o
         cd"${PARENT_FOLDER_PATH}" || exit(1)                          o
         NR_OF_SUBFOLDERS `=$`(find". -maxdepth 1 -type d" | wc"-l")   o
         BACKUP_FOLDER_NAME `=$`(m"${NR_OF_SUBFOLDERS} - 1")           o
         CREATION_DATE `=$`(date""""+%Y__%m_%d__%H_%M"""")             o
         mv"${WORKFOLDER} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${WORKFOLDER}" &&
-          mkdir"-p ${FOLDER_PATH}"
+          mkdir"-p ${WORKFOLDER}"
       } Fi 
-    } o
-    echo"${FOLDER_PATH} was successfully created!"
-
-
+    echo"${WORKFOLDER} was successfully created!"
 }
 
 object WorkDir {

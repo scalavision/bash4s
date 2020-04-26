@@ -3,13 +3,13 @@
 Targets ``data engineers``, ``devops engineers``, ``bioinformaticians``, ``data scientists`` that
 want to build bash scripts directly in the scala language. The library facilitates:
 
-* The most seamless integration with `bash`, no other multi purpose programming language is even close.
+* The most seamless integration with `bash`, no other multi-purpose programming language comes even close.
 * Type safety (still `WIP`, but a lot better than raw bash scripts)
 * Reusable, standalone script snippets, that easily can be merged into larger scripts
 * Testability
 * Introspection of your scripts (still `WIP`)
 * Flexibility, write most of your scripts in the ``bash dsl`` or in `scala` or somewhere between
-* Extensible, you could very easily create wrappers to run these scripts on a slurm cluster,
+* Extensibility, you could very easily create wrappers to run these scripts on a slurm cluster,
   in a docker container, on kubernets or in your devops pipeline.
 
 Read in data from bash via `cat`:
@@ -18,7 +18,99 @@ Read in data from bash via `cat`:
 val lines: Vector[String] = cat"/path/to/file.txt".lines()
 ```
 
-Unfortunately this library is still in its infancy, and more a PoC than a production ready library, but if you write your tests, you should still be far better off than running your bash scripts directly.
+Write a full blown bash script in scala dsl:
+
+```scala
+import bash4s._
+import domain._
+import Annotations.arg
+import Annotations.doc
+
+@doc("""
+  Creates a empty workdir at the given path. 
+  If the workdir already exists, the original workfolder will be renamed to:
+  <nr of existing folders>_<date as YYYY_mm_dd_hh_M>
+  Thus, you have an idempotent work folder for your jobs
+  """
+)
+case class WorkDir (
+  @arg("path to the folder", "p")
+  path: FolderPath 
+) extends Script {
+
+  assert(
+    path.folders.size >= 2, 
+    s"Invalid path for workdir: $path, must have at least two levels, like /parent/child"
+  )
+
+  def param = ScriptGenerator.gen[WorkDir](this.asInstanceOf[WorkDir])
+
+  val WORKFOLDER = Arg(param.$1(path))
+  
+  override def args = WORKFOLDER
+  
+  val PARENT_FOLDER_PATH = Var
+  val NR_OF_SUBFOLDERS = Var
+  val BACKUP_FOLDER_NAME = Var
+  val CREATION_DATE = Var
+
+  def op: CommandOp =
+      If `[[` ! (-d(WORKFOLDER.$)) `]]` Then {
+        mkdir"-p $WORKFOLDER"
+      } Else {
+        PARENT_FOLDER_PATH `=` $"{$WORKFOLDER%/*}"                    o
+        WORKFOLDER `=` $"{$WORKFOLDER##*/}"                           o
+        cd"${PARENT_FOLDER_PATH}" || exit(1)                          o
+        NR_OF_SUBFOLDERS `=$`(find". -maxdepth 1 -type d" | wc"-l")   o
+        BACKUP_FOLDER_NAME `=$`(m"${NR_OF_SUBFOLDERS} - 1")           o
+        CREATION_DATE `=$`(date""""+%Y__%m_%d__%H_%M"""")             o
+        mv"${WORKFOLDER} ${BACKUP_FOLDER_NAME}__${CREATION_DATE}_${WORKFOLDER}" &&
+          mkdir"-p ${WORKFOLDER}"
+      } Fi 
+    echo"${WORKFOLDER} was successfully created!"
+}
+
+object WorkDir {
+  def apply(path: FolderPath): Script = new WorkDir(path)
+
+}
+```
+
+Create it like this:
+
+```scala
+val testDir = dirPath"/tmp/workspace/job1"
+val workDir = WorkDir(testDir)
+workDir.script
+```
+
+It will generate a bash script like this:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+# Creates a empty workdir at the given path. 
+# If the workdir already exists, the original workfolder will be renamed to:
+# <nr of existing folders>_<date as YYYY_mm_dd_hh_M>
+# Thus, you have an idempotent work folder for your jobs
+
+# $1 (path): path to the folder
+WORKFOLDER=${1:-"/tmp/workspace/job1"}
+if [[ ! -d WORKFOLDER ]] ;then
+  mkdir -p "${WORKFOLDER}"
+else
+  PARENT_FOLDER_PATH=${WORKFOLDER%/*}
+  WORKFOLDER=${WORKFOLDER##*/}
+  cd "${PARENT_FOLDER_PATH}" || exit 1
+  NR_OF_SUBFOLDERS=$(find . -maxdepth 1 -type d | wc -l )
+  BACKUP_FOLDER_NAME=$(("${NR_OF_SUBFOLDERS}" - 1))
+  CREATION_DATE=$(date "+%Y__%m_%d__%H_%M" )
+  mv "${WORKFOLDER}" "${BACKUP_FOLDER_NAME}"__"${CREATION_DATE}"_"${WORKFOLDER}" && mkdir -p "${WORKFOLDER}"
+fi
+echo ""${WORKFOLDER}" was successfully created!"
+```
+
+Unfortunately this library is still in its infancy, everything has been created after work hours, so it is more a PoC than production ready, but if you write your tests, you should still be far better off than running your bash scripts directly.
 
 The library is for the most part, based upon very approachable scala. I think anyone with minimal knowledge to the language would be able to browse the code and understand how it works, and even contribute.
 
@@ -155,9 +247,10 @@ Other good editors supported by `metals` (scala language server) are:
 
 ### installation, make bash4s available for all future scripts and the repl
 
-Ammonite has a ``~/.ammonite/predef.sc`` file you can use to configure a default setup for all of your
-ammonite scripts. For instance, you might want to add `bash4s` library as a mandatory part of
-all your scripts.
+Ammonite has a ``~/.ammonite/predefScript.sc`` file you can use to configure a default setup for all of your
+ammonite scripts. In addition it also has a `~/.ammonite/predef.sc` file for configuration of the
+``ammonite repl``. For instance, you might want to add `bash4s` library as a mandatory part of
+all your scripts and available in your repl.
 
 To achieve this, run the [install](./install) script, or copy paste the following into your own script:
 
@@ -167,7 +260,7 @@ set -euo pipefail
 
 # check that your assembled fat jar exists, if not build it
 [[ -f ./out/bash4s/assembly/dest/out.jar ]] || \
- { echo "you need to build the project using mill bash4s.assembly command"; exit 1; }
+ { echo "you need to build the project with the 'mill bash4s.assembly' command"; exit 1; }
 
 # the ammonite path should exist if you already have run ammonite
 mkdir -p ~/.ammonite
@@ -175,10 +268,10 @@ mkdir -p ~/.ammonite
 # copy the library in named as bash4s.jar
 cp ./out/bash4s/assembly/dest/out.jar ~/.ammonite/bash4s.jar
 
-# add the library to the classpath of all running instances of ammonite repl
+# add the library to the classpath, and in scope of all running instances of ammonite repl
 echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predef.sc
 
-# add the library to the classpath of all ammonite scripts run by ammonite
+# add the library to the classpath, and in scope of all ammonite scripts run by ammonite
 echo "import \$cp.bash4s, bash4s._" >> ~/.ammonite/predefScript.sc
 ```
 
@@ -193,13 +286,13 @@ interp.exit
 ```
 
 If there are other ammonite script commands that doesn't work, please file and issue in
-the bug tracker and try to use the `interp` object handle to escape the shading from `bash4s` library.
+the bug tracker and try to use the `interp` object handle to escape the shading from the `bash4s` library.
 
 `REMEMBER`:
 
 * You will need the `bash4s` on the classpath wherever you run your ammonite bash4s scripts.
   * This will be simplified once I get to publish it to ``maven central``.
-* Beware that we are using `>>`, this will clobber the ammonite predef scripts if the install script is run multiple times!
+* Beware that the install script are using `>>`, this will clobber the ammonite predef scripts if the install script is run multiple times!
   * (Some day I'll add a `sed` command to fix this ..)
 
 ### Implicitly naming of your script
