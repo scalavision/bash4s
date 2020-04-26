@@ -2,23 +2,33 @@
 
 set -euo pipefail
 
+echo "cloning repository"
 git clone https://github.com/scalavision/bash4s.git
 
-pushd ./bash4s || { echo "unable to enter bash4s folder, was it correclty cloned?"; exit 1; }
+pushd ./bash4s || { echo "unable to enter bash4s folder, was it correctly cloned?"; exit 1; }
+echo "building the project, generating fat jar output"
 mill bash4s.assembly
 popd
 
+echo "copying fat jar into current working directory, ./bash4s.jar"
 cp ./bash4s/out/bash4s/assembly/dest/out.jar ./bash4s.jar
+
+echo "generating a simple script"
 
 cat <<EOF > ./myscript.sc
 import \$cp.bash4s
 import bash4s._
 
+// getting the current working directory from scala
 val wd = os.pwd
 
+// will save and run the script ./listFiles in
+// current working directory
+// You will see 0 printed to the screen
+// if the script terminated successfully
 val listFiles = ls"-hal \$wd".runAt(wd)
 pprint.pprintln(listFiles)
 EOF
 
+echo "starting the script in a run-eval loop with the script runner ammonite"
 amm -w ./myscript.sc
-

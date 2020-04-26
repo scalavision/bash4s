@@ -3,7 +3,7 @@
 Build bash scripts directly in the scala language. The library facilitates:
 
 * Type safety (still `WIP`, but a lot better than raw bash scripts)
-* Reusable script parts that can be merged into larger scripts
+* Reusable script parts that safely can be merged into larger scripts
 * Testability
 * Introspection of your scripts
 * Extensible, you could very easily create wrappers to run these scripts on a slurm cluster, 
@@ -12,32 +12,40 @@ Build bash scripts directly in the scala language. The library facilitates:
 This is much more a PoC than a production ready library, but if you write your tests, you should
 still be far better off than running your bash scripts directly.
 
-## How to
+## Quick start
 
 ### Installation and setup
 
-The library has not been published to ``maven central`` yet. This is `WIP`, to use it,
+The library has not yet been published to ``maven central``. That is `WIP`, but you can use it as follows:
 
-Install:
+#### Prerequisities:
 
 * [mill](http://www.lihaoyi.com/mill/), an excellent scala build tool
 * [ammonite](https://github.com/lihaoyi/Ammonite), incredibly rich scala script runner
-* This only works with scala `2.13`
+* This only works with scala `2.13`, handled below
 
-Simple way of installing ammonite:
+Those tools needs at least `jdk8` to be installed as well.
+
+#### Simple installation of prerequisities
+
+This is copied from their respective documentation pages.
+
+ammonite:
 
 ```bash
 # You need ammonite for scala 2.13
 sudo sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/2.1.0/2.13-2.1.0) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm' && amm
 ```
 
-Simple way of installing mill:
+mill:
 
 ```bash
 sudo curl -L https://github.com/lihaoyi/mill/releases/download/0.6.2/0.6.2 > /usr/local/bin/mill && sudo chmod +x /usr/local/bin/mill
 ```
 
-You can run this [setup](https://github.com/scalavision/bash4s/setup) in an `empty` !! directory to get started:
+#### Simple setup of the bash4s library for scripting
+
+You can run this [setup](https://github.com/scalavision/bash4s/setup) (or copy paste the script below) in an `empty` !! directory, to get started.
 
 `CAUTION!!` It will write the script `listFiles` to the current directory! Since it is empty, it really shouldn't do
 any harm at all (just so you know ..).
@@ -47,19 +55,24 @@ any harm at all (just so you know ..).
 
 set -euo pipefail
 
+echo "cloning repository"
 git clone https://github.com/scalavision/bash4s.git
 
-pushd ./bash4s || { echo "unable to enter bash4s folder, was it correclty cloned?"; exit 1; }
+pushd ./bash4s || { echo "unable to enter bash4s folder, was it correctly cloned?"; exit 1; }
+echo "building the project, generating fat jar output"
 mill bash4s.assembly
 popd
 
+echo "copying fat jar into current working directory, ./bash4s.jar"
 cp ./bash4s/out/bash4s/assembly/dest/out.jar ./bash4s.jar
+
+echo "generating a simple script"
 
 cat <<EOF > ./myscript.sc
 import \$cp.bash4s
 import bash4s._
 
-// getting the current working directory
+// getting the current working directory from scala
 val wd = os.pwd
 
 // will save and run the script ./listFiles in
@@ -67,9 +80,10 @@ val wd = os.pwd
 // You will see 0 printed to the screen
 // if the script terminated successfully
 val listFiles = ls"-hal \$wd".runAt(wd)
+pprint.pprintln(listFiles)
 EOF
 
-# The ammonite script runner will watch the file and rerun everytime it is saved
+echo "starting the script in a run-eval loop with the script runner ammonite"
 amm -w ./myscript.sc
 ```
 
@@ -78,16 +92,23 @@ All you need to run bash4s dsl scripts is inside this library. See the next sect
 to use it.
 
 Remember to keep `ammonite` running while you edit your script. It recompiles and reruns your script
-every time you save it. Also remember that you can use the `print()` or `printRich()` command to
-just print the script content, as it will look when saved to file.
-
-At last a `warning` !!! When you run `bash` scripts, they have `nasty` side effects like deleting files
-and what not, so be `careful` whenever you use this tool. In the future more guards will probably
-be added to avoid `accidents` happening.
+every time you save it.
 
 ```bash
 amm -w <path to my script.sc>
 ```
+
+Also remember that you can use the `print()` or `printRich()` command to
+just print the script content, as it will look when saved to file.
+
+```scala
+val wd = os.pwd
+ls"-halt $wd".printRich()
+```
+
+`WARNING!!` When you run `bash` scripts, they have `nasty` side effects like ``deleting files``
+and what not, so be `careful` whenever you use this tool. In the future more guards will probably
+be added to avoid `accidents` happening.
 
 ### Your first script, and `java.io.tmp` as the default rundir
 
@@ -122,7 +143,7 @@ Other good editors supported by `metals` (scala language server) are:
 * atom
 * eclipse
 
-### Implicitly naming of script
+### Implicitly naming of your script
 
 If you make a variable point to the script, the variable name will implicitly be used as the name of the script.
 
@@ -153,7 +174,7 @@ ls -halt .
 To capture the output from the script, you can run it like this:
 
 ```scala
-// capture the current working directory in scala
+// capture the current working directory from within scala
 val wd = os.pwd
 // It will return a Vector[String], with the content that exists in the current
 // working directory.
@@ -192,19 +213,28 @@ made by `Lihaoyi`, it is also part of ammonite script engine. It will cut the ou
 You can also get a textual representation of the script with the `.txt` method.
 
 ```scala
-val dirContentScript = ls"-halt $wd".txt
+val dirContentScript: String = ls"-halt $wd".txt
 ```
 
 ### embrace os-lib, zio-process, zio and the scala and java apis
 
-You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all of the rich functionality provided that this library provides.
+You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all of the rich functionality this library provides:
+
+```scala
+// creating a handle to a process description that will be run later.
+val myProc = ls"-halt .".proc
+
+// run the script, setting the current working directory to some path
+myProc.call(cwd = os.Path("/path/to/somehwere"))
+```
 
 The text that is generated by the `bash4s.dsl` is available via the `.txt` function. You can use it to build your own
 script runner, or safer version of whats provided here. `zio-process`, the scala api and the java api have
 a lot of capabilities that could be useful. Also the `zio` core library would make it possible to make
 very complex workflows that is resource safe, retriable, async and the lot.
 
-There is a lot more that should be done to make this part safer and / or more convenient.
+There is a lot more that should be done to make this part safer and / or more convenient. As for now, ease of
+use has been the priority. When creating scripts, you very often just wants something that works there and then.
 
 ## Background
 
