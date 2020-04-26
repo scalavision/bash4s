@@ -372,7 +372,7 @@ Will yield:
 echo "Person(John Doe,99)"
 ```
 
-Instead you would might want to do this:
+Instead you might want to do this:
 
 ```scala
 case class Person(name: String, age: Int) {
@@ -470,7 +470,9 @@ ls -halt .
 
 ### embrace os-lib, zio-process, zio and the scala and java apis
 
-You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all of the rich functionality this library provides when it comes to running it, setting paths and pipe via `stdin`, `stderr`, `stdout`:
+You can use the [proc](https://github.com/lihaoyi/os-lib#osproccall) method in `os-lib` to reuse all
+of the rich functionality this library provides when it comes to running it, setting
+the environment, paths and piping via `stdin`, `stderr`, `stdout`:
 
 ```scala
 // creating a handle to a process description that will be run later.
@@ -480,33 +482,29 @@ val myProc = ls"-halt .".proc
 myProc.call(cwd = os.Path("/path/to/somehwere"))
 ```
 
-[zio-process](https://github.com/zio/zio-process), [zio-core](https://zio.dev/), [zio-config](https://zio.github.io/zio-config/docs/quickstart/quickstart_index) would make it possible to create very complex workflows
-that are resource safe, retriable, async, providing typesafe configuration and so much more.
+Other libraries like [zio-process](https://github.com/zio/zio-process), [zio-core](https://zio.dev/),
+[zio-config](https://zio.github.io/zio-config/docs/quickstart/quickstart_index) would make it possible
+to create very complex workflows that are resource safe, retriable, async,
+providing typesafe configuration and so much more.
 
 In addition scala has the best `notebook` implementation through `netflix`'s [polynote](https://polynote.org/).
 
 Low level `shell` programming features are available via [scala api](https://www.scala-lang.org/api/current/scala/sys/process/ProcessBuilder.html) that wraps the [java api](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/ProcessBuilder.html).
 
 There is a lot more that could be done to make bash4s library richer, safer and even more convenient. As for now, ease of
-use has been the priority. When creating scripts, you very often just wants something that works there and then.
+use has been the priority. When creating scripts, you want something that just works. The scala compiler together
+with bash4s will help you all the way!
 
 ## Background
 
-It started out as an idea to build a big data processing workflow framework like [nextflow](https://nextflow.io),
+The library started out as an idea to build a big data processing workflow framework like [nextflow](https://nextflow.io),
 [chromwell](https://cromwell.readthedocs.io/en/stable/) or [apache airflow](https://airflow.apache.org/) in order
-to build better `bioinformatic` pipelines. However, it turns out that
-you do not need a framework to do these things in `scala`. Scala already have
-excellent libraries that are a much better fit to build complex pipelines.
+to build better `bioinformatic` pipelines.
 
-To run a bash process in scala, you can use the [os-lib](https://github.com/lihaoyi/os-lib):
+However, it turns out that you do not need a framework to do these things in `scala`.
 
-```scala
-os.proc("ls").call()
-```
+Scala already has excellent libraries that are a much better fit to build complex pipelines. The only thing lacking
+was a way to simplify the use of bash scripts within these already existing libraries.
 
-using `bash4s` you can simply do:
-
-```scala
-import bash4s._
-ls"-halt .".run
-```
+The next step will be to build better integration against `os-lib` and `zio`, in addition to improve typesafety.
+If you know about other scala libraries that would fit, please let me know!
