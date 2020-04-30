@@ -197,7 +197,7 @@ def bashDsl = s"""package object bash4s {
   
   def ArgOpt(b: BashCliOptArgVariable)(implicit name: sourcecode.Name) = BashVariable(name.value, b)
   
-  def Array(implicit name: sourcecode.Name) = BashVariable(name.value, UnsetArrayVariable())
+  def BArray(implicit name: sourcecode.Name) = BashVariable(name.value, UnsetArrayVariable())
   
    // True if file exists
   def a(op: CommandOp) = CIfIsFile(op)

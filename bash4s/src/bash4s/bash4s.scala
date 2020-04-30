@@ -75,7 +75,7 @@ package object bash4s {
   def ArgOpt(b: BashCliOptArgVariable)(implicit name: sourcecode.Name) =
     BashVariable(name.value, b)
 
-  def Array(implicit name: sourcecode.Name) =
+  def BArray(implicit name: sourcecode.Name) =
     BashVariable(name.value, UnsetArrayVariable())
 
   // True if file exists
