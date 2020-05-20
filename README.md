@@ -1,5 +1,9 @@
 # Bash dsl for scala (bash4s)
 
+## This is under heavy redesign using more functional constructs !!!!
+
+You may use it, but there is a high probability it will not be maintained the way things are.
+
 Targets ``data engineers``, ``devops engineers``, ``bioinformaticians``, ``data scientists`` that
 want to build bash scripts directly in the scala language. The library facilitates:
 
