@@ -121,6 +121,7 @@ object bash4s extends common {
   def moduleDeps = Seq(meta)
 }
 
+object script4s extends common {}
 
 object workflow extends common {
   def moduleDeps = Seq(bash4s)
