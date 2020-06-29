@@ -3,6 +3,8 @@ import SyntaxEnhancer._
 import $file.command_op
 import $file.templates
 import scala.util.Sorting
+import $ivy.`org.scala-lang.modules::scala-collection-compat:2.1.6`
+import scala.collection.compat._
 
 val cmd = command_op
 val tmpl = templates
@@ -56,10 +58,10 @@ val fileUtils =  os.read(os.pwd / "meta" / "commands" / "file_utils.dat")
     CmdMeta(l.head, l.last)
   }
 
-import scala.collection.IterableLike
+import scala.collection.SpecificIterableFactory
 import scala.collection.generic.CanBuildFrom
 
-class RichCollection[A, Repr](xs: IterableLike[A, Repr]){
+class RichCollection[A, Repr](xs: SpecificIterableFactory[A, Repr]){
   def distinctBy[B, That](f: A => B)(implicit cbf: CanBuildFrom[Repr, A, That]) = {
     val builder = cbf(xs.repr)
     val i = xs.iterator
@@ -76,7 +78,7 @@ class RichCollection[A, Repr](xs: IterableLike[A, Repr]){
   }
 }
 
-implicit def toRich[A, Repr](xs: IterableLike[A, Repr]) = new RichCollection(xs)
+implicit def toRich[A, Repr](xs: SpecificIterableFactory[A, Repr]) = new RichCollection(xs)
 
 
 val toMany = readDat("all.dat"){

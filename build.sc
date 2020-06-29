@@ -1,6 +1,6 @@
 import mill._, scalalib._
-import $ivy.`com.lihaoyi::mill-contrib-bloop:0.6.1`
-import $file.metaGen
+import $ivy.`com.lihaoyi::mill-contrib-bloop:0.7.1`
+// import $file.metaGen
 
 trait common extends ScalaModule {
 
@@ -32,17 +32,17 @@ trait common extends ScalaModule {
     "-Ypatmat-exhaust-depth", "off"
   )
   
-  def scalaVersion = "2.13.1"
+  def scalaVersion = "2.13.2"
   
   def compileIvyDeps = Agg(
-    ivy"com.github.ghik:silencer-plugin_2.13.1:1.4.4",
-    ivy"org.typelevel:kind-projector_2.13.1:0.11.0",
+    ivy"com.github.ghik:silencer-plugin_2.13.2:1.7.0",
+    ivy"org.typelevel:kind-projector_2.13.2:0.11.0",
     //ivy"org.typelevel::kind-projector:0.11.0",
     ivy"com.github.tomasmikula::pascal:0.3.5"
   )
 
   def scalacPluginIvyDeps = Agg(
-    ivy"com.github.ghik:silencer-plugin_2.13.1:1.4.4",
+    ivy"com.github.ghik:silencer-plugin_2.13.2:1.7.0",
     ivy"org.typelevel:kind-projector_2.13.1:0.11.0",
     ivy"com.github.tomasmikula::pascal:0.3.5"
   )
@@ -50,7 +50,7 @@ trait common extends ScalaModule {
   val Http4sVersion = "0.21.1"
   val CirceVersion = "0.13.0"
   val DoobieVersion = "0.8.8"
-  val ZioVersion = "1.0.0-RC18-2"
+  val ZioVersion = "1.0.0-RC21-1"
   val PureConfigVersion = "0.12.3"
   val H2Version = "1.4.199"
   val FlywayVersion = "6.0.0-beta2"
@@ -60,6 +60,9 @@ trait common extends ScalaModule {
     ivy"com.lihaoyi::sourcecode:0.2.1",
     ivy"com.lihaoyi::pprint:0.5.8",
     ivy"com.lihaoyi::os-lib:0.6.3",
+    ivy"dev.zio::zio:$ZioVersion",
+    ivy"dev.zio::zio-streams:$ZioVersion",
+    ivy"org.tpolecat::atto-core:0.7.2",
     ivy"com.propensive::magnolia:0.14.4",
     ivy"org.scalameta::scalafmt-dynamic:2.4.2",
     ivy"org.scalameta::scalafmt-core:2.4.2",
@@ -112,7 +115,7 @@ object meta extends common {
   override def generatedSources = T {    
 //    val metaFiles = allMetaFiles().map(_.path)    
 //    val dir = T.ctx().dest    
-    metaGen.generateDomain(genPath)    
+    //metaGen.generateDomain(genPath)    
     Seq.empty[PathRef] //(PathRef(dir))    
   }
 }
