@@ -1,5 +1,5 @@
 import mill._, scalalib._
-import $ivy.`com.lihaoyi::mill-contrib-bloop:0.7.1`
+import $ivy.`com.lihaoyi::mill-contrib-bloop:0.8.0`
 // import $file.metaGen
 
 trait common extends ScalaModule {
@@ -32,7 +32,7 @@ trait common extends ScalaModule {
     "-Ypatmat-exhaust-depth", "off"
   )
   
-  def scalaVersion = "2.13.2"
+  def scalaVersion = "2.13.3"
   
   def compileIvyDeps = Agg(
     ivy"com.github.ghik:silencer-plugin_2.13.2:1.7.0",

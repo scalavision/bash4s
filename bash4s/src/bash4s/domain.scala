@@ -59,7 +59,7 @@ object domain {
       val fileName = if(name.isEmpty()) implicitName.value else name
       val wd = Try(os.Path(System.getProperty("java.io.tmpdir"))).getOrElse (os.pwd)
       val result = runScript(shebang + "\n" + txt, wd / s"$fileName", wd)
-      result.out.lines
+      result.out.lines()
       
     }
 
