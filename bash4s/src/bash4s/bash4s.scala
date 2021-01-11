@@ -1,3 +1,5 @@
+import scala.language.implicitConversions
+
 package object bash4s {
   import domain._
 
@@ -12,6 +14,16 @@ package object bash4s {
   type `/dev/null` = DevNull.type
   type `/dev/random` = DevRandom.type
 
+  object io {
+ 
+  implicit def convertFolderPathToOsPath(folder: FolderPath): os.Path =
+    os.Path(folder.toString())
+
+  implicit def convertFilePathToOsPath(file: FilePath): os.Path =
+    os.Path(file.toString())
+
+  }
+
   implicit def cmdAliasConverter: BashCommandAdapter => SimpleCommand = _.toCmd
 
   object Until {
@@ -25,7 +37,7 @@ package object bash4s {
   object If {
     def `[[`(op: CommandOp) = CIf(Vector(OpenDoubleSquareBracket(), op))
   }
-
+  
   object #! {
     def apply(shebang: String) = SheBang(s"#!${shebang}")
     def `/usr/bin/env`(shebang: String) = SheBang(s"#!/usr/bin/env $shebang")

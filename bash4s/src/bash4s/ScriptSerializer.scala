@@ -400,14 +400,19 @@ object ScriptSerializer {
       s"if ${iff.testCommands.map(enc.apply).mkString(" ")} ${iff.conseqCmds.map(enc.apply).mkString(" ")}"
     }
 
+  def toExt: Vector[String] => String = {
+    case ext if ext.isEmpty => ""
+    case ext => "." + ext.mkString(".")
+  }
   implicit def fileTypeSerializer: ScriptSerializer[FileType] = pure[FileType] {
     case FilePath(root, fp, fn) => 
-      s"""${root.toString}${fp.mkString(root.toString())}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
+      s"""${root.toString}${fp.mkString(root.toString())}/${fn.baseName.value}${toExt(fn.extension)}"""
     case FolderPath(r, fp) => 
       s"""${fp.mkString(r.toString())}"""
     case FileDescriptor(value) => value.toString()
-    case FileName(bn,fe) => s"""${bn.value}.${fe.mkString(".")}"""
-    case RelPath(folders,fn) => s"""${folders.mkString("/")}/${fn.baseName.value}.${fn.extension.mkString(".")}"""
+    case FileName(bn,fe) =>
+      s"""${bn.value}${toExt(fe)}"""
+    case RelPath(folders,fn) => s"""${folders.mkString("/")}/${fn.baseName.value}${toExt(fn.extension)}"""
     case RelFolderPath(folders) => s"""${folders.mkString("/")}"""
     case DevNull => "/dev/null"
     case DevRandom => "/dev/random"

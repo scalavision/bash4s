@@ -25,6 +25,7 @@ object ScriptFormatter {
         acc ++ addBreak(c) 
       }
       ))
+      case _ => throw new Exception("unsupported")
     }
     case CommandListBuilder(cmds) => cmds match {
       case Vector() => builder.copy(acc = builder.acc :+ PipelineBuilder(cmds) :+ NewLine())
@@ -32,22 +33,27 @@ object ScriptFormatter {
         acc ++ addBreak(c) 
       }
       ))
+      case _ => throw new Exception("unsupported")
     }
     case head => builder.copy(acc = builder.acc :+ head)
+    //case _ => throw new Exception("unsupported")
   }
 
   def loop(op: CommandOp, builder: ScriptBuilder): CommandOp = op match {
     case ScriptBuilder(acc) => acc match {
       case Vector() => builder.copy(acc = builder.acc :+ NewLine())
       case x +: xs => loop(ScriptBuilder(xs), break(builder)(x))
+      case _ => throw new Exception("unsupported")
     }
     case CommandListBuilder(cmds) => cmds match {
       case Vector() =>  builder
       case x +: xs => loop(CommandListBuilder(xs), break(builder)(x))
+      case _ => throw new Exception("unsupported")
     }
     case PipelineBuilder(cmds) => cmds match {
       case Vector() => builder
       case x +: xs => loop(PipelineBuilder(xs), break(builder)(x))
+      case _ => throw new Exception("unsupported")
     }
 
     case Amper() => builder.copy(acc = builder.acc :+ Amper() :+ BreakLine())

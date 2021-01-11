@@ -3,7 +3,7 @@ package bio.tools
 import bio._
 import bio.{Cores, Sample}
 import bash4s._
-import bash4s.domain._
+//import bash4s.domain._
 import bash4s.ScriptGenerator
 import bash4s.scripts._
 import bash4s.domain.IntVariable

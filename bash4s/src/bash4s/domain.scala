@@ -681,6 +681,8 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
     def lastFolderName = folders.last
     def parentFolderName = folders.dropRight(1).last
     def parentFolderPath = copy(folders = folders.dropRight(1))
+    override def toString(): String =
+      s"${root}/${folders.filter(_.nonEmpty).mkString(root.toString())}".replace("//", "/")
   }
 
   sealed trait FileHandle extends FileType { self =>
@@ -703,7 +705,20 @@ final case class CIsSocket(op: CommandOp, isNegated: Boolean = false) extends Co
       root: Char,
       folderPath: Vector[String],
       fileName: FileName
-  ) extends FileHandle
+  ) extends FileHandle {
+    override def toString = {
+
+      val ext =
+        if(fileName.extension.isEmpty) ""
+        else {
+          "." + fileName.extension.mkString(".")
+        }
+
+      s"/${folderPath.mkString("/")}/${fileName.baseName.value}${ext}".replace("//", "/")
+
+    }
+      
+  }
   
   final case class FileName(baseName: BaseName, extension: Vector[String])
       extends FileHandle
