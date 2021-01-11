@@ -3,51 +3,134 @@ package bash4s.scripts
 import bash4s.domain._
 import bash4s.ScriptLinter
 
+trait Scriptable[A] {
+  def script(a: A): String
+  def name: String
+  def $1(a: CommandOp): Scriptable[A]
+  def $2(a: CommandOp): Scriptable[A]
+}
 
-abstract class Script(implicit n: sourcecode.Name) {
+// trait ScriptParam[A] {
+//   def $1(script: Scriptable[A]): 
+//   //def param(a: A): ScriptMeta
+// }
+
+abstract class Script(implicit n: sourcecode.Name) { self =>
   def name = n.value
   def op: CommandOp
   def txt = op.txt
   def run() = op.run(name)
   def param: ScriptMeta
   def args: CommandOp = NoOp()
+
+  def rename(newName: String) = new Script {
+    override def name = newName
+    def op = self.op
+    override def txt = self.op.txt
+    override def run() = self.op.run(self.name)
+    override def param = self.param
+    override def args = self.args
+    override def script = self.script
+  }
+
+  def o(op2: CommandOp) = new Script {
+    override def name = self.name
+    def op = ScriptBuilder(Vector(self.op)).o(op2)
+    override def txt = op.txt
+    override def run() = op.run(self.name)
+    override def param = self.param
+    override def args = self.args
+    override def script = self.script + "\n" + op2.txt
+  }
+
+  def ++ (that: Script) =
+    append(that)
+
+  def append(that: Script, otherName: Option[String] = None) = new Script {
+    override def name = otherName.fold(self.name)(s => s)
+    def op: CommandOp = self.op
+    override def txt = self.txt + "\n" + that.txt
+    def param: ScriptMeta = self.param
+    override def args = (self.args, that.args) match {
+      case (NoOp(), NoOp()) => NoOp()
+      case (NoOp(), o) => o
+      case (o, NoOp()) => o
+      case (op1, op2) =>
+        ScriptBuilder(Vector(op1)).o(op2)
+    }
+    override def script = {
+
+      val mergedParams = {
+        val params: Vector[BashVariable] = args match {
+        case ScriptBuilder(acc) => acc collect {
+          case b: BashVariable => b
+        }
+        case b: BashVariable => Vector(b)
+        case NoOp() => Vector.empty[BashVariable]
+        case _ => throw new Exception(s"Unhandled CommandOp: ${args}")
+      }
+        params.zipWithIndex.map {
+          case (b, index) => b.value match {
+            case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString))
+            case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
+            case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
+            case _ => b
+          }
+        }
+      }
+      
+
+    s"""#!/usr/bin/env bash
+        |set -euo pipefail
+        |
+        |${comments}
+        |${argComments}
+        |${that.argComments}
+        |${mergedParams.map(_.txt).mkString("\n")}
+        |${ScriptFormatter(self.op).txt}
+        |${that.comments}
+        |${ScriptFormatter(that.op).txt}
+      """.stripMargin
+    }
+
+  }
+
 //  def env: CommandOp = NoOp()
 
-  def script = {
-   
-    val comments = param.description.foldLeft(""){(acc,c) =>
-      c match {
-        case '\n' => acc + "\n #  "
-        case _ => acc + c
-      }
-    }.reverse.dropWhile(_ != '#').drop(1).reverse + "\n"
+  def comments = param.description.foldLeft(""){(acc,c) =>
+    c match {
+      case '\n' => acc + "\n #  "
+      case _ => acc + c
+    }
+  }.reverse.dropWhile(_ != '#').drop(1).reverse + "\n"
 
-    val argComments = param.argOpt.zipWithIndex.foldLeft(""){ (acc, ia) =>
+  def argComments = param.argOpt.zipWithIndex.foldLeft(""){ (acc, ia) =>
       val (a, index) = ia
       acc + s"\n # $$${index + 1} (${a.long}): ${a.description}" 
     }
 
-    // If scripts are merged, their environment also needs to be merged,
+  // If scripts are merged, their environment also needs to be merged,
     // hence we need to reindex the positional parameters, i.e. $1, $2 .. $8 etc.
-    val argParam: Vector[BashVariable] = {
-      val params: Vector[BashVariable] = args match {
-          case ScriptBuilder(acc) => acc collect {
-            case b: BashVariable => b
-          }
-          case b: BashVariable => Vector(b)
-          case NoOp() => Vector.empty[BashVariable]
-          case _ => throw new Exception(s"Unhandled CommandOp: ${args}")
-      }
-      params.zipWithIndex.map {
-        case (b, index) => b.value match {
-          case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString))
-          case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
-          case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
-          case _ => b
+  def argParam: Vector[BashVariable] = {
+    val params: Vector[BashVariable] = args match {
+        case ScriptBuilder(acc) => acc collect {
+          case b: BashVariable => b
         }
+        case b: BashVariable => Vector(b)
+        case NoOp() => Vector.empty[BashVariable]
+        case _ => throw new Exception(s"Unhandled CommandOp: ${args}")
+    }
+    params.zipWithIndex.map {
+      case (b, index) => b.value match {
+        case bcli: BashCliOptArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString))
+        case bcli: BashCliArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
+        case bcli: BashCliVecArgVariable => b.copy(value = bcli.copy(name = (index + 1).toString()))
+        case _ => b
       }
     }
+  }
 
+  def script = {
     ScriptLinter.lint(
       s"""#!/usr/bin/env bash
       |set -euo pipefail
