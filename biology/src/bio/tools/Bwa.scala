@@ -1,6 +1,6 @@
 package bio.tools
 
-import bash4s._
+// import bash4s._
 import bash4s.domain._
 import bash4s._
 import bash4s.scripts._
@@ -34,7 +34,7 @@ object Bwa {
     val READ2 = Var
     val BWA_INDEX = Var
     val BWA_MEM_CORES = Var
-    val READ_GROUP_INFO = Array
+    val READ_GROUP_INFO = BArray
 
     override def args = 
       READ1 `=` param.$1(r1)                      o

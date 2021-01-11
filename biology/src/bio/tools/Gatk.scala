@@ -39,7 +39,7 @@ object Gatk {
     val MD_BAM_INPUT = Arg(param.$1(bam))
     val MD_BAM_OUTPUT = Arg(param.$2(bamOut))
     val METRICS = Arg(param.$3(metricsFile))
-    val MD_TMPDIR = Array
+    val MD_TMPDIR = BArray
 
     override def args = 
       MD_BAM_INPUT o
@@ -59,7 +59,7 @@ object Gatk {
    bamOut: Option[Bam] = None
   ) extends Gatk {
 
-    val BAM_OUT = Array
+    val BAM_OUT = BArray
     override def args =
       setup(bam, reference) o
       OUT_VCF `=` param.$3(output) o
@@ -168,8 +168,8 @@ object Gatk {
       val SNP_TRANCHE = Arg(param.$4(snpTranche))
       val INDEL_TRANCHE = Arg(param.$5(indelTranche))
       val FILTERED_2D_OUTPUT = Arg(param.$6(filtered2DOutput))
-      val RESOURCES = Array
-      val INVALIDATE_PREVIOUS_FILTERS = Array 
+      val RESOURCES = BArray
+      val INVALIDATE_PREVIOUS_FILTERS = BArray 
     
       override def args =
         CNN_SCORED_2D o

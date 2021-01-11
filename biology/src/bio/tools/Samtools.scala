@@ -5,7 +5,6 @@ import bio.{Cores, Sample, Memory}
 import bio._
 import bash4s._
 import bash4s.scripts.Script
-import bio.Memory
 
 sealed trait Samtools extends Script {
   def param = ScriptGenerator.gen[Samtools](this.asInstanceOf[Samtools])
