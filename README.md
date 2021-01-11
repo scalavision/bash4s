@@ -4,6 +4,11 @@
 
 You may use it, but there is a high probability it will not be maintained the way things are.
 
+The most probable end-result is that it will be completely rewritten in Scala 3, and this
+will be archived.
+
+## Audience
+
 Targets ``data engineers``, ``devops engineers``, ``bioinformaticians``, ``data scientists`` that
 want to build bash scripts directly in the scala language. The library facilitates:
 
