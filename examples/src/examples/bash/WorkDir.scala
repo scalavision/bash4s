@@ -2,8 +2,8 @@ package examples.bash
 
 import bash4s._
 import domain._
-import Annotations.arg
-import Annotations.doc
+import scripts.Annotations.arg
+import scripts.Annotations.doc
 
 @doc("""
   Creates a empty workdir at the given path. 

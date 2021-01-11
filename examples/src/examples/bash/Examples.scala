@@ -1,10 +1,12 @@
 package examples.bash
 
-import scala.language.postfixOps
+//import scala.language.postfixOps
 //import domain._
-import bash4s._
+//import bash4s._
 
 object Examples {
+
+    /*
     val script = du"ok" > du"hello"                                 o
       du"in" < du"out" | du"ok"                                     o
       du"ok" | du"pipeline"                                         o
@@ -129,7 +131,6 @@ object Examples {
 
     //hereStr3.printRich()
     
-/*
     val HelloWorld = echo"hello world is working"
     val HelloWorld2 = echo("hello", "world", "simple args")
     val exe = HelloWorld.run()
